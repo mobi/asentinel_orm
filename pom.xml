@@ -1,0 +1,177 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.asentinel.common</groupId>
+	<artifactId>asentinel-common</artifactId>
+	<version>1.70.0</version>
+	<packaging>jar</packaging>
+
+	<name>Asentinel Common</name>
+	<description>Common library used by all Asentinel projects. Proud home of the Asentinel ORM.</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>11</java.version>
+
+		<slf4j.version>1.7.35</slf4j.version>
+
+		<spring-framework.version>5.2.20.RELEASE</spring-framework.version>
+
+        <byte.buddy.version>1.10.10</byte.buddy.version>
+        <aspecj.version>1.9.5</aspecj.version>	
+
+        <junit.version>4.13</junit.version>
+        <easymock.version>4.2</easymock.version>
+        <mockito.version>3.3.3</mockito.version>
+
+		<oracle.jdbc.version>12.1.0.2.0</oracle.jdbc.version>
+		<postgres.jdbc.version>42.5.0</postgres.jdbc.version>
+		<h2.jdbc.version>2.1.214</h2.jdbc.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
+		    <version>${slf4j.version}</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring-framework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${spring-framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>${byte.buddy.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspecj.version}</version>
+		</dependency>		
+		
+		
+		<dependency>
+		    <groupId>ch.qos.logback</groupId>
+		    <artifactId>logback-classic</artifactId>
+		    <version>1.2.10</version>
+		    <scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring-framework.version}</version>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+	    	<groupId>junit</groupId>
+	      	<artifactId>junit</artifactId>
+	      	<version>${junit.version}</version>
+			<scope>test</scope>		      	
+	    </dependency>
+		<dependency>
+   			<groupId>org.easymock</groupId>
+   			<artifactId>easymock</artifactId>
+   			<version>${easymock.version}</version>
+   			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.mockito</groupId>
+		    <artifactId>mockito-core</artifactId>
+		    <version>${mockito.version}</version>
+		    <scope>test</scope>
+		</dependency>		
+
+		<!-- 
+			The database specific JDBC drivers are here to allow the compilation of DB
+			specific stuff.
+			In the long run we should move database specific code outside this project.
+			Note that the scope is provided. 
+		-->
+	    <dependency>
+    		<groupId>com.oracle</groupId>
+    		<artifactId>ojdbc7</artifactId>
+    		<version>${oracle.jdbc.version}</version>
+    		<scope>provided</scope>
+		</dependency>	  
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgres.jdbc.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>${h2.jdbc.version}</version>
+			<scope>provided</scope>
+		</dependency>		
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>	
+				<version>3.8.1</version>
+				<configuration>
+					<release>${java.version}</release>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>					
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>					
+					<failOnError>true</failOnError>				
+					<doclint>none</doclint>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.22.2</version>
+				<configuration>
+					<showSuccess>false</showSuccess>
+				</configuration>
+			</plugin>
+		</plugins>		
+	</build>
+	
+</project>

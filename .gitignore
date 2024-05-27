@@ -1,0 +1,16 @@
+# Intelij
+.idea
+
+# Eclipse
+.classpath
+.project
+.jsdtscope
+.settings
+
+# Common to all IDEs
+/*/bin/
+/*/target/
+/*/META-INF/
+*.MF
+*.iml
+/target/

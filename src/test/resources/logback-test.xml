@@ -1,0 +1,17 @@
+<configuration debug="false"> 
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender"> 
+		<encoder>
+			<pattern>%d - %p %logger{0}#%m%n</pattern>
+		</encoder>
+	</appender>
+	  
+	 <!-- set logging for external libraries -->
+	<logger name="org.apache" level="ERROR" additivity="false" /> 
+  	<logger name="org.springframework" level="ERROR" additivity="false" />
+  	<logger name="org.springframework.jdbc.core.JdbcTemplate" level="ERROR" additivity="false" />
+
+	<root level="TRACE">
+		<appender-ref ref="STDOUT" />
+	</root>
+</configuration>
