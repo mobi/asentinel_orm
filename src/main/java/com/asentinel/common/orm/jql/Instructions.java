@@ -183,6 +183,12 @@ class Instructions {
 						}
 					}
 					break;
+				case ID_ALIAS:
+					cCurrentSql.appendSql(" ");
+					cCurrentSql.appendSql(activeEd.getTableAlias());
+					cCurrentSql.appendSql(activeEd.getColumnAliasSeparator());
+					cCurrentSql.appendSql(getIdColumn((EntityDescriptor) activeEd));	
+					break;					
 				case COLUMN:
 					cCurrentSql.appendSql(" ");
 					params = (Object[]) instr.getActual();
@@ -207,6 +213,13 @@ class Instructions {
 							);
 						}
 					}
+					break;
+				case COLUMN_ALIAS:
+					String colToAlias = (String) instr.getActual();
+					cCurrentSql.appendSql(" ");
+					cCurrentSql.appendSql(activeEd.getTableAlias());
+					cCurrentSql.appendSql(activeEd.getColumnAliasSeparator());
+					cCurrentSql.appendSql(colToAlias);	
 					break;
 				case PARAM:
 				case STRING_PARAM:

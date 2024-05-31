@@ -60,12 +60,24 @@ enum InstructionType {
 	/**
 	 * The name of the primary key will get added to the compiled SQL.
 	 */
-	ID_COLUMN, 
+	ID_COLUMN,
+	
+	/**
+	 * The primary key alias will get added to the compiled SQL. This is for
+	 * scenarios where the user controls the columns in the select clause.
+	 */
+	ID_ALIAS,
 
 	/**
 	 * The specified column name will get added to the compiled SQL.
 	 */
 	COLUMN,
+
+	/**
+	 * The specified column alias will get added to the compiled SQL. This is for
+	 * scenarios where the user controls the columns in the select clause.
+	 */
+	COLUMN_ALIAS,
 
 	/**
 	 * Adds a parameter to the compiled SQL.

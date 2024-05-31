@@ -1,7 +1,8 @@
 package com.asentinel.common.orm.jql;
 
-import static com.asentinel.common.orm.jql.InstructionType.ARRAY_PARAM;
+import static com.asentinel.common.orm.jql.InstructionType.*;
 import static com.asentinel.common.orm.jql.InstructionType.COLUMN;
+import static com.asentinel.common.orm.jql.InstructionType.COLUMN_ALIAS;
 import static com.asentinel.common.orm.jql.InstructionType.FROM_QUERY;
 import static com.asentinel.common.orm.jql.InstructionType.ID_COLUMN;
 import static com.asentinel.common.orm.jql.InstructionType.INITIAL_QUERY;
@@ -1291,6 +1292,21 @@ public class SqlBuilder<E> {
 		return this;
 	}
 	
+	/**
+	 * Renders the alias for the id for the current {@link EntityDescriptor} node.
+	 */
+	public SqlBuilder<E> idAlias() {
+		getInstructions().add(new Instruction(ID_ALIAS, null));
+		return this;
+	}
+
+	/**
+	 * Renders the id and its alias for the current {@link EntityDescriptor} node.
+	 */
+	public SqlBuilder<E> idWithAlias() {
+		return this.id().idAlias();
+	}
+
 
 	/**
 	 * References the column with the specified name for the current {@link EntityDescriptor} node.
@@ -1319,6 +1335,28 @@ public class SqlBuilder<E> {
 		return this;
 	}
 	
+	/**
+	 * Renders the alias for the specified {@code column} name for the current
+	 * {@link EntityDescriptor} node.
+	 * 
+	 * @param column the column name
+	 */
+	public SqlBuilder<E> columnAlias(String column) {
+		Assert.assertNotEmpty(column, "column");
+		getInstructions().add(new Instruction(COLUMN_ALIAS, column.trim()));
+		return this;
+	}
+
+	/**
+	 * Renders the column and its alias for the specified {@code column} name for
+	 * the current {@link EntityDescriptor} node.
+	 * 
+	 * @param column the column name
+	 */
+	public SqlBuilder<E> columnWithAlias(String column) {
+		return this.column(column).columnAlias(column);
+	}
+
 	/**
 	 * References the table for the current {@link EntityDescriptor} node.
 	 */

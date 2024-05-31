@@ -938,6 +938,27 @@ public class SqlBuilderTestCase {
 		assertEquals(0, cSql.getParametersList().size());
 	}
 
+	@Test
+	public void testInitialFromQueryWithColumnAliases() {
+		builder.selectK()
+			.idWithAlias().comma()
+			.columnWithAlias(Charge.C_CHARGE).comma()
+			.alias(Charge.class, Bill.class)
+			.idWithAlias().comma()
+			.columnWithAlias(Bill.C_PH_NUMBER).comma()
+			.rootAlias()
+			.idWithAlias()
+		.from();
+		CompiledSql cSql = builder.compile();
+		log.debug("test - cSql: " + cSql.getSqlString());
+		assertEquals(
+				("select t0.c_id t0_c_id, t0.charge t0_charge, b.b_id b_b_id, b.phoneNumber b_phoneNumber, "
+				+ "t0.c_id t0_c_id from charge t0 left join bill b on t0.b_id = b.b_id left join invoice i on b.id = i.id").replace(" ", "").toLowerCase(),
+				cSql.getSqlString().replace(" ", "").toLowerCase());
+		assertEquals(0, cSql.getParameters().length);
+		assertEquals(0, cSql.getParametersList().size());
+	}
+
 	
 	// tests for the EntityDescriptorNodeMatcher rootOnlyQuery() method
 
