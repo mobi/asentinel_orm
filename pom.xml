@@ -7,8 +7,8 @@
 	<version>1.70.0</version>
 	<packaging>jar</packaging>
 
-	<name>Asentinel Common</name>
-	<description>Common library used by all Asentinel projects. Proud home of the Asentinel ORM.</description>
+	<name>Asentinel ORM</name>
+	<description>Asentinel ORM written on top of Spring JDBC. Contains other utilities used by the Tangoe Telecom project.</description>
 	
 	<licenses>
 		<license>
@@ -17,6 +17,15 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+ 
+	<developers>
+		<developer>
+			<name>Razvan Popian</name>
+			<email>razvan77@gmail.com</email>
+			<organization>Tangoe</organization>
+			<organizationUrl>https://www.tangoe.com/</organizationUrl>
+		</developer>
+	</developers>
  
 	<scm>
 		<url>https://github.com/mobi/asentinel_orm</url>
