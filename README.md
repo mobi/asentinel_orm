@@ -198,7 +198,7 @@ private void persistSomeData() {
 
 ```
 
-# Load some 'CarModel' entities using the `SqlBuilder` 
+# Load some `CarModel` entities using the `SqlBuilder` 
 
 Notice that the 'CarManufacturer' inside each `CarModel` is a proxy (it was declared lazy in the `CarModel` class)
 
@@ -218,7 +218,7 @@ private void loadSomeData() {
 }
 ```
 
-# Load some 'CarModel' entities using the `SqlBuilder` 
+# Load some `CarModel` entities using the `SqlBuilder` 
 
 Notice the use of the `AutoEagerLoader` to eagerly load the 'CarManufacturer' inside each `CarModel`.
 
