@@ -9,7 +9,7 @@ The asentinel-orm is a light weight ORM tool written on top of Spring JDBC and `
 - easy to integrate in any `JdbcTemplate` project
 - simple central interface for working with the library - `OrmOperations` 
 - automatically generates SQL statements (select, insert, update) based on entity classes annotations
-- 'SqlBuilder' class for writing SQL statements
+- `SqlBuilder` class for writing SQL statements
 - supports paginated select SQL statements out of the box
 - supports lazy loading entities (entity proxies)
 - supports dynamic schemas - fields can be added to tables at runtime and the tool is able to map them without any code changes
