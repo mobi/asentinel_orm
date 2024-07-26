@@ -40,57 +40,57 @@ Here is how to configure the asentinel-orm to access an H2 database. The last be
 the interface you will use to perform all the ORM actions.
 
 ```
-	@Bean
-	public DataSource dataSource() {
-		return new SingleConnectionDataSource("jdbc:h2:mem:testdb", "sa", "", false);
-	}
+@Bean
+public DataSource dataSource() {
+	return new SingleConnectionDataSource("jdbc:h2:mem:testdb", "sa", "", false);
+}
 
-    @Bean
-    public JdbcFlavor jdbcFlavor() {
-        return new H2JdbcFlavor();
-    }
-	
-	@Bean
-	public JdbcOperations jdbcOperations(DataSource dataSource, JdbcFlavor jdbcFlavor) {
-		return new JdbcTemplate(dataSource) {
-			
-			@Override
-			protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
-				return new CustomArgumentPreparedStatementSetter(jdbcFlavor, args);
-			}
-		};
-	}
-	
-    @Bean
-    public SqlQuery sqlQuery(JdbcFlavor jdbcFlavor, JdbcOperations jdbcOps) {
-        return new SqlQueryTemplate(jdbcFlavor, jdbcOps);
-    }
+@Bean
+public JdbcFlavor jdbcFlavor() {
+    return new H2JdbcFlavor();
+}
 
-    @Bean
-    public SqlFactory sqlFactory(JdbcFlavor jdbcFlavor) {
-        return new DefaultSqlFactory(jdbcFlavor);
-    }
+@Bean
+public JdbcOperations jdbcOperations(DataSource dataSource, JdbcFlavor jdbcFlavor) {
+	return new JdbcTemplate(dataSource) {
+		
+		@Override
+		protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
+			return new CustomArgumentPreparedStatementSetter(jdbcFlavor, args);
+		}
+	};
+}
 
-    @Bean
-    public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(SqlBuilderFactory sqlBuilderFactory) {
-        DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
-        treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
-        return treeRepository;
-    }
+@Bean
+public SqlQuery sqlQuery(JdbcFlavor jdbcFlavor, JdbcOperations jdbcOps) {
+    return new SqlQueryTemplate(jdbcFlavor, jdbcOps);
+}
 
-    @Bean
-    public DefaultSqlBuilderFactory sqlBuilderFactory(@Lazy EntityDescriptorTreeRepository entityDescriptorTreeRepository,
-                                                      SqlFactory sqlFactory, SqlQuery sqlQuery) {
-        DefaultSqlBuilderFactory sqlBuilderFactory = new DefaultSqlBuilderFactory(sqlFactory, sqlQuery);
-        sqlBuilderFactory.setEntityDescriptorTreeRepository(entityDescriptorTreeRepository);
-        return sqlBuilderFactory;
-    }
+@Bean
+public SqlFactory sqlFactory(JdbcFlavor jdbcFlavor) {
+    return new DefaultSqlFactory(jdbcFlavor);
+}
 
-    @Bean
-    public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
-                             SqlBuilderFactory sqlBuilderFactory) {
-        return new OrmTemplate(sqlBuilderFactory, new SimpleUpdater(jdbcFlavor, sqlQuery));
-    }
+@Bean
+public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(SqlBuilderFactory sqlBuilderFactory) {
+    DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
+    treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
+    return treeRepository;
+}
+
+@Bean
+public DefaultSqlBuilderFactory sqlBuilderFactory(@Lazy EntityDescriptorTreeRepository entityDescriptorTreeRepository,
+                                                  SqlFactory sqlFactory, SqlQuery sqlQuery) {
+    DefaultSqlBuilderFactory sqlBuilderFactory = new DefaultSqlBuilderFactory(sqlFactory, sqlQuery);
+    sqlBuilderFactory.setEntityDescriptorTreeRepository(entityDescriptorTreeRepository);
+    return sqlBuilderFactory;
+}
+
+@Bean
+public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
+                         SqlBuilderFactory sqlBuilderFactory) {
+    return new OrmTemplate(sqlBuilderFactory, new SimpleUpdater(jdbcFlavor, sqlQuery));
+}
 ```
 
 # Define two entities
@@ -171,30 +171,30 @@ CREATE TABLE CarModels(
 # Persist some entities in the database
 
 ```
-	private void persistSomeData() {
-		logger.info("\n\npersist some data ...");
-		CarManufacturer mazda = new CarManufacturer("Mazda");
-		orm.update(mazda);
-		CarModel mx5 = new CarModel("mx5", CarType.CAR, mazda);
-		CarModel m3 = new CarModel("3", CarType.CAR, mazda);
-		CarModel m6 = new CarModel("6", CarType.CAR, mazda);
-		CarModel cx3 = new CarModel("cx3", CarType.SUV, mazda);
-		orm.update(mx5, m3, m6, cx3);
-		
-		CarManufacturer honda = new CarManufacturer("Honda");
-		orm.update(honda);
-		
-		CarModel accord = new CarModel("accord", CarType.CAR, honda);
-		orm.update(accord);
-		
-		CarModel civic = new CarModel("civic", CarType.CAR, honda);
-		CarModel crv = new CarModel("crv", CarType.SUV, honda);
-		orm.update(civic, crv);
-		
-		CarManufacturer toyota = new CarManufacturer("Toyota");
-		orm.update(toyota);
-		orm.delete(CarManufacturer.class, toyota.getId());
-	}
+private void persistSomeData() {
+	logger.info("\n\npersist some data ...");
+	CarManufacturer mazda = new CarManufacturer("Mazda");
+	orm.update(mazda);
+	CarModel mx5 = new CarModel("mx5", CarType.CAR, mazda);
+	CarModel m3 = new CarModel("3", CarType.CAR, mazda);
+	CarModel m6 = new CarModel("6", CarType.CAR, mazda);
+	CarModel cx3 = new CarModel("cx3", CarType.SUV, mazda);
+	orm.update(mx5, m3, m6, cx3);
+	
+	CarManufacturer honda = new CarManufacturer("Honda");
+	orm.update(honda);
+	
+	CarModel accord = new CarModel("accord", CarType.CAR, honda);
+	orm.update(accord);
+	
+	CarModel civic = new CarModel("civic", CarType.CAR, honda);
+	CarModel crv = new CarModel("crv", CarType.SUV, honda);
+	orm.update(civic, crv);
+	
+	CarManufacturer toyota = new CarManufacturer("Toyota");
+	orm.update(toyota);
+	orm.delete(CarManufacturer.class, toyota.getId());
+}
 
 ```
 
@@ -203,19 +203,19 @@ CREATE TABLE CarModels(
 Notice that the 'CarManufacturer' inside each `CarModel` is a proxy (it was declared lazy in the `CarModel` class)
 
 ```
-	private void loadSomeData() {
-		logger.info("\n\nload some data ...");
-		List<CarModel> models = orm.newSqlBuilder(CarModel.class)
-				.select().orderBy().column(CarModel.COL_NAME)
-				.exec();
-		for (CarModel model: models) {
-			logger.info(model);
-			// check the manufacturer is lazily loaded, it is a proxy
-			if (EntityUtils.isProxy(model.getCarManufacturer()) && EntityUtils.isLoadedProxy(model.getCarManufacturer())) {
-				throw new RuntimeException("Something is wrong !");
-			}
+private void loadSomeData() {
+	logger.info("\n\nload some data ...");
+	List<CarModel> models = orm.newSqlBuilder(CarModel.class)
+			.select().orderBy().column(CarModel.COL_NAME)
+			.exec();
+	for (CarModel model: models) {
+		logger.info(model);
+		// check the manufacturer is lazily loaded, it is a proxy
+		if (EntityUtils.isProxy(model.getCarManufacturer()) && EntityUtils.isLoadedProxy(model.getCarManufacturer())) {
+			throw new RuntimeException("Something is wrong !");
 		}
 	}
+}
 ```
 
 # Load some 'CarModel' entities using the `SqlBuilder` 
@@ -223,20 +223,20 @@ Notice that the 'CarManufacturer' inside each `CarModel` is a proxy (it was decl
 Notice the use of the `AutoEagerLoader` to eagerly load the 'CarManufacturer' inside each `CarModel`.
 
 ```
-	private void loadSomeDataEagerly() {
-		logger.info("\n\nload some data eagerly ...");
-		List<CarModel> models = orm.newSqlBuilder(CarModel.class)
-				.select(
-					AutoEagerLoader.forPath(CarModel.class, CarManufacturer.class)
-				)
-				.orderBy().column(CarModel.COL_NAME)
-				.exec();
-		for (CarModel model: models) {
-			logger.info(model);
-			// check the manufacturer is eagerly loaded, it is NOT a proxy
-			if (EntityUtils.isProxy(model.getCarManufacturer())) {
-				throw new RuntimeException("Something is wrong !");
-			}
+private void loadSomeDataEagerly() {
+	logger.info("\n\nload some data eagerly ...");
+	List<CarModel> models = orm.newSqlBuilder(CarModel.class)
+			.select(
+				AutoEagerLoader.forPath(CarModel.class, CarManufacturer.class)
+			)
+			.orderBy().column(CarModel.COL_NAME)
+			.exec();
+	for (CarModel model: models) {
+		logger.info(model);
+		// check the manufacturer is eagerly loaded, it is NOT a proxy
+		if (EntityUtils.isProxy(model.getCarManufacturer())) {
+			throw new RuntimeException("Something is wrong !");
 		}
 	}
+}
 ```
