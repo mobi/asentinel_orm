@@ -96,7 +96,11 @@ public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
 # Define two entities
 
 We are defining here 2 entity classes `CarManufacturer` and `CarModel`. The relationship between them should be obvious,
-a car manufacturer can have multiple car models. Getters and setters are omitted for brevity.
+a car manufacturer can have multiple car models. Getters and setters are omitted for brevity. Notice the annotations:
+- `@Table` used to map the entity to a table in the database
+- `@PkColumn` used to map the primary key column to the entity id
+- `@Column` used to map a  regular column to a member in the entity class
+- `@Child` used to define a relationship to another entity class
 
 ```
 @Table("CarManufacturers")
@@ -200,7 +204,7 @@ private void persistSomeData() {
 
 # Load some `CarModel` entities using the `SqlBuilder` 
 
-Notice that the 'CarManufacturer' inside each `CarModel` is a proxy (it was declared lazy in the `CarModel` class)
+Notice that the `CarManufacturer` inside each `CarModel` is a proxy (it was declared lazy in the `CarModel` class)
 
 ```
 private void loadSomeData() {
@@ -218,9 +222,9 @@ private void loadSomeData() {
 }
 ```
 
-# Load some `CarModel` entities using the `SqlBuilder` 
+# Load some `CarModel` entities using the `SqlBuilder` eager loading the `CarManufacturer` 
 
-Notice the use of the `AutoEagerLoader` to eagerly load the 'CarManufacturer' inside each `CarModel`.
+Notice the use of the `AutoEagerLoader` to eagerly load the `CarManufacturer` inside each `CarModel`.
 
 ```
 private void loadSomeDataEagerly() {
