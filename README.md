@@ -15,6 +15,9 @@ One of the features of the Tangoe Telecom project is to allow users to define th
 - supports lazy loading entities (entity proxies)
 - supports dynamic schemas - fields can be added to tables at runtime and the tool is able to map them without any code changes
 
+# Example
+
+Please see [asentinel-orm-demo](https://github.com/jMediaConverter/asentinel-orm-demo) for a working example. All of the code snippets below are extracted from that project.
 
 # Supported databases
 
