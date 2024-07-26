@@ -3,7 +3,7 @@
 The asentinel-orm is a light weight ORM tool written on top of Spring JDBC and `JdbcTemplate`. It was developed initially as an enhancement for a project whose data access layer was based on JdbcTemplate. If you are using JdbcTemplate in your project but you feel you could do better than just using `RowMapper` for mapping database resultsets or you want to stop writing manually inserts and updates, this library might be for you.
 
 
-#Key features
+# Key features
 
 - simple configuration on top of JdbcTemplate
 - easy to integrate in any `JdbcTemplate` project
@@ -15,7 +15,7 @@ The asentinel-orm is a light weight ORM tool written on top of Spring JDBC and `
 - supports dynamic schemas - fields can be added to tables at runtime and the tool is able to map them without any code changes
 
 
-#Supported databases
+# Supported databases
 
 The database specifics are abstracted behind an interface called `JdbcFlavor`. Currently out of the box this interface has implementations for the following databases.
 
@@ -25,7 +25,7 @@ The database specifics are abstracted behind an interface called `JdbcFlavor`. C
 
 It should be reasonably easy to add specific `JdbcFlavor` implementations for other databases. It's likely that we will add other out of the box implementations in the future.
 
-#Add the library to your Maven project
+# Add the library to your Maven project
 ```
 <dependency>
     <groupId>com.asentinel.common</groupId>
@@ -34,7 +34,7 @@ It should be reasonably easy to add specific `JdbcFlavor` implementations for ot
 </dependency>
 ```
 
-#Configuration for Spring application context
+# Configuration for Spring application context
 
 Here is how to configure the asentinel-orm to access an H2 database. The last bean created is the `OrmOperations` which is
 the interface you will use to perform all the ORM actions.
@@ -93,7 +93,7 @@ the interface you will use to perform all the ORM actions.
     }
 ```
 
-#Define two entities
+# Define two entities
 
 We are defining here 2 entity classes `CarManufacturer` and `CarModel`. The relationship between them should be obvious,
 a car manufacturer can have multiple car models. Getters and setters are omitted for brevity.
@@ -154,7 +154,7 @@ public enum CarType {
 }
 ```
 
-#SQL statements to create the tables in the database
+# SQL statements to create the tables in the database
 ```
 CREATE TABLE CarManufacturers(ID INT auto_increment PRIMARY KEY,
 	NAME VARCHAR(255));
@@ -168,7 +168,7 @@ CREATE TABLE CarModels(
 );
 ```
 
-#Persist some entities in the database
+# Persist some entities in the database
 
 ```
 	private void persistSomeData() {
@@ -198,7 +198,7 @@ CREATE TABLE CarModels(
 
 ```
 
-#Load some 'CarModel' entities using the `SqlBuilder` 
+# Load some 'CarModel' entities using the `SqlBuilder` 
 
 Notice that the 'CarManufacturer' inside each `CarModel` is a proxy (it was declared lazy in the `CarModel` class)
 
@@ -218,7 +218,7 @@ Notice that the 'CarManufacturer' inside each `CarModel` is a proxy (it was decl
 	}
 ```
 
-#Load some 'CarModel' entities using the `SqlBuilder` 
+# Load some 'CarModel' entities using the `SqlBuilder` 
 
 Notice the use of the `AutoEagerLoader` to eagerly load the 'CarManufacturer' inside each `CarModel`.
 
