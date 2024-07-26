@@ -13,7 +13,7 @@ One of the features of the Tangoe Telecom project is to allow users to define th
 - `SqlBuilder` class for writing SQL statements
 - supports paginated select SQL statements out of the box
 - supports lazy loading entities (entity proxies)
-- supports dynamic schemas - fields can be added to tables at runtime and the tool is able to map them without any code changes
+- supports dynamic schemas - fields can be added to tables at runtime and the tool is able to map them without any code changes. SQL statements (select, insert, update) are generated so that they include the dynamic columns.
 
 # Example
 
