@@ -11,24 +11,24 @@ import org.junit.Test;
 
 public class PageTestCase {
 
-	private final static Logger log = LoggerFactory.getLogger(PageTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(PageTestCase.class);
 	
 	@Test
 	public void test1() {
-		Page<Integer> p = new Page<Integer>(Arrays.asList(1,2,3), 10);
+		Page<Integer> p = new Page<>(Arrays.asList(1,2,3), 10);
 		assertEquals(3, p.getItems().size());
 		assertEquals(10, p.getCount());
-		log.debug("test1 - Page:" + p);
+		log.debug("test1 - Page: {}", p);
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void test2() {
-		new Page<Integer>(null, 10);
+		new Page<>(null, 10);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void test3() {
-		new Page<Integer>(new ArrayList<Integer>(), -1);
+		new Page<>(new ArrayList<>(), -1);
 	}
 
 }

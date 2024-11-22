@@ -1,36 +1,11 @@
 package com.asentinel.common.jdbc;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.reset;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.asentinel.common.jdbc.flavors.postgres.PostgresJdbcFlavor;
+import com.asentinel.common.util.Utils;
 import org.easymock.Capture;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -38,23 +13,33 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
 
-import com.asentinel.common.jdbc.flavors.postgres.PostgresJdbcFlavor;
-import com.asentinel.common.util.Utils;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests the {@link SqlQueryTemplate} methods without the conversion
  * of ResultSet rows to objects.
  */
 public class SqlQueryTemplateTestCase {
-	private final static Logger log = LoggerFactory.getLogger(SqlQueryTemplateTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(SqlQueryTemplateTestCase.class);
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void testUserLogging() throws SQLException {
+	public void testUserLogging() {
 		log.info("testUserLogging - start");
 		
 		JdbcOperations jdbcOperations = createMock(JdbcOperations.class);
-		expect(jdbcOperations.query((String) anyObject(), (RowMapper) anyObject(), new Object[0]))
+		expect(jdbcOperations.query(anyObject(), (RowMapper) anyObject(), new Object[0]))
 			.andReturn(Collections.emptyList()).anyTimes();
 		expect(jdbcOperations.update(anyObject(PreparedStatementCreator.class)))
 			.andReturn(0).anyTimes();
@@ -68,7 +53,7 @@ public class SqlQueryTemplateTestCase {
 		sqlQuery.update("dummy sql");
 		
 		// test with null thread local user
-		ThreadLocalUser.getThreadLocalUser().set(null);
+        ThreadLocalUser.getThreadLocalUser().remove();
 		sqlQuery.query("dummy sql", Integer.class);
 		sqlQuery.update("dummy sql");
 		ThreadLocalUser.getThreadLocalUser().remove();
@@ -89,8 +74,7 @@ public class SqlQueryTemplateTestCase {
 		sqlQuery.query("dummy sql", Integer.class);
 		sqlQuery.update("dummy sql");
 		ThreadLocalUser.getThreadLocalUser().remove();
-		
-		
+
 		// test with thread local user
 		ThreadLocalUser.getThreadLocalUser().set(new SimpleUser() {
 			@Override
@@ -111,7 +95,6 @@ public class SqlQueryTemplateTestCase {
 		verify(jdbcOperations);
 		
 		log.info("testUserLogging - stop");
-
 	}
 	
 	/**
@@ -126,10 +109,10 @@ public class SqlQueryTemplateTestCase {
 		
 		// test correct operation
 		JdbcOperations jdbcOperations = createMock(JdbcOperations.class);
-		List<Integer> rs = new ArrayList<Integer>();
+		List<Integer> rs = new ArrayList<>();
 		final Integer value = 1;
 		rs.add(value);
-		expect(jdbcOperations.query((String)anyObject(), (RowMapper<Integer>)anyObject(), new Object[0])).andReturn(rs);
+		expect(jdbcOperations.query(anyObject(), (RowMapper<Integer>)anyObject(), new Object[0])).andReturn(rs);
 		
 		replay(jdbcOperations);
 		SqlQueryTemplate query = new SqlQueryTemplate(new PostgresJdbcFlavor(), jdbcOperations);		
@@ -140,28 +123,28 @@ public class SqlQueryTemplateTestCase {
 		// test empty result set
 		reset(jdbcOperations);
 		rs.clear();
-		expect(jdbcOperations.query((String)anyObject(), (RowMapper<Integer>)anyObject(), new Object[0])).andReturn(rs);
+		expect(jdbcOperations.query(anyObject(), (RowMapper<Integer>)anyObject(), new Object[0])).andReturn(rs);
 		
 		replay(jdbcOperations);
 		query = new SqlQueryTemplate(new PostgresJdbcFlavor(), jdbcOperations);
 		try { 
-			object = query.queryForObject("dummy sql", Integer.class);
+			query.queryForObject("dummy sql", Integer.class);
 			fail("Should throw exception.");
 		} catch (EmptyResultDataAccessException e) {
 			log.info("testCallForObject - Expected exception: ", e);
 		}
 		verify(jdbcOperations);
 		
-		// test too many rows resultset
+		// test too many rows result set
 		reset(jdbcOperations);
 		rs.add(1);
 		rs.add(2);
-		expect(jdbcOperations.query((String)anyObject(), (RowMapper<Integer>)anyObject(), new Object[0])).andReturn(rs);
+		expect(jdbcOperations.query(anyObject(), (RowMapper<Integer>)anyObject(), new Object[0])).andReturn(rs);
 		
 		replay(jdbcOperations);
 		query = new SqlQueryTemplate(new PostgresJdbcFlavor(), jdbcOperations);
 		try { 
-			object = query.queryForObject("dummy sql", Integer.class);
+			query.queryForObject("dummy sql", Integer.class);
 			fail("Should throw exception.");
 		} catch (IncorrectResultSizeDataAccessException e) {
 			log.info("testCallForObject - Expected exception: ", e);
@@ -188,15 +171,14 @@ public class SqlQueryTemplateTestCase {
 		assertNotNull(query.getRowMapperFactory());
 		assertNotNull(query.getBooleanParameterConverter());
 		query.query(sql, Integer.class, true, false);
-		log.debug("testQueryWithBooleanParameter - captured inParams: " + capturedInParam0 + ", " + capturedInParam1);
+		log.debug("testQueryWithBooleanParameter - captured inParams: {}, {}", capturedInParam0, capturedInParam1);
 		assertEquals(sql, capturedSql.getValue());
 		assertEquals("Y", capturedInParam0.getValue());
 		assertEquals("N", capturedInParam1.getValue());
 		verify(jdbcOperations);
 		log.info("testQueryWithBooleanParameter - stop");
 	}
-	
-	
+
 	@Test
 	public void testQueryWithTemporalParameters() {
 		log.info("testQueryWithTemporalParameters - start");
@@ -221,7 +203,7 @@ public class SqlQueryTemplateTestCase {
 		query.query(sql, Integer.class, localDate, localTime, localDateTime);
 		verify(jdbcOperations);
 		
-		log.debug("testQueryWithTemporalParameters - captured inParams: " + localDateParam0 + ", " + localTimeParam1 + ", " + localDateTimeParam2);
+		log.debug("testQueryWithTemporalParameters - captured inParams: {}, {}, {}", localDateParam0, localTimeParam1, localDateTimeParam2);
 		assertEquals(sql, capturedSql.getValue());
 		assertEquals(Utils.toDate(localDate), localDateParam0.getValue());
 		assertEquals(Utils.toDate(localTime), localTimeParam1.getValue());
@@ -229,7 +211,6 @@ public class SqlQueryTemplateTestCase {
 		
 		log.info("testQueryWithTemporalParameters - stop");
 	}
-	
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
@@ -249,14 +230,13 @@ public class SqlQueryTemplateTestCase {
 		assertNotNull(query.getRowMapperFactory());
 		assertNotNull(query.getBooleanParameterConverter());
 		query.query(sql, Integer.class, "test", 10);
-		log.debug("testQueryWithoutBooleanParameter - captured inParams: " + capturedInParam0 + ", " + capturedInParam1);
+		log.debug("testQueryWithoutBooleanParameter - captured inParams: {}, {}", capturedInParam0, capturedInParam1);
 		assertEquals(sql, capturedSql.getValue());
 		assertEquals("test", capturedInParam0.getValue());
-		assertEquals(Integer.valueOf(10), capturedInParam1.getValue());
+		assertEquals(10, capturedInParam1.getValue());
 		verify(jdbcOperations);
 		log.info("testQueryWithoutBooleanParameter - stop");
 	}
-	
 
 	@Test
 	public void testUpdateWithoutBooleanOrBlobParameter() {
@@ -273,7 +253,7 @@ public class SqlQueryTemplateTestCase {
 		query.update(sql, "test", 10);
 		assertEquals(sql, capturedCreator.getValue().getSql());
 		assertEquals("test", capturedCreator.getValue().getParams()[0]);
-		assertEquals(Integer.valueOf(10), capturedCreator.getValue().getParams()[1]);
+		assertEquals(10, capturedCreator.getValue().getParams()[1]);
 		verify(jdbcOperations);
 		log.info("testUpdateWithoutBooleanOrBlobParameter - stop");
 	}
@@ -299,7 +279,7 @@ public class SqlQueryTemplateTestCase {
 	}
 
 	@Test
-	public void testUpdateWithBlobParameter() throws IOException {
+	public void testUpdateWithBlobParameter() {
 		log.info("testUpdateWithBlobParameter - start");
 		final String sql = "dummy sql";
 		JdbcOperations jdbcOperations = createMock(JdbcOperations.class);
@@ -345,23 +325,16 @@ public class SqlQueryTemplateTestCase {
 		assertEquals(Utils.toDate(localDateTime), capturedCreator.getValue().getParams()[2]);
 		log.info("testUpdateWithTemporalParameters - stop");
 	}
-	
-	
-	
+
 	/**
 	 * Tests the query method with a RowCallbackHandler. The test is 
-	 * shallow because it is difficult to mock the ResultSet in this case.
+	 * shallow because it is challenging to mock the ResultSet in this case.
 	 */
 	@Test
 	public void testQueryWithRowCallbackHandler() {
 		log.info("testQueryWithRowCallbackHandler - start");
 		JdbcOperations jdbcOperations = createStrictMock(JdbcOperations.class);
-		RowCallbackHandler handler = new RowCallbackHandler() {
-			@Override
-			public void processRow(ResultSet rs) throws SQLException {
-				log.debug("testQueryWithRowCallbackHandler - row: " + rs.getRow());
-			}
-		};
+		RowCallbackHandler handler = rs -> log.debug("testQueryWithRowCallbackHandler - row: {}", rs.getRow());
 		jdbcOperations.query(anyObject(String.class), anyObject(Object[].class), anyObject(RowCallbackHandler.class));
 		
 		SqlQueryTemplate query = new SqlQueryTemplate(new PostgresJdbcFlavor(), jdbcOperations);
@@ -417,5 +390,4 @@ public class SqlQueryTemplateTestCase {
 		assertEquals(BigDecimal.valueOf(2.0f), capturedCreator.getValue().getParams()[1]);
 		log.info("testUpdateForDoubleWrappingInBigDecimal - stop");
 	}
-	
 }

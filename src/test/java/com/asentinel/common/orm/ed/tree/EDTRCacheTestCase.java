@@ -61,25 +61,19 @@ public class EDTRCacheTestCase {
 	@Test
 	public void testLobHandlerSet() {
 		Node<EntityDescriptor> root = edtrRepo.getEntityDescriptorTree(Invoice.class);
-		root.traverse(n -> {
-			assertSame(lh, ((AnnotationRowMapper<?>) n.getValue().getEntityRowMapper()).getLobHandler());
-		});
+		root.traverse(n ->
+				assertSame(lh, ((AnnotationRowMapper<?>) n.getValue().getEntityRowMapper()).getLobHandler()));
 	}
-	
-	
+
 	// should not be considered a valid production tree equality function,
 	// it's just good enough for this test
 	private boolean equalTrees(Node<EntityDescriptor> t1, Node<EntityDescriptor> t2) {
 		List<EntityDescriptor> l1 = new ArrayList<>();
 		List<EntityDescriptor> l2  = new ArrayList<>();
 		
-		t1.traverse((n) -> {
-			l1.add(n.getValue());
-		});
+		t1.traverse(n -> l1.add(n.getValue()));
 		
-		t2.traverse((n) -> {
-			l2.add(n.getValue());
-		});
+		t2.traverse(n -> l2.add(n.getValue()));
 		
 		return l1.equals(l2);
 	}

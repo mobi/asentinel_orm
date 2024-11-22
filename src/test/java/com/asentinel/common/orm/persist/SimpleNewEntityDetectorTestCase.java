@@ -11,8 +11,7 @@ import com.asentinel.common.orm.persist.SimpleUpdaterTestCase.Bean;
 public class SimpleNewEntityDetectorTestCase {
 
 	SimpleNewEntityDetector d = new SimpleNewEntityDetector();
-	
-	
+
 	@Test
 	public void test1() {
 		Bean b = new Bean();
@@ -43,8 +42,6 @@ public class SimpleNewEntityDetectorTestCase {
 		b.id = 7;
 		assertFalse(d.isNewEntity(b));
 	}
-
-	
 }
 
 class NullIdBean {

@@ -1,20 +1,23 @@
 package com.asentinel.common.jdbc.flavors.oracle;
 
-import static org.easymock.EasyMock.anyInt;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.asentinel.common.jdbc.BooleanParameterConverter;
+import com.asentinel.common.jdbc.SimpleUser;
+import com.asentinel.common.jdbc.ThreadLocalUser;
+import com.asentinel.common.jdbc.flavors.JdbcFlavor;
+import org.easymock.Capture;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.CallableStatementCallback;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ParameterDisposer;
+import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.support.lob.LobCreator;
 
+import javax.sql.DataSource;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,24 +33,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import javax.sql.DataSource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.easymock.Capture;
-import org.junit.Test;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.CallableStatementCallback;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ParameterDisposer;
-import org.springframework.jdbc.core.SqlParameterValue;
-import org.springframework.jdbc.support.lob.LobCreator;
-
-import com.asentinel.common.jdbc.BooleanParameterConverter;
-import com.asentinel.common.jdbc.SimpleUser;
-import com.asentinel.common.jdbc.ThreadLocalUser;
-import com.asentinel.common.jdbc.flavors.JdbcFlavor;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests the creation of CallableStatements using {@link InOutCallableStatementCreator}
@@ -56,9 +43,9 @@ import com.asentinel.common.jdbc.flavors.JdbcFlavor;
  */
 public class InOutCallableStatementCreatorTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(InOutCallableStatementCreatorTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(InOutCallableStatementCreatorTestCase.class);
 	
-	private JdbcFlavor jdbcFlavor = new OracleJdbcFlavor();
+	private final JdbcFlavor jdbcFlavor = new OracleJdbcFlavor();
 	
 	private static class TestByteArrayInputStream extends ByteArrayInputStream {
 		
@@ -69,7 +56,7 @@ public class InOutCallableStatementCreatorTestCase {
 		}
 
 		@Override
-	    public void close() throws IOException {
+	    public void close() {
 			closeCount++;
 	    }
 
@@ -139,10 +126,6 @@ public class InOutCallableStatementCreatorTestCase {
 	
 	/**
 	 * Method that allows for the creation and validation of various calls.
-	 * @param spName
-	 * @param outParamCount
-	 * @param inParams
-	 * @throws SQLException
 	 */
 	private void testCall(String spName, int outParamCount, Object ... inParams) throws SQLException {
 		Connection conn = createMock(Connection.class);
@@ -218,7 +201,7 @@ public class InOutCallableStatementCreatorTestCase {
 
 		// validate values
 		String sqlCallString = capturedSqlCallString.getValue();
-		assertTrue(sqlCallString.indexOf(spName)>=0);
+		assertTrue(sqlCallString.contains(spName));
 		
 		// count question marks
 		int qmCount = 0;
@@ -241,7 +224,7 @@ public class InOutCallableStatementCreatorTestCase {
 				if (o instanceof TestByteArrayInputStream) {
 					// close is called 2 times for InputStreams
 					// 1) the lobCreator calls close (not the mock but the OracleLobCreator in a live situation)
-					// 2) cleanupParameters calls close on any Closeables
+					// 2) cleanupParameters calls close on any Closables
 					assertTrue("Close was not called for an InputStream parameter",
 							((TestByteArrayInputStream) o).getCloseCount() > 0);
 				}
@@ -276,7 +259,7 @@ public class InOutCallableStatementCreatorTestCase {
 		testCall("test", 5, 1, 2, 3, new Date(), "aaaa");
 		
 		testCall("test", 2, 				
-				1, 10l, 1.5d, 1.5f,
+				1, 10L, 1.5d, 1.5f,
 				new Date(), Calendar.getInstance(),
 				"test",
 				true, false, null
@@ -286,7 +269,7 @@ public class InOutCallableStatementCreatorTestCase {
 		testCall("test", 2, "aaaa", new byte[]{1}, 2, 3.5d);
 		
 		testCall("test", 0, new TestByteArrayInputStream(new byte[]{1}));
-		testCall("test", 2, "aaaa", new TestByteArrayInputStream(new byte[]{1}), 2l, 3.5d);
+		testCall("test", 2, "aaaa", new TestByteArrayInputStream(new byte[]{1}), 2L, 3.5d);
 		
 		testCall("test", 1, new TestByteArrayInputStream(new byte[]{1}), new byte[]{2});
 		testCall("test", 2, new TestByteArrayInputStream(new byte[]{1}), new TestByteArrayInputStream(new byte[]{2}));
@@ -311,7 +294,7 @@ public class InOutCallableStatementCreatorTestCase {
 		testCall("test", 1, 2);
 		
 		// test with null thread local user
-		ThreadLocalUser.getThreadLocalUser().set(null);
+        ThreadLocalUser.getThreadLocalUser().remove();
 		testCall("test", 1, 2);
 		ThreadLocalUser.getThreadLocalUser().remove();
 		
@@ -360,7 +343,7 @@ public class InOutCallableStatementCreatorTestCase {
 	public void testInCombinationWithJdbcTemplate() throws SQLException {
 		log.info("testInCombinationWithJdbcTemplate - start");
 		
-		final List<Integer> testList = new ArrayList<Integer>();
+		final List<Integer> testList = new ArrayList<>();
 		InputStream in = new ByteArrayInputStream(new byte[]{3, 4}) {
 			int i = 1;
 			
@@ -391,13 +374,10 @@ public class InOutCallableStatementCreatorTestCase {
 		
 		InOutCallableStatementCreator creator = new InOutCallableStatementCreator(jdbcFlavor, "test", 0, new byte[]{0, 1}, in);
 		creator.setLobCreator(lobCreator);
-		CallableStatementCallback<Object> action = new CallableStatementCallback<Object>() {
-			@Override
-			public Object doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
-				log.debug("doInCallableStatement - made it to the action.");
-				return null;
-			}
-		};
+		CallableStatementCallback<Object> action = cs1 -> {
+            log.debug("doInCallableStatement - made it to the action.");
+            return null;
+        };
 		
 		replay(dataSource, conn, cs, lobCreator);
 		
@@ -405,18 +385,17 @@ public class InOutCallableStatementCreatorTestCase {
 		
 		verify(dataSource, conn, cs, lobCreator);
 
-		assertTrue("The input stream was not closed.", testList.size() > 0 );
-		log.debug("testInCombinationWithJdbcTemplate - close was called on InputStream " + testList.size() + " times. That's to be expected.");
+        assertFalse("The input stream was not closed.", testList.isEmpty());
+		log.debug("testInCombinationWithJdbcTemplate - close was called on InputStream {} times. That's to be expected.", testList.size());
 
 		log.info("testInCombinationWithJdbcTemplate - stop");
 	}
-	
 
 	/**
 	 * Test that ensures that the InOutCallableStatementCreator works correctly
 	 * in combination with the JdbcTemplate when it comes to closing the LobCreator
-	 * that it is using for blobs. Unlike the previous test in this one the JdbcTemplate
-	 * throws an exception. In this this situation the stream still has to be closed.
+	 * that it is using for blobs. Unlike the previous test in this one, the JdbcTemplate
+	 * throws an exception. In this situation, the stream still has to be closed.
 	 */
 	@Test
 	public void testInCombinationWithJdbcTemplateAndException() throws SQLException {
@@ -443,7 +422,7 @@ public class InOutCallableStatementCreatorTestCase {
 		expect(conn.getMetaData()).andReturn(dbMeta);
 		conn.close();
 						
-		// ensure that the lobCreator is closed and implicitly the  InOutCallableStatementCreator#cleanupParameters
+		// ensure that the lobCreator is closed and implicitly the InOutCallableStatementCreator#cleanupParameters
 		// is called by the JdbcTemplate#execute method
 		lobCreator.close();
 				
@@ -451,13 +430,10 @@ public class InOutCallableStatementCreatorTestCase {
 		
 		InOutCallableStatementCreator creator = new InOutCallableStatementCreator(jdbcFlavor, "test", 0, in);
 		creator.setLobCreator(lobCreator);
-		CallableStatementCallback<Object> action = new CallableStatementCallback<>() {
-			@Override
-			public Object doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
-				log.debug("doInCallableStatement - made it to the action.");
-				return null;
-			}
-		};
+		CallableStatementCallback<Object> action = cs1 -> {
+            log.debug("doInCallableStatement - made it to the action.");
+            return null;
+        };
 		
 		replay(dataSource, conn, cs, lobCreator);
 		
@@ -465,15 +441,14 @@ public class InOutCallableStatementCreatorTestCase {
 			jdbcOps.execute(creator, action);
 			fail("execute should throw exception.");
 		} catch (DataAccessException e) {
-			log.debug("testInCombinationWithJdbcTemplateAndException - Expected exception: " + e.getMessage());
+			log.debug("testInCombinationWithJdbcTemplateAndException - Expected exception: {}", e.getMessage());
 		}
 		
 		verify(dataSource, conn, cs, lobCreator);
 
-		assertTrue("The input stream was not closed.", testList.size() > 0 );
-		log.debug("testInCombinationWithJdbcTemplateAndException - close was called on InputStream " + testList.size() + " times. That's to be expected.");
+        assertFalse("The input stream was not closed.", testList.isEmpty());
+		log.debug("testInCombinationWithJdbcTemplateAndException - close was called on InputStream {} times. That's to be expected.", testList.size());
 
 		log.info("testInCombinationWithJdbcTemplateAndException - stop");
 	}
-	
 }

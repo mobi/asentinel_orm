@@ -103,7 +103,5 @@ public class SimpleUpdaterNoColumnsUpsertTestCase {
 		PkOnlySeqBean(int id) {
 			this.id = id;
 		}
-
 	}
-	
 }

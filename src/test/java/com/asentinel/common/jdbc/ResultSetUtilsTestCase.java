@@ -1,16 +1,10 @@
 package com.asentinel.common.jdbc;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createStrictMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.RowCallbackHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,92 +18,88 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.jdbc.core.RowCallbackHandler;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests the following:
- * 
+ * <br>
  * 	- ResultSetUtils#asXXX methods in combination with ReflectionRowMapper
  * 	and also the exception situations for the ReflectionRowMapper.
- * 
+ * <br>
  * 	- {@link ResultSetUtils#processResultSet(ResultSet, RowCallbackHandler)}
- * 
+ * <br>
  * 	- the {@link ReflectionRowMapper} with best effort. 
- * 
+ * <br>
  * 	- type conversions 
  */
 public class ResultSetUtilsTestCase {
-	private final static Logger log = LoggerFactory.getLogger(ResultSetUtilsTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(ResultSetUtilsTestCase.class);
 	
-	final static String VALUE_INT_COL = "ValueInt";
-	final static String VALUE_LONG_COL = "ValueLong";
-	final static String VALUE_DOUBLE_COL = "ValueDouble";
-	final static String VALUE_STRING_COL = "ValueString";
-	final static String VALUE_DATE_COL = "ValueDate";
-	final static String VALUE_BOOLEAN_COL = "ValueBoolean";
-	final static String VALUE_BIG_DECIMAL_COL = "ValueBigDecimal";	
-	final static String VALUE_BIG_INTEGER_COL = "ValueBigInteger";
-	final static String VALUE_BYTES_COL = "ValueBytes";
-	final static String VALUE_INPUT_STREAM_COL = "ValueInputStream";
-	final static String VALUE_NUMBER_COL = "ValueNumber";
-	final static String VALUE_STRING_ARRAY_COL = "ValueStringArray";
-	final static String VALUE_NUMBER_ARRAY_COL = "ValueNumberArray";
-	final static String VALUE_BIG_DECIMAL_ARRAY_COL = "ValueBigDecimalArray";
-	final static String VALUE_INT_ARRAY_COL = "ValueIntArray";
-	final static String VALUE_LONG_ARRAY_COL = "ValueLongArray";
-	final static String VALUE_DOUBLE_ARRAY_COL = "ValueDoubleArray";
-	final static String VALUE_BIGINTEGER_ARRAY_COL = "ValueBigIntegerArray";
-	final static String VALUE_LOCAL_DATE_COL = "ValueLocalDate";
-	final static String VALUE_LOCAL_TIME_COL = "ValueLocalTime";
-	final static String VALUE_LOCAL_DATE_TIME_COL = "ValueLocalDateTime";
-	final static String VALUE_ENUM_COL = "ValueEnum";
+	static final String VALUE_INT_COL = "ValueInt";
+	static final String VALUE_LONG_COL = "ValueLong";
+	static final String VALUE_DOUBLE_COL = "ValueDouble";
+	static final String VALUE_STRING_COL = "ValueString";
+	static final String VALUE_DATE_COL = "ValueDate";
+	static final String VALUE_BOOLEAN_COL = "ValueBoolean";
+	static final String VALUE_BIG_DECIMAL_COL = "ValueBigDecimal";	
+	static final String VALUE_BIG_INTEGER_COL = "ValueBigInteger";
+	static final String VALUE_BYTES_COL = "ValueBytes";
+	static final String VALUE_INPUT_STREAM_COL = "ValueInputStream";
+	static final String VALUE_NUMBER_COL = "ValueNumber";
+	static final String VALUE_STRING_ARRAY_COL = "ValueStringArray";
+	static final String VALUE_NUMBER_ARRAY_COL = "ValueNumberArray";
+	static final String VALUE_BIG_DECIMAL_ARRAY_COL = "ValueBigDecimalArray";
+	static final String VALUE_INT_ARRAY_COL = "ValueIntArray";
+	static final String VALUE_LONG_ARRAY_COL = "ValueLongArray";
+	static final String VALUE_DOUBLE_ARRAY_COL = "ValueDoubleArray";
+	static final String VALUE_BIGINTEGER_ARRAY_COL = "ValueBigIntegerArray";
+	static final String VALUE_LOCAL_DATE_COL = "ValueLocalDate";
+	static final String VALUE_LOCAL_TIME_COL = "ValueLocalTime";
+	static final String VALUE_LOCAL_DATE_TIME_COL = "ValueLocalDateTime";
+	static final String VALUE_ENUM_COL = "ValueEnum";
 	
 	
-	private final static String STRING_PREFIX = "string_";
+	private static final String STRING_PREFIX = "string_";
 	
-	private ResultSet rs = createMock(ResultSet.class);
-	private ResultSetMetaData rsmd = createMock(ResultSetMetaData.class);
+	private final ResultSet rs = createMock(ResultSet.class);
+	private final ResultSetMetaData rsmd = createMock(ResultSetMetaData.class);
 	
 	private Array stringArray;
-	private String[] stringArrayValue = new String[] {"s1", "s2"};
+	private final String[] stringArrayValue = new String[] {"s1", "s2"};
 	
 	
 	private Array numberArray;
-	private Number[] numberArrayValue = new Number[] {new BigDecimal(1), new BigDecimal(2)};
+	private final Number[] numberArrayValue = new Number[] {new BigDecimal(1), new BigDecimal(2)};
 
 	private Array bigDecimalArray;
-	private BigDecimal[] bigDecimalArrayValue = new BigDecimal[] {new BigDecimal(1), new BigDecimal(2)};
+	private final BigDecimal[] bigDecimalArrayValue = new BigDecimal[] {new BigDecimal(1), new BigDecimal(2)};
 	
 	private Array intArray;
-	private int[] intTestArrayValue = new int[] {1, 2};
-	private BigDecimal[] intArrayValue = new BigDecimal[] {new BigDecimal(intTestArrayValue[0]), new BigDecimal(intTestArrayValue[1])};
+	private final int[] intTestArrayValue = new int[] {1, 2};
+	private final BigDecimal[] intArrayValue = new BigDecimal[] {new BigDecimal(intTestArrayValue[0]), new BigDecimal(intTestArrayValue[1])};
 
 	private Array longArray;
-	private long[] longTestArrayValue = new long[] {1, 2};
-	private BigDecimal[] longArrayValue = new BigDecimal[] {new BigDecimal(longTestArrayValue[0]), new BigDecimal(longTestArrayValue[1])};
+	private final long[] longTestArrayValue = new long[] {1, 2};
+	private final BigDecimal[] longArrayValue = new BigDecimal[] {new BigDecimal(longTestArrayValue[0]), new BigDecimal(longTestArrayValue[1])};
 
 	private Array doubleArray;
-	private double[] doubleTestArrayValue = new double[] {1.1, 2.2};
-	private BigDecimal[] doubleArrayValue = new BigDecimal[] {new BigDecimal(doubleTestArrayValue[0]), new BigDecimal(doubleTestArrayValue[1])};
+	private final double[] doubleTestArrayValue = new double[] {1.1, 2.2};
+	private final BigDecimal[] doubleArrayValue = new BigDecimal[] {BigDecimal.valueOf(doubleTestArrayValue[0]), BigDecimal.valueOf(doubleTestArrayValue[1])};
 
 	private Array bigIntegerArray;
-	private BigInteger[] bigIntegerTestArrayValue = new BigInteger[] {new BigInteger(String.valueOf(1)), new BigInteger(String.valueOf(2))};
-	private BigDecimal[] bigIntegerArrayValue = new BigDecimal[] {new BigDecimal(intTestArrayValue[0]), new BigDecimal(intTestArrayValue[1])};
+	private final BigInteger[] bigIntegerTestArrayValue = new BigInteger[] {new BigInteger(String.valueOf(1)), new BigInteger(String.valueOf(2))};
+	private final BigDecimal[] bigIntegerArrayValue = new BigDecimal[] {new BigDecimal(intTestArrayValue[0]), new BigDecimal(intTestArrayValue[1])};
 	
 	
 	
 	@Before
-	public void setup() throws SQLException {
+	public void setup() {
 		
-		// for simplicity we test with one array for all rows
+		// for simplicity, we test with one array for all rows
 		stringArray = createMock(Array.class);
 		numberArray = createMock(Array.class);
 		bigDecimalArray = createMock(Array.class);
@@ -117,7 +107,6 @@ public class ResultSetUtilsTestCase {
 		longArray = createMock(Array.class);
 		doubleArray = createMock(Array.class);
 		bigIntegerArray = createMock(Array.class);
-		
 	}
 	
 	private void prepareArrayMock(Array array, Object ret) throws SQLException {
@@ -125,9 +114,7 @@ public class ResultSetUtilsTestCase {
 		array.free();
 		expectLastCall().anyTimes();
 	}
-	
-	
-	
+
 	@Test
 	public void testReflectionRowMapper() throws SQLException {
 		log.info("testReflectionRowMapper - start");
@@ -192,13 +179,13 @@ public class ResultSetUtilsTestCase {
 				expect(rs.wasNull()).andReturn(false);
 				expect(rs.getObject(VALUE_STRING_COL)).andReturn(STRING_PREFIX + i); cc++;
 				expect(rs.getTimestamp(VALUE_DATE_COL)).andReturn(sqlTimestamp); cc++;
-				expect(rs.getObject(VALUE_BOOLEAN_COL)).andReturn(new StringBuilder().append("Y").append((char)0).append((char)0).append((char)0).toString()); cc++;
+				expect(rs.getObject(VALUE_BOOLEAN_COL)).andReturn("Y" + (char) 0 + (char) 0 + (char) 0); cc++;
 				expect(rs.getBigDecimal(VALUE_BIG_DECIMAL_COL)).andReturn(new BigDecimal(i + .5)); cc++;
 				expect(rs.getBigDecimal(VALUE_BIG_INTEGER_COL)).andReturn(new BigDecimal(i)); cc++;
 				expect(rs.findColumn(VALUE_BYTES_COL)).andReturn(cc);
 				expect(rs.getBytes(cc++)).andReturn(new byte[]{(byte)i});
 				expect(rs.findColumn(VALUE_INPUT_STREAM_COL)).andReturn(cc);
-				expect(rs.getBinaryStream(cc++)).andReturn(new ByteArrayInputStream( new byte[]{(byte)(i * 2)}));
+				expect(rs.getBinaryStream(cc)).andReturn(new ByteArrayInputStream( new byte[]{(byte)(i * 2)}));
 				expect(rs.getBigDecimal(VALUE_NUMBER_COL)).andReturn(new BigDecimal(i));
 				expect(rs.getArray(VALUE_STRING_ARRAY_COL)).andReturn(stringArray);
 				expect(rs.getArray(VALUE_NUMBER_ARRAY_COL)).andReturn(numberArray);
@@ -227,7 +214,7 @@ public class ResultSetUtilsTestCase {
 			t0 = System.nanoTime();
 			TBean[] list = ResultSetUtils.asArray(rs, TBean.class);
 			t1 = System.nanoTime();
-			log.info("testReflectionRowMapper - conversion took: " + (t1 - t0)/1000000d + " ms");
+			log.info("testReflectionRowMapper - conversion took: {} ms", (t1 - t0)/1000000d);
 			verify(rs, rsmd, st, 
 					stringArray, numberArray, bigDecimalArray, 
 					intArray, longArray, doubleArray, bigIntegerArray
@@ -242,7 +229,7 @@ public class ResultSetUtilsTestCase {
 				assertEquals(i + .5, b.getValueDouble(), 0.0001);
 				assertEquals(STRING_PREFIX + i, b.getValueString());
 				assertEquals(sqlTimestamp.getTime(), b.getValueDate().getTime());
-				assertEquals(true, b.isValueBoolean());
+                assertTrue(b.isValueBoolean());
 				assertEquals(new BigDecimal(i + .5), b.getValueBigDecimal());
 				assertEquals(new BigInteger(String.valueOf(i)), b.getValueBigInteger());
 				assertEquals(1, b.getValueBytes().length);
@@ -250,7 +237,7 @@ public class ResultSetUtilsTestCase {
 				assertEquals(new BigDecimal(i), b.getValueNumber());
 				
 				InputStream in = b.getValueInputStream();
-				List<Byte> bytes = new ArrayList<Byte>();
+				List<Byte> bytes = new ArrayList<>();
 				int ib;
 				try {
 					while( (ib = in.read()) > 0) {
@@ -258,18 +245,18 @@ public class ResultSetUtilsTestCase {
 					}
 					in.close();
 				} catch (IOException e) {
-					assertTrue("Should not throw IOException.", false);
+                    fail("Should not throw IOException.");
 				}
 				assertEquals(1, bytes.size());
 				assertEquals((byte)(i * 2), (byte)bytes.get(0));
-				
-				assertTrue(Arrays.equals(stringArrayValue, b.getValueStringArray()));
-				assertTrue(Arrays.equals(numberArrayValue, b.getValueNumberArray()));
-				assertTrue(Arrays.equals(bigDecimalArrayValue, b.getValueBigDecimalArray()));
-				assertTrue(Arrays.equals(intTestArrayValue, b.getValueIntArray()));
-				assertTrue(Arrays.equals(longTestArrayValue, b.getValueLongArray()));
-				assertTrue(Arrays.equals(doubleTestArrayValue, b.getValueDoubleArray()));
-				assertTrue(Arrays.equals(bigIntegerTestArrayValue, b.getValueBigIntegerArray()));
+
+                assertArrayEquals(stringArrayValue, b.getValueStringArray());
+                assertArrayEquals(numberArrayValue, b.getValueNumberArray());
+                assertArrayEquals(bigDecimalArrayValue, b.getValueBigDecimalArray());
+                assertArrayEquals(intTestArrayValue, b.getValueIntArray());
+                assertArrayEquals(longTestArrayValue, b.getValueLongArray());
+                assertArrayEquals(doubleTestArrayValue, b.getValueDoubleArray(), 0.0);
+                assertArrayEquals(bigIntegerTestArrayValue, b.getValueBigIntegerArray());
 				assertEquals(sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), b.getValueLocalDate());
 				assertEquals(sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalTime(), b.getValueLocalTime());
 				assertEquals(sqlTimestamp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(), b.getValueLocalDateTime());
@@ -277,7 +264,7 @@ public class ResultSetUtilsTestCase {
 			}
 		} catch (SQLException e) {
 			log.error("Exception:", e);
-			assertTrue("No exception should be thrown.",false);
+            fail("No exception should be thrown.");
 		}
 		log.info("testReflectionRowMapper - stop");		
 	}
@@ -319,22 +306,20 @@ public class ResultSetUtilsTestCase {
 		expect(rs.wasNull()).andReturn(false);
 		expect(rs.getObject(VALUE_STRING_COL)).andReturn(STRING_PREFIX + i); cc++;
 		expect(rs.getTimestamp(VALUE_DATE_COL)).andReturn(sqlTimestamp); cc++;
-		expect(rs.getObject(VALUE_BOOLEAN_COL)).andReturn(new StringBuilder().append("Y").append((char)0).append((char)0).append((char)0).toString()); cc++;
+		expect(rs.getObject(VALUE_BOOLEAN_COL)).andReturn("Y" + (char) 0 + (char) 0 + (char) 0); cc++;
 		expect(rs.getBigDecimal(VALUE_BIG_DECIMAL_COL)).andReturn(new BigDecimal(i + .5)); cc++;
 		expect(rs.getBigDecimal(VALUE_BIG_INTEGER_COL)).andReturn(new BigDecimal(i)); cc++;
 		expect(rs.findColumn(VALUE_BYTES_COL)).andReturn(cc);
 		expect(rs.getBytes(cc++)).andReturn(new byte[]{(byte)i});
 		expect(rs.findColumn(VALUE_INPUT_STREAM_COL)).andReturn(cc);
-		expect(rs.getBinaryStream(cc++)).andReturn(new ByteArrayInputStream( new byte[]{(byte)(i * 2)}));
+		expect(rs.getBinaryStream(cc)).andReturn(new ByteArrayInputStream( new byte[]{(byte)(i * 2)}));
 		rs.close();
-		
-		
+
 		try {
-			
 			replay(rs, rsmd);
 
 			ResultSetUtils.asArray(rs, TBean.class);
-			assertTrue("Should not get to this point.", false);			
+            fail("Should not get to this point.");
 		} catch (SQLException e) {
 			log.error("Expected exception:", e);
 		}
@@ -358,7 +343,7 @@ public class ResultSetUtilsTestCase {
 			ResultSetUtils.asArray(rs, TBean.class);
 			verify(rs);
 		} catch (SQLException e) {
-			assertTrue("No exception should be thrown.",false);
+            fail("No exception should be thrown.");
 		}		
 		log.info("testReflectionRowMapperEmptyResultSet - stop");
 	}
@@ -372,14 +357,14 @@ public class ResultSetUtilsTestCase {
 		Exception expectedException = new SQLException("Test SqlException");
 		expect(rs.getInt("intValue")).andThrow(expectedException);
 		
-		ReflectionRowMapper<TIntFieldBean> mapper = new ReflectionRowMapper<TIntFieldBean>(TIntFieldBean.class);
+		ReflectionRowMapper<TIntFieldBean> mapper = new ReflectionRowMapper<>(TIntFieldBean.class);
 		
 		replay(rs, rsmd);
 		try {
 			mapper.mapRow(rs, 1);
 			fail("Expected SQLException not thrown.");
 		} catch(SQLException e) {
-			log.debug("Expected exception: " + e.getMessage());
+			log.debug("Expected exception: {}", e.getMessage());
 			assertSame(expectedException, e.getCause());
 		}
 		verify(rs, rsmd);
@@ -400,7 +385,7 @@ public class ResultSetUtilsTestCase {
 			mapper.mapRow(rs, 1);
 			fail("Expected SQLException not thrown.");
 		} catch(SQLException e) {
-			log.debug("Expected exception: " + e.getMessage());
+			log.debug("Expected exception: {}", e.getMessage());
 		}
 		verify(rs, rsmd);
 		log.info("testReflectionRowMapperWithInvalidSetMethod - stop");
@@ -415,13 +400,13 @@ public class ResultSetUtilsTestCase {
 		expect(rs.getInt("intValue")).andReturn(10);
 		expect(rs.wasNull()).andReturn(false);
 		
-		ReflectionRowMapper<TFaillingSetterBean> mapper = new ReflectionRowMapper<TFaillingSetterBean>(TFaillingSetterBean.class);
+		ReflectionRowMapper<TFaillingSetterBean> mapper = new ReflectionRowMapper<>(TFaillingSetterBean.class);
 		replay(rs, rsmd);
 		try {
 			mapper.mapRow(rs, 1);
 			fail("Expected SQLException not thrown.");
 		} catch(SQLException e) {
-			log.debug("Expected exception: " + e.getMessage());
+			log.debug("Expected exception: {}", e.getMessage());
 			assertTrue("Wrong cause exception type.", e.getCause().getCause() instanceof UnsupportedOperationException);
 		}
 		verify(rs, rsmd);
@@ -435,8 +420,8 @@ public class ResultSetUtilsTestCase {
 	public void testProcessResultSet() throws SQLException {
 		log.info("testProcessResultSet - start");
 		ResultSet rs = createStrictMock(ResultSet.class);
-		int SIZE = 10;
-		for (int i=1; i<=SIZE; i++) {
+		int size = 10;
+		for (int i=1; i<=size; i++) {
 			expect(rs.next()).andReturn(true);
 		}
 		expect(rs.next()).andReturn(false);
@@ -446,22 +431,21 @@ public class ResultSetUtilsTestCase {
 		rs.close();		
 		
 		replay(rs);
-		final List<Integer> list = new ArrayList<Integer>();
+		final List<Integer> list = new ArrayList<>();
 		ResultSetUtils.processResultSet(rs, new RowCallbackHandler() {
 			int count = 0;
 			@Override
-			public void processRow(ResultSet rs) throws SQLException {
+			public void processRow(ResultSet rs) {
 				list.clear();
 				list.add(++count);
 			}
 		});
 		verify(rs);
 		
-		assertEquals(SIZE, list.get(0).intValue());
+		assertEquals(size, list.get(0).intValue());
 		log.info("testProcessResultSet - stop");
 	}
-	
-	
+
 	@Test
 	public void testReflectionRowMapperMissingSetMethodWithBestEffort() throws SQLException {
 		log.info("testBestEffortReflectionRowMapperMissingSetMethod - start");	
@@ -503,13 +487,13 @@ public class ResultSetUtilsTestCase {
 			expect(rs.wasNull()).andReturn(false);
 			expect(rs.getObject(VALUE_STRING_COL)).andReturn(STRING_PREFIX + i); ci++;
 			expect(rs.getTimestamp(VALUE_DATE_COL)).andReturn(sqlTimestamp); ci++;
-			expect(rs.getObject(VALUE_BOOLEAN_COL)).andReturn(new StringBuilder().append("Y").append((char)0).append((char)0).append((char)0).toString()); ci++;
+			expect(rs.getObject(VALUE_BOOLEAN_COL)).andReturn("Y" + (char) 0 + (char) 0 + (char) 0); ci++;
 			expect(rs.getBigDecimal(VALUE_BIG_DECIMAL_COL)).andReturn(new BigDecimal(i + .5)); ci++;
 			expect(rs.getBigDecimal(VALUE_BIG_INTEGER_COL)).andReturn(new BigDecimal(i)); ci++;
 			expect(rs.findColumn(VALUE_BYTES_COL)).andReturn(ci);
 			expect(rs.getBytes(ci)).andReturn(new byte[]{(byte)i}); ci++;
 			expect(rs.findColumn(VALUE_INPUT_STREAM_COL)).andReturn(ci);
-			expect(rs.getBinaryStream(ci)).andReturn(new ByteArrayInputStream(new byte[]{(byte)(i * 2)})); ci++;
+			expect(rs.getBinaryStream(ci)).andReturn(new ByteArrayInputStream(new byte[]{(byte)(i * 2)}));
 		}
 		expect(rs.next()).andReturn(false);
 		if (log.isTraceEnabled()) {
@@ -519,12 +503,11 @@ public class ResultSetUtilsTestCase {
 		
 		replay(rs, rsmd, st);
 		try {
-			ResultSetUtils.asList(rs, new ReflectionRowMapper<TBean>(TBean.class, true));
+			ResultSetUtils.asList(rs, new ReflectionRowMapper<>(TBean.class, true));
 		} catch (SQLException e) {
 			fail("Should not throw exception.");
 		}
 		verify(rs, rsmd, st);
 		log.info("testBestEffortReflectionRowMapperMissingSetMethod - stop");			
 	}
-	
 }

@@ -129,7 +129,7 @@ public class AbstractLazyLoadInterceptorMultiThreadedTestCase {
 
 		
 		// the variable name is critical
-		public volatile Function<Object, TestEntity> com$asentinel$common$orm$proxy$loader = (id) -> entity;
+		public volatile Function<Object, TestEntity> com$asentinel$common$orm$proxy$loader = id -> entity;
 	
 	}
 	

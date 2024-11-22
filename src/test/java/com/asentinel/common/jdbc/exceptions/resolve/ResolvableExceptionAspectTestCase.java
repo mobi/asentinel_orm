@@ -21,7 +21,6 @@ import com.asentinel.common.orm.mappers.Table;
 /**
  * @since 1.60.12
  * @author Razvan Popian
- *
  */
 public class ResolvableExceptionAspectTestCase {
 	private final IllegalArgumentException e = new IllegalArgumentException();

@@ -28,15 +28,15 @@ import org.junit.Test;
  * mappers.
  */
 public class ResultSetUtils2TestCase {
-	private final static Logger log = LoggerFactory.getLogger(ResultSetUtils2TestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(ResultSetUtils2TestCase.class);
 
-	private final static int SIZE = 10;
+	private static final int SIZE = 10;
 	
-	private static interface ExpectationCallback {
+	private interface ExpectationCallback {
 		
-			public void expectCall(ResultSet rs, int row) throws SQLException;
+			void expectCall(ResultSet rs, int row) throws SQLException;
 			
-			public void validate(Object[] objects);
+			void validate(Object[] objects);
 	}
 	
 	private void genericRowMapperTest(Class<?> clasz, ExpectationCallback expectation) throws SQLException {
@@ -79,8 +79,7 @@ public class ResultSetUtils2TestCase {
 			}
 		});
 		log.info("testSingleColumnResultSet - passed for String.");
-		
-		
+
 		genericRowMapperTest(Integer.class, new ExpectationCallback(){
 
 			@Override
@@ -96,9 +95,7 @@ public class ResultSetUtils2TestCase {
 			}
 		});
 		log.info("testSingleColumnResultSet - passed for int.");
-		
-		
-		
+
 		genericRowMapperTest(Long.class, new ExpectationCallback(){
 
 			@Override
@@ -126,7 +123,7 @@ public class ResultSetUtils2TestCase {
 			@Override
 			public void validate(Object[] objects) {
 				for (int i=0; i<objects.length; i++) {
-					assertEquals((double)i + 1, ((Double)objects[i]).doubleValue(), 0.01);
+					assertEquals((double)i + 1, (Double) objects[i], 0.01);
 				}
 			}
 		});
@@ -141,9 +138,9 @@ public class ResultSetUtils2TestCase {
 
 			@Override
 			public void validate(Object[] objects) {
-				for (int i=0; i<objects.length; i++) {
-					assertEquals(true, ((Boolean)objects[i]).booleanValue());
-				}
+                for (Object object : objects) {
+                    assertEquals(true, object);
+                }
 			}
 		});
 		log.info("testSingleColumnResultSet - passed for boolean.");
@@ -161,14 +158,13 @@ public class ResultSetUtils2TestCase {
 
 			@Override
 			public void validate(Object[] objects) {
-				for (int i=0; i<objects.length; i++) {
-					assertEquals(d, objects[i]);
-				}
+                for (Object object : objects) {
+                    assertEquals(d, object);
+                }
 			}
 		});
 		log.info("testSingleColumnResultSet - passed for date.");
-		
-		
+
 		genericRowMapperTest(BigInteger.class, new ExpectationCallback(){
 
 			@Override

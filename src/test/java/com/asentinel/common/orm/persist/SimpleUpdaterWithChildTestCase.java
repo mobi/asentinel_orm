@@ -1,24 +1,5 @@
 package com.asentinel.common.orm.persist;
 
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.getCurrentArguments;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.easymock.Capture;
-import org.easymock.IAnswer;
-import org.junit.Test;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-
 import com.asentinel.common.jdbc.SqlQuery;
 import com.asentinel.common.jdbc.flavors.JdbcFlavor;
 import com.asentinel.common.jdbc.flavors.postgres.PostgresJdbcFlavor;
@@ -26,16 +7,27 @@ import com.asentinel.common.orm.mappers.Child;
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.orm.mappers.Table;
+import org.easymock.Capture;
+import org.junit.Test;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 public class SimpleUpdaterWithChildTestCase {
 	
-	final static String SEQ_NEXT_VAL_PLACEHOLDER = "[SEQ]";
+	static final String SEQ_NEXT_VAL_PLACEHOLDER = "[SEQ]";
 	
-	final static String INSERT = "insert into A(aId, name, x2Id, xId) values(?, ?, ?, ?)";
-	final static String INSERT_AUTO_ID = "insert into A(aId, name, x2Id, xId) values(" + SEQ_NEXT_VAL_PLACEHOLDER+ ", ?, ?, ?)";
-	final static String INSERT_AUTO_ID_NO_SEQ = "insert into A(name, x2Id, xId) values(?, ?, ?)";
-	final static String UPDATE = "update A set name = ?, x2Id = ?, xId = ? where aId = ?";
-	final static int ID = 11;
+	static final String INSERT = "insert into A(aId, name, x2Id, xId) values(?, ?, ?, ?)";
+	static final String INSERT_AUTO_ID = "insert into A(aId, name, x2Id, xId) values(" + SEQ_NEXT_VAL_PLACEHOLDER+ ", ?, ?, ?)";
+	static final String INSERT_AUTO_ID_NO_SEQ = "insert into A(name, x2Id, xId) values(?, ?, ?)";
+	static final String UPDATE = "update A set name = ?, x2Id = ?, xId = ? where aId = ?";
+	static final int ID = 11;
 
 	JdbcFlavor jdbcFlavor = new PostgresJdbcFlavor();
 	
@@ -87,7 +79,7 @@ public class SimpleUpdaterWithChildTestCase {
 		assertEquals(a.id, c0.getValue().intValue());
 		assertEquals(a.name, c1.getValue());
 		assertEquals(a.x2Id, c2.getValue().intValue());
-		assertEquals(null, c3.getValue());
+        assertNull(c3.getValue());
 		assertEquals(INSERT.replaceAll("\\s", "").toLowerCase(), 
 				cSql.getValue().replaceAll("\\s", "").toLowerCase()
 		);
@@ -116,32 +108,28 @@ public class SimpleUpdaterWithChildTestCase {
 	public void testInsertAutoIdNoSeq() {
 		expect(ex.update(capture(cSql), capture(cIdNames), capture(cKeyHolder),
 				capture(c1), capture(c2), capture(c3)))
-			.andAnswer(new IAnswer<Integer>() {
-
-				@Override
-				public Integer answer() throws Throwable {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
+			.andAnswer(() -> {
+                Object[] args = getCurrentArguments();
+                for (Object arg: args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<String, Object>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            })
 		;
 		
 		replay(ex);
 		int count = u.update(a, UpdateType.INSERT_AUTO_ID);
 		verify(ex);
 		assertEquals(1, count);
-		assertEquals(a.id, ID);
+		assertEquals(ID, a.id);
 		assertEquals(a.name, c1.getValue());
 		assertEquals(a.x2Id, c2.getValue().intValue());
 		assertEquals(a.x1.id, c3.getValue().intValue());
@@ -154,32 +142,28 @@ public class SimpleUpdaterWithChildTestCase {
 	public void testInsertAutoId() {
 		expect(ex.update(capture(cSql), capture(cIdNames), capture(cKeyHolder),
 				capture(c1), capture(c2), capture(c3)))
-			.andAnswer(new IAnswer<Integer>() {
-
-				@Override
-				public Integer answer() throws Throwable {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
+			.andAnswer(() -> {
+                Object[] args = getCurrentArguments();
+                for (Object arg: args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            })
 		;
 		
 		replay(ex);
 		int count = u.update(aa, UpdateType.INSERT_AUTO_ID);
 		verify(ex);
 		assertEquals(1, count);
-		assertEquals(aa.id, ID);
+		assertEquals(ID, aa.id);
 		assertEquals(aa.name, c1.getValue());
 		assertEquals(aa.x2Id, c2.getValue().intValue());
 		assertEquals(aa.x1.id, c3.getValue().intValue());
@@ -190,7 +174,6 @@ public class SimpleUpdaterWithChildTestCase {
 		);
 	}
 
-	
 	@Test
 	public void testInsert_IgnoreFK() {
 		expect(ex.update(capture(cSql), capture(c0),
@@ -227,9 +210,6 @@ public class SimpleUpdaterWithChildTestCase {
 		);
 	}
 
-
-	
-	
 	@Table("X")
 	private static class X {
 		@PkColumn("xId")
@@ -283,10 +263,10 @@ public class SimpleUpdaterWithChildTestCase {
 		}
 
 		@PkColumn(value = "aId", sequence = "seq")
-		public void setId(int id) {
+
+		@Override public void setId(int id) {
 			this.id = id;
 		}
-
 	}
 	
 	private static class AAA extends A {
@@ -297,7 +277,5 @@ public class SimpleUpdaterWithChildTestCase {
 		public AAA(int id, String name, int x2Id, X x1, X x2) {
 			super(id, name, x2Id, x1, x2);
 		}
-
 	}
-
 }

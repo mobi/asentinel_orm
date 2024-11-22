@@ -1,22 +1,19 @@
 package com.asentinel.common.orm;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import org.junit.Test;
-import org.springframework.jdbc.core.RowMapper;
-
 import com.asentinel.common.collections.tree.Node;
 import com.asentinel.common.collections.tree.SimpleNode;
 import com.asentinel.common.orm.jql.SqlBuilder;
 import com.asentinel.common.orm.jql.SqlBuilderFactory;
+import org.junit.Test;
+import org.springframework.jdbc.core.RowMapper;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.*;
 
 public class AutoLazyLoaderTestCaseSqlBuilderFactoryFocusedTestCase {
 	

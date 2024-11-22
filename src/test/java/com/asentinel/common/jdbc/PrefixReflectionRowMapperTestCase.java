@@ -15,14 +15,13 @@ import static org.junit.Assert.*;
 
 public class PrefixReflectionRowMapperTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(PrefixReflectionRowMapperTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(PrefixReflectionRowMapperTestCase.class);
 	
 	private static final String PREFIX = "prefix_";
 	
-	private ResultSet rs = createMock(ResultSet.class);
-	private ResultSetMetaData rsmd = createMock(ResultSetMetaData.class);
+	private final ResultSet rs = createMock(ResultSet.class);
+	private final ResultSetMetaData rsmd = createMock(ResultSetMetaData.class);
 
-	
 	@Before
 	public void setup() throws SQLException {
 		
@@ -56,7 +55,7 @@ public class PrefixReflectionRowMapperTestCase {
 		}
 		
 		replay(rs, rsmd);
-		List<PrefixBean> results = ResultSetUtils.asList(rs, new PrefixReflectionRowMapper<PrefixBean>(PrefixBean.class, PREFIX));
+		List<PrefixBean> results = ResultSetUtils.asList(rs, new PrefixReflectionRowMapper<>(PrefixBean.class, PREFIX));
 		verify(rs, rsmd);
 		
 		assertEquals(1, results.size());
@@ -85,12 +84,11 @@ public class PrefixReflectionRowMapperTestCase {
 		
 		replay(rs, rsmd);
 		try {
-			ResultSetUtils.asList(rs, new PrefixReflectionRowMapper<PrefixBean>(PrefixBean.class, PREFIX));
+			ResultSetUtils.asList(rs, new PrefixReflectionRowMapper<>(PrefixBean.class, PREFIX));
 			fail("Should not get to this line.");
 		} catch (Exception e) {
-			log.debug("Expected exception: " + e.getMessage());
+			log.debug("Expected exception: {}", e.getMessage());
 		}
-		
 	}
 
 	@Test
@@ -110,7 +108,7 @@ public class PrefixReflectionRowMapperTestCase {
 		}
 		
 		replay(rs, rsmd);
-		PrefixBean b = ResultSetUtils.asList(rs, new PrefixReflectionRowMapper<PrefixBean>(PrefixBean.class, PREFIX, true)).get(0);
+		PrefixBean b = ResultSetUtils.asList(rs, new PrefixReflectionRowMapper<>(PrefixBean.class, PREFIX, true)).get(0);
 		assertEquals(1, b.id);
 		assertNull(b.name);
 	}
@@ -131,7 +129,7 @@ public class PrefixReflectionRowMapperTestCase {
 		}
 		
 		replay(rs, rsmd);
-		PrefixReflectionRowMapper<PrefixBean> mapper = new PrefixReflectionRowMapper<PrefixBean>(PrefixBean.class, PREFIX);
+		PrefixReflectionRowMapper<PrefixBean> mapper = new PrefixReflectionRowMapper<>(PrefixBean.class, PREFIX);
 		mapper.ignore("IGNOREDColumn");
 		ResultSetUtils.asList(rs, mapper);
 		verify(rs, rsmd);		
@@ -153,7 +151,7 @@ public class PrefixReflectionRowMapperTestCase {
 		}
 		
 		replay(rs, rsmd);
-		PrefixReflectionRowMapper<PrefixBean> mapper = new PrefixReflectionRowMapper<PrefixBean>(PrefixBean.class, PREFIX);
+		PrefixReflectionRowMapper<PrefixBean> mapper = new PrefixReflectionRowMapper<>(PrefixBean.class, PREFIX);
 		mapper.ignore(PREFIX + "IGNOREDColumn");
 		ResultSetUtils.asList(rs, mapper);
 		verify(rs, rsmd);

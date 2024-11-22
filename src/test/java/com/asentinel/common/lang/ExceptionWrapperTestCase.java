@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -19,8 +20,8 @@ public class ExceptionWrapperTestCase {
 	
 	@Test
 	public void apply_NoExceptionEncountered() {
-		String result = List.of(new OddNumber(1),
-						   new OddNumber(3)).stream()
+		String result = Stream.of(new OddNumber(1),
+						   new OddNumber(3))
 								.map(ExceptionWrapper.apply(OddNumber::stringValue))
 								.collect(joining("+"));
 		
@@ -29,16 +30,16 @@ public class ExceptionWrapperTestCase {
 	
 	@Test(expected = RuntimeException.class)
 	public void apply_ExceptionEncountered() {
-		List.of(new OddNumber(1),
-		   new OddNumber(2)).stream()
+		Stream.of(new OddNumber(1),
+		   new OddNumber(2))
 						.map(ExceptionWrapper.apply(OddNumber::stringValue))
 						.collect(joining("+"));
 	}
 	
 	@Test
 	public void applyEither_NoExceptionEncountered() {
-		boolean result = List.of(new OddNumber(1),
-							new OddNumber(3)).stream()
+		boolean result = Stream.of(new OddNumber(1),
+							new OddNumber(3))
 								.map(ExceptionWrapper.applyEither(OddNumber::stringValue))
 								.allMatch(Either::isRight);
 		assertTrue(result);
@@ -87,7 +88,7 @@ public class ExceptionWrapperTestCase {
 	public void test_NoExceptionEncountered() {
 		final int value = 1;
 		
-		int result = List.of(new OddNumber(value)).stream()
+		int result = Stream.of(new OddNumber(value))
 								.filter(ExceptionWrapper.test(OddNumber::isValid))
 								.map(OddNumber::getValue)
 								.findFirst()
@@ -97,7 +98,7 @@ public class ExceptionWrapperTestCase {
 	
 	@Test(expected = RuntimeException.class)
 	public void test_ExceptionEncountered() {
-		List.of(new OddNumber(2)).stream()
+		Stream.of(new OddNumber(2))
 					.filter(ExceptionWrapper.test(OddNumber::isValid))
 					.map(OddNumber::getValue)
 					.findFirst()

@@ -24,7 +24,6 @@ public class CollectionProxyFactoryTestCase {
 		factory.getProxyObjectFactory(Object.class).getType();
 	}
 
-
 	@Test
 	public void testCache() {
 		Class<?> clazz1 = factory.getProxyObjectFactory(ArrayList.class).getType();
@@ -39,10 +38,10 @@ public class CollectionProxyFactoryTestCase {
 
 	@Test
 	public void testObjectFactory() {
-		List<?> t11 = factory.newProxy(ArrayList.class, (id) -> null, 1);
-		List<?> t12 = factory.newProxy(ArrayList.class, (id) -> null, 2);
-		Map<?, ?> t21 = factory.newProxy(HashMap.class, (id) -> null, 3);
-		Map<?, ?> t22 = factory.newProxy(HashMap.class, (id) -> null, 4);
+		List<?> t11 = factory.newProxy(ArrayList.class, id -> null, 1);
+		List<?> t12 = factory.newProxy(ArrayList.class, id -> null, 2);
+		Map<?, ?> t21 = factory.newProxy(HashMap.class, id -> null, 3);
+		Map<?, ?> t22 = factory.newProxy(HashMap.class, id -> null, 4);
 		
 		assertNotSame(t11, t12);
 		assertNotSame(t21, t22);
@@ -56,10 +55,9 @@ public class CollectionProxyFactoryTestCase {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testProxyForProxy() {
-		ArrayList<?> l1 = factory.newProxy(ArrayList.class, (id) -> null, 1);
-		factory.newProxy(l1.getClass(), (id) -> null, 1);
+		ArrayList<?> l1 = factory.newProxy(ArrayList.class, id -> null, 1);
+		factory.newProxy(l1.getClass(), id -> null, 1);
 	}
-
 
 	@Test
 	public void testTarget1HasSerialVersionUid() {
@@ -70,5 +68,4 @@ public class CollectionProxyFactoryTestCase {
 		Object uid = ReflectionTestUtils.getField(clazz, "serialVersionUID");
 		assertEquals(8683452581122892189L, uid);
 	}
-
 }

@@ -1,9 +1,5 @@
 package com.asentinel.common.resource;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 public class FileTempResourceTestCase {
 	private static final Logger log = LoggerFactory.getLogger(FileTempResourceTestCase.class);
@@ -27,8 +25,8 @@ public class FileTempResourceTestCase {
 		FileCopyUtils.copy(bytes, out);
 		
 		byte[] readBytes = FileCopyUtils.copyToByteArray(r.getInputStream());
-		log.debug("testWriteReadNoDeleteAfterRead - readBytes: " + Arrays.toString(readBytes));
-		assertTrue(Arrays.equals(bytes, readBytes));
+		log.debug("testWriteReadNoDeleteAfterRead - readBytes: {}", Arrays.toString(readBytes));
+        assertArrayEquals(bytes, readBytes);
 		
 		assertFalse(r.isCleaned());
 		assertFalse(r.isOpen());
@@ -47,14 +45,14 @@ public class FileTempResourceTestCase {
 			r.getInputStream();
 			fail("Should not be able to open another input stream.");
 		} catch (IOException e) {
-			log.debug("testWriteReadNoDeleteAfterRead - Expected exception: " + e.getMessage());
+			log.debug("testWriteReadNoDeleteAfterRead - Expected exception: {}", e.getMessage());
 		}
 		
 		try {
 			r.getOutputStream();
 			fail("Should not be able to open another output stream.");
 		} catch (IOException e) {
-			log.debug("testWriteReadNoDeleteAfterRead - Expected exception: " + e.getMessage());
+			log.debug("testWriteReadNoDeleteAfterRead - Expected exception: {}", e.getMessage());
 		}
 		
 	}
@@ -70,7 +68,7 @@ public class FileTempResourceTestCase {
 		out.write(bytes);
 		
 		byte[] readBytes = FileCopyUtils.copyToByteArray(r.getInputStream());
-		log.debug("testWriteReadNoDeleteAfterRead - readBytes: " + Arrays.toString(readBytes));
+		log.debug("testWriteReadNoDeleteAfterRead - readBytes: {}", Arrays.toString(readBytes));
 		assertTrue(Arrays.equals(bytes, readBytes));
 		
 		r.getOutputStream();
@@ -106,7 +104,7 @@ public class FileTempResourceTestCase {
 
 	@SuppressWarnings("resource")
 	@Test
-	public void testWithFileThatDoesNotExist() throws IOException {
+	public void testWithFileThatDoesNotExist() {
 		try {
 			new FileTempResource("dummy");
 			fail("Should not be able to create temp resource for a file that does not exist.");

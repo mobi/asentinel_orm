@@ -6,8 +6,7 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -44,7 +43,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getIntObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		int i2 = ResultSetUtils.getIntValue(rs, 0);
 		assertEquals(0, i2);
@@ -55,7 +53,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testIntegerColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getInt((String) anyObject())).andReturn(0).anyTimes();
+		expect(rs.getInt(anyObject())).andReturn(0).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -65,7 +63,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getIntObject(rs, "", true);
 		assertNull("The result should be null.", i);
-		
 
 		int i2 = ResultSetUtils.getIntValue(rs, "");
 		assertEquals(0, i2);
@@ -96,7 +93,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testIntegerColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getInt((String) anyObject())).andReturn(10).anyTimes();
+		expect(rs.getInt(anyObject())).andReturn(10).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -113,13 +110,12 @@ public class ResultSetUtils4TestCase {
 		verify(rs);
 	}
 
-	
 	// Long tests
 	
 	@Test
 	public void testLongColByIndexWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getLong(anyInt())).andReturn(0l).anyTimes();
+		expect(rs.getLong(anyInt())).andReturn(0L).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -129,7 +125,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getLongObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		long i2 = ResultSetUtils.getLongValue(rs, 0);
 		assertEquals(0, i2);
@@ -140,7 +135,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testLongColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getLong((String) anyObject())).andReturn(0l).anyTimes();
+		expect(rs.getLong(anyObject())).andReturn(0L).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -160,7 +155,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testLongColByIndex() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getLong(anyInt())).andReturn(10l).anyTimes();
+		expect(rs.getLong(anyInt())).andReturn(10L).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -170,7 +165,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getLongObject(rs, 0, true);
 		assertEquals(Long.valueOf(10), i);
-		
 
 		long i2 = ResultSetUtils.getLongValue(rs, 0);
 		assertEquals(10, i2);
@@ -181,7 +175,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testLongColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getLong((String) anyObject())).andReturn(10l).anyTimes();
+		expect(rs.getLong(anyObject())).andReturn(10L).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -191,14 +185,12 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getLongObject(rs, "", true);
 		assertEquals(Long.valueOf(10), i);
-		
 
 		long i2 = ResultSetUtils.getLongValue(rs, "");
 		assertEquals(10, i2);
 
 		verify(rs);
 	}
-	
 
 	// Double tests
 	
@@ -215,7 +207,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getDoubleObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		double i2 = ResultSetUtils.getDoubleValue(rs, 0);
 		assertEquals(0, i2, 0.001);
@@ -226,7 +217,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testDoubleColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getDouble((String) anyObject())).andReturn(0d).anyTimes();
+		expect(rs.getDouble(anyObject())).andReturn(0d).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -236,7 +227,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getDoubleObject(rs, "", true);
 		assertNull("The result should be null.", i);
-		
 
 		double i2 = ResultSetUtils.getDoubleValue(rs, "");
 		assertEquals(0, i2, 0.001);
@@ -257,7 +247,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getDoubleObject(rs, 0, true);
 		assertEquals(Double.valueOf(10), i);
-		
 
 		double i2 = ResultSetUtils.getDoubleValue(rs, 0);
 		assertEquals(10, i2, 0.001);
@@ -268,7 +257,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testDoubleColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getDouble((String) anyObject())).andReturn(10d).anyTimes();
+		expect(rs.getDouble(anyObject())).andReturn(10d).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -278,7 +267,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getDoubleObject(rs, "", true);
 		assertEquals(Double.valueOf(10), i);
-		
 
 		double i2 = ResultSetUtils.getDoubleValue(rs, "");
 		assertEquals(10d, i2, 0.001);
@@ -286,8 +274,6 @@ public class ResultSetUtils4TestCase {
 		verify(rs);
 	}
 
-	
-	
 	// String tests
 	
 	@Test
@@ -303,7 +289,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getStringObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		String i2 = ResultSetUtils.getStringValue(rs, 0);
 		assertEquals("", i2);
@@ -314,7 +299,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testStringColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getObject((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getObject(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -324,7 +309,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getStringObject(rs, "", true);
 		assertNull("The result should be null.", i);
-		
 
 		String i2 = ResultSetUtils.getStringValue(rs, "");
 		assertEquals("", i2);
@@ -345,7 +329,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getStringObject(rs, 0, true);
 		assertEquals("not null", i);
-		
 
 		String i2 = ResultSetUtils.getStringValue(rs, 0);
 		assertEquals("not null", i2);
@@ -356,7 +339,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testStringColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getObject((String) anyObject())).andReturn("not null").anyTimes();
+		expect(rs.getObject(anyObject())).andReturn("not null").anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -366,7 +349,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getStringObject(rs, "", true);
 		assertEquals("not null", i);
-		
 
 		String i2 = ResultSetUtils.getStringValue(rs, "");
 		assertEquals("not null", i2);
@@ -374,7 +356,6 @@ public class ResultSetUtils4TestCase {
 		verify(rs);
 	}
 
-	
 	// Boolean tests
 	
 	@Test
@@ -390,10 +371,9 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBooleanObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		boolean i2 = ResultSetUtils.getBooleanValue(rs, 0);
-		assertEquals(false, i2);
+        assertFalse(i2);
 
 		verify(rs);
 	}
@@ -401,7 +381,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testBooleanColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getObject((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getObject(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -411,10 +391,9 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBooleanObject(rs, "", true);
 		assertNull("The result should be null.", i);
-		
 
 		boolean i2 = ResultSetUtils.getBooleanValue(rs, "");
-		assertEquals(false, i2);
+        assertFalse(i2);
 
 		verify(rs);
 	}
@@ -432,7 +411,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBooleanObject(rs, 0, true);
 		assertEquals(Boolean.TRUE, i);
-		
 
 		boolean i2 = ResultSetUtils.getBooleanValue(rs, 0);
 		assertEquals(Boolean.TRUE, i2);
@@ -443,7 +421,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testBooleanColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getObject((String) anyObject())).andReturn(" y ").anyTimes();
+		expect(rs.getObject(anyObject())).andReturn(" y ").anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -486,7 +464,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testRealBooleanColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getObject((String) anyObject())).andReturn(Boolean.TRUE).anyTimes();
+		expect(rs.getObject(anyObject())).andReturn(Boolean.TRUE).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -527,7 +505,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testDateColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -565,7 +543,7 @@ public class ResultSetUtils4TestCase {
 		Date testDate = new Date(0);
 		Timestamp testTimeStamp = new Timestamp(testDate.getTime());
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(testTimeStamp).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(testTimeStamp).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -578,8 +556,7 @@ public class ResultSetUtils4TestCase {
 
 		verify(rs);
 	}
-	
-	
+
 	// LocalDate tests
 	
 	@Test
@@ -599,7 +576,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testLocalDateColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -631,7 +608,7 @@ public class ResultSetUtils4TestCase {
 		Date testDate = new Date(0);
 		Timestamp testTimeStamp = new Timestamp(testDate.getTime());
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(testTimeStamp).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(testTimeStamp).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -641,7 +618,6 @@ public class ResultSetUtils4TestCase {
 
 		verify(rs);
 	}
-	
 
 	// LocalTime tests
 	
@@ -662,7 +638,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testLocalTimeColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -694,7 +670,7 @@ public class ResultSetUtils4TestCase {
 		Date testDate = new Date(0);
 		Timestamp testTimeStamp = new Timestamp(testDate.getTime());
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(testTimeStamp).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(testTimeStamp).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -724,7 +700,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testLocalDateTimeColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -756,7 +732,7 @@ public class ResultSetUtils4TestCase {
 		Date testDate = new Date(0);
 		Timestamp testTimeStamp = new Timestamp(testDate.getTime());
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getTimestamp((String) anyObject())).andReturn(testTimeStamp).anyTimes();
+		expect(rs.getTimestamp(anyObject())).andReturn(testTimeStamp).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -766,8 +742,7 @@ public class ResultSetUtils4TestCase {
 
 		verify(rs);
 	}
-	
-	
+
 	// BigDecimal tests
 	
 	@Test
@@ -783,7 +758,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBigDecimalObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		BigDecimal i2 = ResultSetUtils.getBigDecimalValue(rs, 0);
 		assertEquals(BigDecimal.ZERO, i2);
@@ -794,7 +768,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testBigDecimalColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getBigDecimal((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getBigDecimal(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -804,7 +778,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBigDecimalObject(rs, "", true);
 		assertNull("The result should be null.", i);
-		
 
 		BigDecimal i2 = ResultSetUtils.getBigDecimalValue(rs, "");
 		assertEquals(BigDecimal.ZERO, i2);
@@ -825,7 +798,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBigDecimalObject(rs, 0, true);
 		assertEquals(BigDecimal.TEN, i);
-		
 
 		BigDecimal i2 = ResultSetUtils.getBigDecimalValue(rs, 0);
 		assertEquals(BigDecimal.TEN, i2);
@@ -836,7 +808,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testBigDecimalColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getBigDecimal((String) anyObject())).andReturn(BigDecimal.TEN).anyTimes();
+		expect(rs.getBigDecimal(anyObject())).andReturn(BigDecimal.TEN).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -853,7 +825,6 @@ public class ResultSetUtils4TestCase {
 		verify(rs);
 	}
  
-
 	// BigInteger tests
 	
 	@Test
@@ -869,7 +840,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBigIntegerObject(rs, 0, true);
 		assertNull("The result should be null.", i);
-		
 
 		BigInteger i2 = ResultSetUtils.getBigIntegerValue(rs, 0);
 		assertEquals(BigInteger.ZERO, i2);
@@ -880,7 +850,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testBigIntegerColByNameWithNull() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getBigDecimal((String) anyObject())).andReturn(null).anyTimes();
+		expect(rs.getBigDecimal(anyObject())).andReturn(null).anyTimes();
 		expect(rs.wasNull()).andReturn(true).anyTimes();
 		
 		replay(rs);
@@ -890,7 +860,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBigIntegerObject(rs, "", true);
 		assertNull("The result should be null.", i);
-		
 
 		BigInteger i2 = ResultSetUtils.getBigIntegerValue(rs, "");
 		assertEquals(BigInteger.ZERO, i2);
@@ -911,7 +880,6 @@ public class ResultSetUtils4TestCase {
 		
 		i = ResultSetUtils.getBigIntegerObject(rs, 0, true);
 		assertEquals(BigInteger.TEN, i);
-		
 
 		BigInteger i2 = ResultSetUtils.getBigIntegerValue(rs, 0);
 		assertEquals(BigInteger.TEN, i2);
@@ -922,7 +890,7 @@ public class ResultSetUtils4TestCase {
 	@Test
 	public void testBigIntegerColByName() throws SQLException {
 		ResultSet rs = createMock(ResultSet.class);
-		expect(rs.getBigDecimal((String) anyObject())).andReturn(BigDecimal.TEN).anyTimes();
+		expect(rs.getBigDecimal(anyObject())).andReturn(BigDecimal.TEN).anyTimes();
 		expect(rs.wasNull()).andReturn(false).anyTimes();
 		
 		replay(rs);
@@ -938,5 +906,4 @@ public class ResultSetUtils4TestCase {
 
 		verify(rs);
 	}
-	
 }

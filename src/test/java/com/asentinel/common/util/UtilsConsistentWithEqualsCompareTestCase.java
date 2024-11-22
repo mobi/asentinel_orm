@@ -1,9 +1,7 @@
 package com.asentinel.common.util;
 
 import static com.asentinel.common.util.Utils.consistentWithEqualsCompare;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Comparator;
 
@@ -14,13 +12,13 @@ import org.junit.Test;
  */
 public class UtilsConsistentWithEqualsCompareTestCase {
 	
-	private A a1 = new A();
+	private final A a1 = new A();
 	{
 		a1.id = 1;
 		a1.name = "a1";
 	}
 
-	private A a2 = new A();
+	private final A a2 = new A();
 	{
 		a2.id = 2;
 		a2.name = "a2";
@@ -30,13 +28,13 @@ public class UtilsConsistentWithEqualsCompareTestCase {
 	public void equal() {
 		a2.id = a1.id;
 		a2.name = a2.name;
-		assertTrue(a1.equals(a2));
+        assertEquals(a1, a2);
 		assertEquals(0, a1.compareTo(a2));
 	}
 
 	@Test
 	public void notEqual() {
-		assertFalse(a1.equals(a2));
+        assertNotEquals(a1, a2);
 		assertTrue(a1.compareTo(a2) < 0);
 	}
 
@@ -72,10 +70,8 @@ public class UtilsConsistentWithEqualsCompareTestCase {
 			if (obj == null)
 				return false;
 			A other = (A) obj;
-			if (id != other.id)
-				return false;
-			return true;
-		}
+            return id == other.id;
+        }
 
 		@Override
 		public int compareTo(A o) {
@@ -89,7 +85,5 @@ public class UtilsConsistentWithEqualsCompareTestCase {
 		public String getName() {
 			return name;
 		}
-
 	}
-	
 }

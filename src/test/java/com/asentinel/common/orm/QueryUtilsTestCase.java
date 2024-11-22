@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.junit.Test;
 
 public class QueryUtilsTestCase {
-	private final static Logger log = LoggerFactory.getLogger(QueryUtilsTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(QueryUtilsTestCase.class);
 	
 	@Test
 	public void testTableAliasSequence() {
@@ -16,12 +16,12 @@ public class QueryUtilsTestCase {
 			int r = i % QueryUtils.MAX_DESCRIPTOR_ID;
 			String alias = QueryUtils.nextTableAlias();
 			if (r == QueryUtils.MAX_DESCRIPTOR_ID - 1) {
-				log.debug("testTableAliasSequence - i: " + i);
-				log.debug("testTableAliasSequence - alias: " + alias);
+				log.debug("testTableAliasSequence - i: {}", i);
+				log.debug("testTableAliasSequence - alias: {}", alias);
 			}
 			if (r == 0) {
-				log.debug("testTableAliasSequence - i: " + i);
-				log.debug("testTableAliasSequence - alias: " + alias);
+				log.debug("testTableAliasSequence - i: {}", i);
+				log.debug("testTableAliasSequence - alias: {}", alias);
 				
 			}
 			assertEquals("a" + Integer.toHexString(r), alias);

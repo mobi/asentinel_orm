@@ -1,40 +1,30 @@
 package com.asentinel.common.orm.proxy.entity;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.springframework.test.util.ReflectionTestUtils.invokeGetterMethod;
-import static org.springframework.test.util.ReflectionTestUtils.invokeMethod;
-import static org.springframework.test.util.ReflectionTestUtils.invokeSetterMethod;
-
-import java.util.function.Function;
-
+import com.asentinel.common.orm.Entity;
+import com.asentinel.common.orm.EntityUtils;
+import com.asentinel.common.orm.mappers.Column;
+import com.asentinel.common.orm.mappers.PkColumn;
+import com.asentinel.common.orm.proxy.ProxyFactorySupport;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.asentinel.common.orm.Entity;
-import com.asentinel.common.orm.EntityUtils;
-import com.asentinel.common.orm.mappers.Column;
-import com.asentinel.common.orm.mappers.PkColumn;
-import com.asentinel.common.orm.proxy.ProxyFactorySupport;
-import com.asentinel.common.orm.proxy.entity.ProxyFactory;
-import com.asentinel.common.orm.proxy.entity.ToStringInterceptor;
+import java.util.function.Function;
 
+import static org.junit.Assert.*;
+import static org.springframework.test.util.ReflectionTestUtils.*;
 
 @RunWith(Parameterized.class)
 public class ProxyTestCase {
 	
-	final static String LOADER_FIELD_NAME = (String) ReflectionTestUtils.getField(ProxyFactorySupport.class, "LOADER_FIELD_NAME"); 
+	static final String LOADER_FIELD_NAME = (String) ReflectionTestUtils.getField(ProxyFactorySupport.class, "LOADER_FIELD_NAME"); 
 	
-	final static int ID = 17;
-	final static String NAME = "Razvan";
-	final static int FINAL_FIELD_ORG_VALUE = 10;
-	final static int FINAL_FIELD_NEW_VALUE = 1000;
+	static final int ID = 17;
+	static final String NAME = "Razvan";
+	static final int FINAL_FIELD_ORG_VALUE = 10;
+	static final int FINAL_FIELD_NEW_VALUE = 1000;
 
 	ProxyFactory pcf = ProxyFactory.getInstance();
 	
@@ -88,13 +78,11 @@ public class ProxyTestCase {
 			invokeSetterMethod(proxy, "id", id);
 		}
 	}
-	
-	
+
 	private static int getFinalField(Object instance) {
 		return (int) ReflectionTestUtils.getField(instance, "finalField");
 	}
-	
-	
+
 	private final Class<?> targetClass;
 	private boolean loadCalled = false;
 	
@@ -211,7 +199,7 @@ public class ProxyTestCase {
 	}
 
 	@Test
-	public void super_Method_Does_Trigger_Load() throws InterruptedException {
+	public void super_Method_Does_Trigger_Load() {
 		Object proxy = createProxy();
 		
 		proxy.hashCode();
@@ -380,7 +368,5 @@ public class ProxyTestCase {
 		public final void aFinalMethod() {
 			
 		}
-
 	}
-	
 }

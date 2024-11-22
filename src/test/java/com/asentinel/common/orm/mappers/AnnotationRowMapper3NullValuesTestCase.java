@@ -33,29 +33,27 @@ import org.slf4j.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
- * Tests the allowNull feature with NULL values in the resultset.
+ * Tests the allowNull feature with NULL values in the result set.
  * 
  * @see AnnotationRowMapperTestCase#testNormalFieldOperationWithBean3()
  */
 public class AnnotationRowMapper3NullValuesTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(AnnotationRowMapper3NullValuesTestCase.class);
-	
-	
+	private static final Logger log = LoggerFactory.getLogger(AnnotationRowMapper3NullValuesTestCase.class);
+
 	private ResultSet rs;
 	private Map<String, Object> mapValues;
 	
 	@Before
 	public void setup() throws SQLException {
 		rs = createMock(ResultSet.class);
-		mapValues = new LinkedHashMap<String, Object>();
+		mapValues = new LinkedHashMap<>();
 
 		mapValues.put(COL_INT_VAL, 0);
 		mapValues.put(COL_INT_OBJ, 0);
-		mapValues.put(COL_LONG_VAL, 0l);
-		mapValues.put(COL_LONG_OBJ, 0l);
+		mapValues.put(COL_LONG_VAL, 0L);
+		mapValues.put(COL_LONG_OBJ, 0L);
 		mapValues.put(COL_DOUBLE_VAL, 0d);
 		mapValues.put(COL_DOUBLE_OBJ, 0d);
 		mapValues.put(COL_BOOL_VAL, "N");
@@ -72,9 +70,9 @@ public class AnnotationRowMapper3NullValuesTestCase {
 		expect(rs.getLong(COL_LONG_OBJ)).andReturn((Long) mapValues.get(COL_LONG_OBJ));
 		expect(rs.getDouble(COL_DOUBLE_VAL)).andReturn((Double) mapValues.get(COL_DOUBLE_VAL));
 		expect(rs.getDouble(COL_DOUBLE_OBJ)).andReturn((Double) mapValues.get(COL_DOUBLE_OBJ));
-		expect(rs.getObject(COL_BOOL_VAL)).andReturn((String) mapValues.get(COL_BOOL_VAL));
-		expect(rs.getObject(COL_BOOL_OBJ)).andReturn((String) mapValues.get(COL_BOOL_OBJ));
-		expect(rs.getObject(COL_STRING)).andReturn((String) mapValues.get(COL_STRING));
+		expect(rs.getObject(COL_BOOL_VAL)).andReturn(mapValues.get(COL_BOOL_VAL));
+		expect(rs.getObject(COL_BOOL_OBJ)).andReturn(mapValues.get(COL_BOOL_OBJ));
+		expect(rs.getObject(COL_STRING)).andReturn(mapValues.get(COL_STRING));
 		expect(rs.getTimestamp(COL_DATE)).andReturn((Timestamp) mapValues.get(COL_DATE));
 		expect(rs.getBigDecimal(COL_BIG_DECIMAL)).andReturn((BigDecimal) mapValues.get(COL_BIG_DECIMAL));
 		expect(rs.getBigDecimal(COL_BIG_INTEGER)).andReturn((BigDecimal) mapValues.get(COL_BIG_INTEGER));
@@ -84,7 +82,7 @@ public class AnnotationRowMapper3NullValuesTestCase {
 	}
 	
 	private void validateBean3(Bean3 bean) {
-		log.debug("validateBean3 - bean instance: " + bean);
+		log.debug("validateBean3 - bean instance: {}", bean);
 		assertEquals(mapValues.get(COL_PK), bean.getPk());
 		assertEquals(mapValues.get(COL_INT_VAL), bean.getIntVal());
 		assertNull(bean.getIntObj());
@@ -104,12 +102,10 @@ public class AnnotationRowMapper3NullValuesTestCase {
 	public void testNormalFieldOperation() throws SQLException {
 		mapValues.put(COL_PK, 0);
 		expect(rs.getInt(COL_PK)).andReturn((Integer) mapValues.get(COL_PK)).anyTimes();
-		AnnotationRowMapper<Bean3> mapper = new AnnotationRowMapper<Bean3>(Bean3.class);
+		AnnotationRowMapper<Bean3> mapper = new AnnotationRowMapper<>(Bean3.class);
 		replay(rs);
 		Bean3 bean = mapper.mapRow(rs, 1);
 		verify(rs);
 		validateBean3(bean);
 	}
-	
-	
 }

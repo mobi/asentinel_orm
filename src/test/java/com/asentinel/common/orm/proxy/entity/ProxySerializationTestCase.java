@@ -19,9 +19,7 @@ public class ProxySerializationTestCase {
 	
 	@Test
 	public void serializationOfLoadedProxyAndDeserialization() throws IOException, ClassNotFoundException {
-		Target t = ProxyFactory.getInstance().newProxy(Target.class, id -> {
-			return new Target(1, "Alfa");
-		});
+		Target t = ProxyFactory.getInstance().newProxy(Target.class, id -> new Target(1, "Alfa"));
 		
 		// force load proxy, if not loaded the state of the object will not be the expected one
 		// but serialization would still work

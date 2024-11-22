@@ -23,12 +23,12 @@ import com.asentinel.common.jdbc.ResultSetUtils;
 
 public class CacheEntityDescriptorTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(CacheEntityDescriptorTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(CacheEntityDescriptorTestCase.class);
 	
 	private final ServiceType st1 = new ServiceType(1, "Wireless");
 	private final ServiceType st2 = new ServiceType(2, "Local");
 	
-	private final List<ServiceType> serviceTypes = new ArrayList<ServiceType>();
+	private final List<ServiceType> serviceTypes = new ArrayList<>();
 	
 	@Before
 	public void setup() {
@@ -82,7 +82,7 @@ public class CacheEntityDescriptorTestCase {
 		
 		List<ServiceTypeBill> bills = builder.getEntityList();
 		for (ServiceTypeBill bill: bills) {
-			log.debug("testNormalOperation - bill: " + bill);
+			log.debug("testNormalOperation - bill: {}", bill);
 		}
 		
 		assertEquals(3, bills.size());
@@ -97,7 +97,5 @@ public class CacheEntityDescriptorTestCase {
 		assertEquals(3, bills.get(2).billId);
 		assertEquals("bill_3", bills.get(2).itemNumber);
 		assertSame(st1, bills.get(2).serviceType);
-
 	}
-
 }

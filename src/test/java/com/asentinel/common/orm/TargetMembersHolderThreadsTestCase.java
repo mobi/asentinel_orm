@@ -1,8 +1,9 @@
 package com.asentinel.common.orm;
 
-import static org.junit.Assert.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.BrokenBarrierException;
@@ -10,9 +11,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Tests the {@link TargetMembers} cache under multiple thread access. We ensure that for a certain class
@@ -29,12 +28,12 @@ public class TargetMembersHolderThreadsTestCase {
 	List<TargetMembers> calculatedTargetMembers = new Vector<TargetMembers>();
     
     @Before
-    public void setup() throws SQLException {
+    public void setup() {
     	pool = Executors.newCachedThreadPool();
     }
     
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
     	pool.shutdown();
     }
 	
@@ -78,7 +77,5 @@ public class TargetMembersHolderThreadsTestCase {
 				}
 			}
 		}
-		
 	}
-
 }
