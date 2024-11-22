@@ -42,8 +42,7 @@ public class SimpleUpdaterDeleteTestCase {
 			.thenReturn(2);
 		assertEquals(2, u.delete(DeleteTestEntity.class, 1, 2));
 	}
-	
-	
+
 	@Table("table")
 	private static class DeleteTestEntity {
 		

@@ -40,6 +40,4 @@ public class ValidationHelperTestCase {
 		String email = null;
 		assertFalse(ValidationHelper.isEmailValid(email));
 	}
-
-	
 }

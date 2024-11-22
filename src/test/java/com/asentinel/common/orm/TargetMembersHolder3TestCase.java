@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Tests the static utility method {@link TargetMembersHolder#findGetterMethod(java.lang.reflect.Method, Class)} 
+ * Tests the static utility method {@link TargetMembersHolder#findGetterMethod(Class, Method)}
  */
 public class TargetMembersHolder3TestCase {
 	
@@ -36,14 +36,6 @@ public class TargetMembersHolder3TestCase {
 		findGetterMethod(WrongHasArgs.class, s);
 	}
 
-	public void testWrongMultiple() {
-		Method s = ReflectionUtils.findMethod(WrongMultiple.class, "setVar", int.class);
-		Method g = findGetterMethod(WrongMultiple.class, s);
-		assertNotNull(g);
-		assertEquals("getVar", g.getName());
-		assertEquals(0, g.getParameterTypes().length);
-	}
-	
 	@Test(expected = IllegalArgumentException.class)
 	public void testWrongNoReturn() {
 		Method s = ReflectionUtils.findMethod(WrongNoReturn.class, "setVar", int.class);

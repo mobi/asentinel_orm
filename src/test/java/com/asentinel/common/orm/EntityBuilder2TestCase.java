@@ -23,9 +23,9 @@ import com.asentinel.common.orm.mappers.ColumnRowMapper;
 
 public class EntityBuilder2TestCase {
 
-	private final static BigDecimal INVOICE_ID = new BigDecimal("1");
+	private static final BigDecimal INVOICE_ID = new BigDecimal("1");
 	
-	private final static BigDecimal BILL_ID = new BigDecimal("100");
+	private static final BigDecimal BILL_ID = new BigDecimal("100");
 
 	/**
 	 * Tests the scenario when a parent entity has the same child for 2 entity descriptors. 
@@ -70,9 +70,7 @@ public class EntityBuilder2TestCase {
 		for (String col: cols) {
 			expect(meta.getColumnName(i++)).andReturn(col).anyTimes();
 		}
-		
-		
-		
+
 		ResultSet rs = createMock(ResultSet.class);
 		expect(rs.getMetaData()).andReturn(meta).anyTimes();
 		expect(rs.getRow()).andReturn(0).anyTimes();

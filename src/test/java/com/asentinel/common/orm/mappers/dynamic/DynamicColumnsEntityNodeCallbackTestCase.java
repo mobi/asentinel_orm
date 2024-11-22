@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.junit.Test;
@@ -68,7 +69,6 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 					"OverriddenTable"
 			);
 		test(callback, "OverriddenTable", "OverriddenId");
-		
 	}
 	
 	private SimpleNode<EntityDescriptor> test(DynamicColumnsEntityNodeCallback<DefaultDynamicColumn, TestBean> callback, String tableName, String pk) {
@@ -83,12 +83,8 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 		assertTrue(node.getValue() instanceof DynamicColumnsEntityDescriptor);
 		@SuppressWarnings("unchecked")
 		DynamicColumnsEntityDescriptor<DefaultDynamicColumn, TestBean> dced = (DynamicColumnsEntityDescriptor<DefaultDynamicColumn, TestBean>) node.getValue();
-		
-		if (tableName == null) {
-			assertEquals("Test", dced.getTableName());
-		} else {
-			assertEquals(tableName, dced.getTableName());
-		}
+
+        assertEquals(Objects.requireNonNullElse(tableName, "Test"), dced.getTableName());
 		
 		if (pk == null) {
 			assertEquals("Id", dced.getPkName());
@@ -188,9 +184,7 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 			return null;
 		}
 	}
-	
-	
-	
+
 	@Table("Association")
 	private static class AssociationBean {
 		@PkColumn("Aid")

@@ -72,7 +72,7 @@ public class TargetMembersHolderTestCase {
 			TargetMembersHolder.getInstance().getTargetMembers(MultiplePkBean.class);
 			fail("Should not get to this line. Exception expected.");
 		} catch (IllegalStateException e) {
-			
+			//do nothing, expected exception
 		}
 	}
 	
@@ -112,7 +112,7 @@ public class TargetMembersHolderTestCase {
 			TargetMembersHolder.getInstance().getTargetMembers(NoGetterForPk.class);			
 			fail("Should throw exception here");
 		} catch(IllegalArgumentException e) {
-			
+			//do nothing, expected exception
 		}
 	}
 
@@ -122,7 +122,7 @@ public class TargetMembersHolderTestCase {
 			TargetMembersHolder.getInstance().getTargetMembers(InvalidGetterForPk.class);			
 			fail("Should throw exception here");
 		} catch(IllegalArgumentException e) {
-			
+			//do nothing, expected exception
 		}
 	}
 
@@ -132,7 +132,7 @@ public class TargetMembersHolderTestCase {
 			TargetMembersHolder.getInstance().getTargetMembers(InvalidGetterForPk2.class);			
 			fail("Should throw exception here");
 		} catch(IllegalArgumentException e) {
-			
+			//do nothing, expected exception
 		}
 	}
 	

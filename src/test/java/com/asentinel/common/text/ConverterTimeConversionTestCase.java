@@ -1,8 +1,5 @@
 package com.asentinel.common.text;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.text.ParseException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -10,6 +7,8 @@ import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ConverterTimeConversionTestCase {
 	
@@ -26,7 +25,7 @@ public class ConverterTimeConversionTestCase {
 	}
 	
 	@Test
-	public void testStandardConverterEN_US() throws ConversionException, ParseException{
+	public void testStandardConverterEN_US() throws ConversionException {
 		System.out.println("ConverterTestCase#testStandardConverterEN_US start");
 		Converter converter = new StandardConverter();
 		
@@ -44,7 +43,7 @@ public class ConverterTimeConversionTestCase {
 	}
 	
 	@Test
-	public void testStandardConverterRO() throws ConversionException, ParseException{
+	public void testStandardConverterRO() throws ConversionException {
 		System.out.println("ConverterTestCase#testStandardConverterRO start");
 		Locale locale = new Locale("ro");
 		Converter converter = new StandardConverter(locale);
@@ -71,7 +70,7 @@ public class ConverterTimeConversionTestCase {
 		String value = "Not a TIME value !";
 		try{
 			converter.convertToTime(value, null);
-			assertTrue(false);
+            fail();
 		} catch (ConversionException e){
 			assertTrue(e.getCause() instanceof DateTimeParseException);
 		}

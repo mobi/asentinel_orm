@@ -22,8 +22,8 @@ import com.asentinel.common.orm.EntityUtils;
 import com.asentinel.common.orm.proxy.ProxyFactorySupport;
 
 public class CollectionProxyTestCase {
-	
-	final static String LOADER_FIELD_NAME = (String) ReflectionTestUtils.getField(ProxyFactorySupport.class, "LOADER_FIELD_NAME");
+
+	static final String LOADER_FIELD_NAME = (String) ReflectionTestUtils.getField(ProxyFactorySupport.class, "LOADER_FIELD_NAME");
 	
 	CollectionProxyFactory factory = CollectionProxyFactory.getInstance();
 	
@@ -120,7 +120,4 @@ public class CollectionProxyTestCase {
 		verifyNoMoreInteractions(loader);
 		assertTrue(isLoaded(proxy));
 	}
-	
-	
-	
 }

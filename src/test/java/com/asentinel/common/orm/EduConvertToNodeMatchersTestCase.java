@@ -26,23 +26,22 @@ public class EduConvertToNodeMatchersTestCase {
 	@Test
 	public void classes() {
 		NodeMatcher<EntityDescriptor>[] matchers = convertToNodeMatchers(Integer.class, String.class);
-		assertTrue(((EntityDescriptorNodeMatcher) matchers[0]).getType() == Integer.class);
-		assertTrue(((EntityDescriptorNodeMatcher) matchers[1]).getType() == String.class);
+        assertSame(Integer.class, ((EntityDescriptorNodeMatcher) matchers[0]).getType());
+        assertSame(String.class, ((EntityDescriptorNodeMatcher) matchers[1]).getType());
 	}
 	
 	@Test
 	public void classAndMatcher() {
 		EntityDescriptorNodeMatcher m2 = new EntityDescriptorNodeMatcher(String.class);
 		NodeMatcher<EntityDescriptor>[] matchers = convertToNodeMatchers(Integer.class, m2);
-		assertTrue(((EntityDescriptorNodeMatcher) matchers[0]).getType() == Integer.class);
+        assertSame(Integer.class, ((EntityDescriptorNodeMatcher) matchers[0]).getType());
 		assertSame(matchers[1], m2);
 	}
 
 	@Test
 	public void classAndAnnotation() {
 		NodeMatcher<EntityDescriptor>[] matchers = convertToNodeMatchers(Integer.class, Override.class);
-		assertTrue(((EntityDescriptorNodeMatcher) matchers[0]).getType() == Integer.class);
-		assertTrue(((AnnotationNodeMatcher) matchers[1]).getAnnotationTypes()[0] == Override.class);
+        assertSame(Integer.class, ((EntityDescriptorNodeMatcher) matchers[0]).getType());
+        assertSame(Override.class, ((AnnotationNodeMatcher) matchers[1]).getAnnotationTypes()[0]);
 	}
-	
 }

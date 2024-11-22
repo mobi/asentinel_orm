@@ -1,11 +1,9 @@
 package com.asentinel.common.jdbc;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.springframework.jdbc.core.RowMapper;
 
-import com.asentinel.common.jdbc.ResultSetUtils;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class TBeanRowMapper implements RowMapper<TBean> {
 

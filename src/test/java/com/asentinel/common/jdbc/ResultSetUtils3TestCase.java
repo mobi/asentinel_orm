@@ -1,8 +1,9 @@
 package com.asentinel.common.jdbc;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -10,22 +11,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.junit.Test;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests the following:
- * 
+ * <p>
  * 	- {@link ResultSetUtils#getResults(CallableStatement, List, int)}
- * 
  * 	- {@link ResultSetUtils#toResultSetSqlParameters(RowMapper[])}
- * 
  */
 public class ResultSetUtils3TestCase {
-	private final static Logger log = LoggerFactory.getLogger(ResultSetUtilsTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(ResultSetUtils3TestCase.class);
 	
 	@Test
 	public void testGetResults() throws SQLException {
@@ -34,10 +30,9 @@ public class ResultSetUtils3TestCase {
 		final int RS_COUNT_HANDLER = 2;
 		final int RS_COUNT_UNUSED = 2;
 		final int RS_SIZE = 3;
-		
-		
+
 		CallableStatement cs = createStrictMock(CallableStatement.class);
-		List<ResultSet> rss = new ArrayList<ResultSet>();
+		List<ResultSet> rss = new ArrayList<>();
 		for (int i=1; i <= RS_COUNT_MAPPER; i++) {
 			ResultSet rs = createStrictMock(ResultSet.class);
 			rss.add(rs);
@@ -78,39 +73,31 @@ public class ResultSetUtils3TestCase {
 			rs.close();		
 		}
 		
-		List<ResultSetSqlParameter> rsParams = new ArrayList<ResultSetSqlParameter>();
+		List<ResultSetSqlParameter> rsParams = new ArrayList<>();
 		for (int i=1; i <= RS_COUNT_MAPPER; i++) {
-				rsParams.add(new ResultSetSqlParameter(new RowMapper<Integer>() {
-					@Override
-					public Integer mapRow(ResultSet rs, int rowNum)
-							throws SQLException {
-						// do nothing, the test scope is not in this method
-						return null;
-					}
-				}));
+				rsParams.add(new ResultSetSqlParameter((RowMapper<Integer>) (rs, rowNum) -> {
+                    // do nothing, the test scope is not in this method
+                    return null;
+                }));
 		}
 		
 		for (int i=1; i <= RS_COUNT_HANDLER; i++) {
-			rsParams.add(new ResultSetSqlParameter(new RowCallbackHandler() {
-				@Override
-				public void processRow(ResultSet rs) throws SQLException {
-					// do nothing, the test scope is not in this method						
-				}
-			}));
+			rsParams.add(new ResultSetSqlParameter(rs -> {
+                // do nothing, the test scope is not in this method
+            }));
 		}
 		
 		for (int i=1; i <= RS_COUNT_UNUSED; i++) {
 			rsParams.add(null);
 		}
 
-
 		
 		replay(cs);
-		replay((Object[]) rss.toArray(new ResultSet[rss.size()]));
+		replay((Object[]) rss.toArray(new ResultSet[0]));
 		List<List<?>> results = ResultSetUtils.getResults(cs, rsParams, 0);
-		log.debug("testGetResults - Results: " + results);
+		log.debug("testGetResults - Results: {}", results);
 		verify(cs);
-		verify((Object[]) rss.toArray(new ResultSet[rss.size()]));
+		verify((Object[]) rss.toArray(new ResultSet[0]));
 		
 		assertEquals(RS_COUNT_MAPPER + RS_COUNT_HANDLER + RS_COUNT_UNUSED, results.size());
 		
@@ -129,8 +116,7 @@ public class ResultSetUtils3TestCase {
 				i++) {
 			assertNull(results.get(i-1));
 		}
-		
-		
+
 		log.info("testGetResults - stop");
 	}
 	
@@ -153,6 +139,4 @@ public class ResultSetUtils3TestCase {
 			}
 		}
 	}
-
 }
-

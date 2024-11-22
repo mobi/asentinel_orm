@@ -11,6 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -41,13 +42,10 @@ public class RowAsArrayRowMapperTestCase {
 		replay(rs, md);
 		Object[] row = new RowAsArrayRowMapper().mapRow(rs, 1);
 		verify(rs, md);
-		
-		assertEquals(colCount, row.length);
+
+		Assert.assertNotNull(row);
+        assertEquals(colCount, row.length);
 		assertEquals("val_1", row[0]);
 		assertEquals("val_2", row[1]);
-		
-
 	}
-
-
 }

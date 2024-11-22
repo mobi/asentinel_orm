@@ -39,9 +39,9 @@ import com.asentinel.common.orm.persist.SimpleUpdater.CustomBatchPreparedStateme
  * @author Razvan Popian
  */
 public class SimpleUpdaterCollectionUpsertTestCase {
-	private final static String UPSERT_AUTO_ID_NO_SEQ = "insert into A(name, age, insertable) values(?, ?, ?) on conflict (name) do update set name = ?, age = ?, updatable = ?";
-	private final static String UPSERT_AUTO_ID_WITH_SEQ = "insert into B(aId, name, age, insertable) values(nextval('seq'), ?, ?, ?) on conflict (name) do update set name = ?, age = ?, updatable = ?";
-	private final static String UPSERT_INSERT = "insert into A(aId, name, age, insertable) values(?, ?, ?, ?) on conflict (name) do update set name = ?, age = ?, updatable = ?, aId = ?";
+	private static final String UPSERT_AUTO_ID_NO_SEQ = "insert into A(name, age, insertable) values(?, ?, ?) on conflict (name) do update set name = ?, age = ?, updatable = ?";
+	private static final String UPSERT_AUTO_ID_WITH_SEQ = "insert into B(aId, name, age, insertable) values(nextval('seq'), ?, ?, ?) on conflict (name) do update set name = ?, age = ?, updatable = ?";
+	private static final String UPSERT_INSERT = "insert into A(aId, name, age, insertable) values(?, ?, ?, ?) on conflict (name) do update set name = ?, age = ?, updatable = ?, aId = ?";
 	
 	private final JdbcFlavor jdbcFlavor = new PostgresJdbcFlavor();
 	private final JdbcOperations jdbcOps = mock(JdbcOperations.class);
@@ -115,9 +115,7 @@ public class SimpleUpdaterCollectionUpsertTestCase {
 	@Test
 	public void upsert_insertAutoId_NoSeq_With_NewRowDetector() throws SQLException {
 		u.setNewRowOnUpsertDetector(newRowOnUpsertDetector);
-		upsert_insertAutoId_NoSeq().forEach(e -> {
-			assertTrue(e.isNewRow());
-		});
+		upsert_insertAutoId_NoSeq().forEach(e -> assertTrue(e.isNewRow()));
 	}	
 
 	/**
@@ -127,9 +125,7 @@ public class SimpleUpdaterCollectionUpsertTestCase {
 	 */
 	@Test
 	public void upsert_insertAutoId_NoSeq_Without_NewRowDetector() throws SQLException {
-		upsert_insertAutoId_NoSeq().forEach(e -> {
-			assertFalse(e.isNewRow());
-		});
+		upsert_insertAutoId_NoSeq().forEach(e -> assertFalse(e.isNewRow()));
 	}	
 
 	@Test
@@ -162,8 +158,7 @@ public class SimpleUpdaterCollectionUpsertTestCase {
 		assertEquals(2, entities.get(1).getId());
 		assertTrue(entities.get(1).isNewRow());
 	}
-	
-	
+
 	@Test
 	public void upsert_insert() throws SQLException {
 		A a0 = new A(11, "test1", 10, 100, 1000);

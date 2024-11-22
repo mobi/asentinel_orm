@@ -56,12 +56,12 @@ public class SimpleUpdaterCollectionTestCase {
 	
 	// we use this constant because the sequence next val instruction varies depending on the selected
 	// JdbcFlavor
-	final static String SEQ_NEXT_VAL_PLACEHOLDER = "[SEQ]";
+	static final String SEQ_NEXT_VAL_PLACEHOLDER = "[SEQ]";
 	
-	final static int GENERATED_ID = 10;
-	final static String INSERT_AUTO_ID = "insert into table(tableId, name, BlobFieldInputStream, BlobFieldByteArray, BooleanField, insertable) values(" + SEQ_NEXT_VAL_PLACEHOLDER + ", ?, ?, ?, ?, ?)";
-	final static String INSERT_AUTO_ID_NO_SEQ = "insert into table(name, BlobFieldInputStream, BlobFieldByteArray, BooleanField, insertable) values(?, ?, ?, ?, ?)";
-	final static String UPDATE = "update table set name = ?, BlobFieldInputStream = ?, BlobFieldByteArray = ?, BooleanField = ?, updatable = ? where tableId = ?";
+	static final int GENERATED_ID = 10;
+	static final String INSERT_AUTO_ID = "insert into table(tableId, name, BlobFieldInputStream, BlobFieldByteArray, BooleanField, insertable) values(" + SEQ_NEXT_VAL_PLACEHOLDER + ", ?, ?, ?, ?, ?)";
+	static final String INSERT_AUTO_ID_NO_SEQ = "insert into table(name, BlobFieldInputStream, BlobFieldByteArray, BooleanField, insertable) values(?, ?, ?, ?, ?)";
+	static final String UPDATE = "update table set name = ?, BlobFieldInputStream = ?, BlobFieldByteArray = ?, BooleanField = ?, updatable = ? where tableId = ?";
 	
 	boolean closeCalled = false;
 	final InputStream in = new ByteArrayInputStream(new byte[] {1,2,3}) {
@@ -111,7 +111,6 @@ public class SimpleUpdaterCollectionTestCase {
 		expect(rs.getObject(1)).andReturn(new BigDecimal(GENERATED_ID));
 		expect(rs.next()).andReturn(false);
 		rs.close();
-		
 	}
 	
 	@Test
@@ -127,8 +126,7 @@ public class SimpleUpdaterCollectionTestCase {
 		
 		expect(jdbcOps.batchUpdate(capture(captureSqlUpdate), capture(captureBatchSetter)))
 				.andReturn(new int[]{Statement.SUCCESS_NO_INFO});
-		
-		
+
 		replay(jdbcOps, ex);
 		
 		u.update(list);
@@ -191,8 +189,6 @@ public class SimpleUpdaterCollectionTestCase {
 		assertEquals(ReflectionTestUtils.getField(psc, "allArgs"), Arrays.asList("insert_entity", in, bArray, "Y", 10));
 		assertEquals(GENERATED_ID, list.get(0).id);
 
-		
-		
 		// validate update callback
 		ps1.setString(1, "update_entity");
 		ps1.setBinaryStream(2, in);
@@ -231,8 +227,7 @@ public class SimpleUpdaterCollectionTestCase {
 		
 		expect(jdbcOps.batchUpdate(capture(captureSqlUpdate), capture(captureBatchSetter)))
 				.andReturn(new int[]{Statement.SUCCESS_NO_INFO});
-		
-		
+
 		replay(jdbcOps, ex);
 		
 		u.update(list);
@@ -295,8 +290,6 @@ public class SimpleUpdaterCollectionTestCase {
 		assertEquals(ReflectionTestUtils.getField(psc, "allArgs"), Arrays.asList("insert_entity", in, bArray, "Y", 10));
 		assertEquals(GENERATED_ID, list.get(0).id);
 
-		
-		
 		// validate update callback
 		ps1.setString(1, "update_entity");
 		ps1.setBinaryStream(2, in);

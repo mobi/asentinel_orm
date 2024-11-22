@@ -47,7 +47,6 @@ public class SimpleUpdaterCollectionWithProxiesTestCase {
        when(ex.getJdbcOperations()).thenReturn(jdbcOps);
     }
 
-	
 	@Test
 	public void testWithUnloadedProxy() {
 		SimpleEntity entity1 = new SimpleEntity(1);
@@ -124,8 +123,5 @@ public class SimpleUpdaterCollectionWithProxiesTestCase {
 		public String toString() {
 			return "SimpleEntity [id=" + id + "]";
 		}
-		
-		
 	}
-
 }

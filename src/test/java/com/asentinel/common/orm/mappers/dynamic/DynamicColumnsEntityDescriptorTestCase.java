@@ -30,7 +30,7 @@ public class DynamicColumnsEntityDescriptorTestCase {
 			= new DynamicColumnsEntityDescriptor<>(dynamicColumns, null, 
 				new SimpleEntityDescriptor.Builder(TestBean.class)
 					.queryExecutor(mock(SqlQuery.class))
-					.entityFactory(() -> new TestBean())
+					.entityFactory(TestBean::new)
 			);
 		
 		assertEquals(
@@ -46,7 +46,7 @@ public class DynamicColumnsEntityDescriptorTestCase {
 			= new DynamicColumnsEntityDescriptor<>(dynamicColumns, null,
 				new SimpleEntityDescriptor.Builder(TestBean.class)
 					.queryExecutor(null)
-					.entityFactory(() -> new TestBean())
+					.entityFactory(TestBean::new)
 			);
 		
 		assertEquals(
@@ -95,6 +95,5 @@ public class DynamicColumnsEntityDescriptorTestCase {
 			}
 			return null; // to keep the compiler happy
 		}
-		
 	}
 }

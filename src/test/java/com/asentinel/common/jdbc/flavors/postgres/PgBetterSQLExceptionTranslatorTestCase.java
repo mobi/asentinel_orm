@@ -19,7 +19,7 @@ import com.asentinel.common.jdbc.exceptions.ForeignKeyViolationException;
 
 public class PgBetterSQLExceptionTranslatorTestCase {
 
-	private final static String CONSTRAINT = "test-constraint";
+	private static final String CONSTRAINT = "test-constraint";
 	
 	private final SQLExceptionTranslator defaultTranslator = mock(SQLExceptionTranslator.class);
 	private final PgBetterSQLExceptionTranslator pgTranslator = new PgBetterSQLExceptionTranslator(defaultTranslator);
@@ -29,7 +29,6 @@ public class PgBetterSQLExceptionTranslatorTestCase {
 	{
 		when(sqlEx.getServerErrorMessage()).thenReturn(sem);
 	}
-
 
 	@Test
 	public void testBetterDuplicateKeyException() {
@@ -67,12 +66,10 @@ public class PgBetterSQLExceptionTranslatorTestCase {
 		assertTrue(tex.getMessage().contains(CONSTRAINT));
 	}
 
-	
 	@Test
 	public void testDataIntegrityViolationException() {
 		DataIntegrityViolationException ex = new DataIntegrityViolationException("test", sqlEx);
 		when(defaultTranslator.translate("a", "select", sqlEx)).thenReturn(ex);
 		assertSame(ex, pgTranslator.translate("a", "select", sqlEx));
 	}
-
 }

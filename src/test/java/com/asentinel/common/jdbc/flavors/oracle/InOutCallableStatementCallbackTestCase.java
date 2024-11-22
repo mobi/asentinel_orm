@@ -31,7 +31,7 @@ import com.asentinel.common.jdbc.ResultSetUtilsTestCase;
  */
 public class InOutCallableStatementCallbackTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(InOutCallableStatementCallbackTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(InOutCallableStatementCallbackTestCase.class);
 	
 	private int countBooleans(Object ... inParams) {
 		int count = 0;
@@ -45,7 +45,7 @@ public class InOutCallableStatementCallbackTestCase {
 	}
 	
 	private void testExec(ResultSetSqlParameter[] rsParams, Object ... inParams) throws SQLException {
-		List<Object> mocks = new ArrayList<Object>();
+		List<Object> mocks = new ArrayList<>();
 		CallableStatement cs = createMock(CallableStatement.class);
 		mocks.add(cs);
 		
@@ -64,11 +64,11 @@ public class InOutCallableStatementCallbackTestCase {
 		
 		InOutCallableStatementCallback action = new InOutCallableStatementCallback(rsParams, inParams);
 		
-		replay(mocks.toArray(new Object[mocks.size()]));
+		replay(mocks.toArray(new Object[0]));
 		
 		action.doInCallableStatement(cs);
 		
-		verify(mocks.toArray(new Object[mocks.size()]));
+		verify(mocks.toArray(new Object[0]));
 	}
 	
 	
@@ -115,8 +115,4 @@ public class InOutCallableStatementCallbackTestCase {
 		
 		assertEquals(3, InOutCallableStatementCallback.countPreparedInputParams(10, "test", null, true, BooleanParameterConverter.NULL_BOOLEAN));
 	}
-
-	
-	
-
 }

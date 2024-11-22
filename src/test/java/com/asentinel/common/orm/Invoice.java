@@ -51,10 +51,6 @@ public class Invoice implements Entity {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Invoice [invoiceId=" + invoiceId + ", invoiceNumber="
-				+ invoiceNumber + "]");
-		return sb.toString();
+		return "Invoice [invoiceId=" + invoiceId + ", invoiceNumber=" + invoiceNumber + "]";
 	}
-
 }

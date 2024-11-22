@@ -1,26 +1,5 @@
 package com.asentinel.common.orm.integration.tests;
 
-import static java.util.stream.Collectors.toSet;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Set;
-import java.util.SortedSet;
-
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.asentinel.common.collections.tree.Node;
 import com.asentinel.common.orm.AutoEagerLoader;
 import com.asentinel.common.orm.EntityBuilder;
@@ -35,6 +14,18 @@ import com.asentinel.common.orm.jql.SqlBuilderFactory;
 import com.asentinel.common.orm.mappers.Child;
 import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.orm.mappers.Table;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Set;
+import java.util.SortedSet;
+
+import static java.util.stream.Collectors.toSet;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * This test was used to replicate a bug, it is now part of the standard set of
@@ -42,10 +33,9 @@ import com.asentinel.common.orm.mappers.Table;
  * 
  * @since 1.60.14
  * @author Razvan Popian
- *
  */
 public class SelfReferencingEntityWithCollectionTestCase {
-	private final static Logger log = LoggerFactory.getLogger(SelfReferencingEntityWithCollectionTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(SelfReferencingEntityWithCollectionTestCase.class);
 	
 	private final SqlBuilderFactory sbFactory = mock(SqlBuilderFactory.class);
 	private final DefaultEntityDescriptorTreeRepository treeRepo = new DefaultEntityDescriptorTreeRepository();
@@ -119,8 +109,6 @@ public class SelfReferencingEntityWithCollectionTestCase {
 						+ ", set=" + set  
 						+ "]";
 		}
-		
-		
 	}
 	
 	@Table("C")
@@ -138,6 +126,5 @@ public class SelfReferencingEntityWithCollectionTestCase {
 		public int compareTo(C o) {
 			return Integer.compare(id, o.id);
 		}
-
 	}
 }

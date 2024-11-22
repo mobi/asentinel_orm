@@ -42,11 +42,11 @@ public class ProxyCovariantIdTestCase {
 	}
 	
 
-	static interface User {
+	interface User {
 
-		public Object getUserId();
+		Object getUserId();
 
-		public String getUsername();
+		String getUsername();
 
 	}
 	
@@ -118,5 +118,4 @@ public class ProxyCovariantIdTestCase {
 			return username;
 		}
 	}
-	
 }

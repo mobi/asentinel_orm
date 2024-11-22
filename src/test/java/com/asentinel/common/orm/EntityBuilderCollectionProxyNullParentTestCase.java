@@ -1,23 +1,21 @@
 package com.asentinel.common.orm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Test;
-import org.springframework.util.ReflectionUtils;
-
 import com.asentinel.common.collections.tree.Node;
 import com.asentinel.common.collections.tree.SimpleNode;
 import com.asentinel.common.orm.mappers.Child;
 import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.orm.mappers.Table;
+import org.junit.Test;
+import org.springframework.util.ReflectionUtils;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class EntityBuilderCollectionProxyNullParentTestCase {
 	
@@ -32,7 +30,7 @@ public class EntityBuilderCollectionProxyNullParentTestCase {
 			.tableAlias("l1")
 			.targetMember(ReflectionUtils.findField(Level0.class, "level1"))
 			.build();
-		CollectionProxyEntityDescriptor level2Ed = new CollectionProxyEntityDescriptor(id -> Arrays.asList(new Level2()), 
+		CollectionProxyEntityDescriptor level2Ed = new CollectionProxyEntityDescriptor(id -> List.of(new Level2()),
 				Level2.class, ReflectionUtils.findField(Level1.class, "level2s"), "Level1Id");
 		Node<EntityDescriptor> level0 = new SimpleNode<>(level0Ed);
 		Node<EntityDescriptor> level1 = new SimpleNode<>(level1Ed);
@@ -51,10 +49,8 @@ public class EntityBuilderCollectionProxyNullParentTestCase {
 		Level0 level0Instance = eb.getEntity();
 		assertEquals(10, level0Instance.id);
 		assertNull(level0Instance.level1);
-		
 	}
 
-	
 	@Table("level0")
 	public static class Level0 {
 		@PkColumn("Level0Id")
@@ -71,7 +67,6 @@ public class EntityBuilderCollectionProxyNullParentTestCase {
 		
 		@Child(parentRelationType = RelationType.MANY_TO_ONE)
 		List<Level2> level2s;
-		
 	}
 
 	@Table("level2")
@@ -79,5 +74,4 @@ public class EntityBuilderCollectionProxyNullParentTestCase {
 		@PkColumn("Level2Id")
 		int id;
 	}
-	
 }

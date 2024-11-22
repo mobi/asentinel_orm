@@ -22,7 +22,7 @@ import com.asentinel.common.jdbc.ResultSetUtils;
 
 public class EntityBuilderErrorsTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(EntityBuilderErrorsTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(EntityBuilderErrorsTestCase.class);
 
 	@Test
 	public void testWithEmptyResultSet() throws SQLException {
@@ -36,8 +36,8 @@ public class EntityBuilderErrorsTestCase {
 		rs.close();
 		
 		Node<EntityDescriptor> ed = 
-			new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(InvoiceParentEntity.class, new InvoiceParentEntity.InvoiceRowMapper(), "InvoiceId"))
-				.addChild(new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(BillParentEntity.class, new BillParentEntity.BillRowMapper(), "BillId")));
+			new SimpleNode<>(EntityDescriptor.forColumnPk(InvoiceParentEntity.class, new InvoiceParentEntity.InvoiceRowMapper(), "InvoiceId"))
+				.addChild(new SimpleNode<>(EntityDescriptor.forColumnPk(BillParentEntity.class, new BillParentEntity.BillRowMapper(), "BillId")));
 		
 		EntityBuilder<InvoiceParentEntity> handler = new EntityBuilder<InvoiceParentEntity>(ed);
 		
@@ -52,7 +52,7 @@ public class EntityBuilderErrorsTestCase {
 				sb.append("   ").append(b).append("\n");
 			}
 		}
-		log.debug("testNormalOperation - Invoices:\n" + sb);
+		log.debug("testNormalOperation - Invoices:\n{}", sb);
 		verify(rs);
 
 		assertEquals(0, invoices.size());
@@ -77,7 +77,7 @@ public class EntityBuilderErrorsTestCase {
 			new EntityBuilder<InvoiceParentEntity>(ed);
 			fail("Should not get to this line.");
 		} catch (NullPointerException e) {
-			
+			//do nothing
 		}
 	}
 

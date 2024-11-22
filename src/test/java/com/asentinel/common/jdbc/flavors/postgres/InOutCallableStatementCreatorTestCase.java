@@ -9,9 +9,7 @@ import static org.easymock.EasyMock.createStrictMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,7 +51,7 @@ import com.asentinel.common.jdbc.flavors.JdbcFlavor;
 // Should try to isolate the common parts in a base class
 
 public class InOutCallableStatementCreatorTestCase {
-	private final static Logger log = LoggerFactory.getLogger(InOutCallableStatementCreatorTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(InOutCallableStatementCreatorTestCase.class);
 	
 	JdbcFlavor jdbcFlavor = new PostgresJdbcFlavor();
 
@@ -124,10 +122,6 @@ public class InOutCallableStatementCreatorTestCase {
 	
 	/**
 	 * Method that allows for the creation and validation of various calls.
-	 * @param spName
-	 * @param outParamCount
-	 * @param inParams
-	 * @throws SQLException
 	 */
 	private void testCall(String spName, Object ... inParams) throws SQLException {
 		int outParamCount = 1;
@@ -199,7 +193,7 @@ public class InOutCallableStatementCreatorTestCase {
 
 		// validate values
 		String sqlCallString = capturedSqlCallString.getValue();
-		assertTrue(sqlCallString.indexOf(spName)>=0);
+		assertTrue(sqlCallString.contains(spName));
 		
 		// count question marks
 		int qmCount = 0;
@@ -255,7 +249,7 @@ public class InOutCallableStatementCreatorTestCase {
 		testCall("test", 1, 2, 3, new Date(), "aaaa");
 		
 		testCall("test",  				
-				1, 10l, 1.5d, 1.5f,
+				1, 10L, 1.5d, 1.5f,
 				new Date(), Calendar.getInstance(),
 				"test",
 				true, false, null
@@ -265,7 +259,7 @@ public class InOutCallableStatementCreatorTestCase {
 		testCall("test", "aaaa", new byte[]{1}, 2, 3.5d);
 		
 		testCall("test", new TestByteArrayInputStream(new byte[]{1}));
-		testCall("test", "aaaa", new TestByteArrayInputStream(new byte[]{1}), 2l, 3.5d);
+		testCall("test", "aaaa", new TestByteArrayInputStream(new byte[]{1}), 2L, 3.5d);
 		
 		testCall("test", new TestByteArrayInputStream(new byte[]{1}), new byte[]{2});
 		testCall("test", new TestByteArrayInputStream(new byte[]{1}), new TestByteArrayInputStream(new byte[]{2}));
@@ -371,13 +365,10 @@ public class InOutCallableStatementCreatorTestCase {
 		
 		InOutCallableStatementCreator creator = new InOutCallableStatementCreator(jdbcFlavor, "test", new byte[]{0, 1}, in);
 		creator.setLobCreator(lobCreator);
-		CallableStatementCallback<Object> action = new CallableStatementCallback<>() {
-			@Override
-			public Object doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
-				log.debug("doInCallableStatement - made it to the action.");
-				return null;
-			}
-		};
+		CallableStatementCallback<Object> action = cs1 -> {
+            log.debug("doInCallableStatement - made it to the action.");
+            return null;
+        };
 		
 		replay(dataSource, conn, cs, lobCreator);
 		
@@ -385,8 +376,8 @@ public class InOutCallableStatementCreatorTestCase {
 		
 		verify(dataSource, conn, cs, lobCreator);
 
-		assertTrue("The input stream was not closed.", testList.size() > 0 );
-		log.debug("testInCombinationWithJdbcTemplate - close was called on InputStream " + testList.size() + " times. That's to be expected.");
+        assertFalse("The input stream was not closed.", testList.isEmpty());
+		log.debug("testInCombinationWithJdbcTemplate - close was called on InputStream {} times. That's to be expected.", testList.size());
 
 		log.info("testInCombinationWithJdbcTemplate - stop");
 	}
@@ -395,8 +386,8 @@ public class InOutCallableStatementCreatorTestCase {
 	/**
 	 * Test that ensures that the InOutCallableStatementCreator works correctly
 	 * in combination with the JdbcTemplate when it comes to closing the LobCreator
-	 * that it is using for blobs. Unlike the previous test in this one the JdbcTemplate
-	 * throws an exception. In this situation the stream still has to be closed.
+	 * that it is using for blobs. Unlike the previous test in this one, the JdbcTemplate
+	 * throws an exception. In this situation, the stream still has to be closed.
 	 */
 	@Test
 	public void testInCombinationWithJdbcTemplateAndException() throws SQLException {
@@ -432,13 +423,10 @@ public class InOutCallableStatementCreatorTestCase {
 		
 		InOutCallableStatementCreator creator = new InOutCallableStatementCreator(jdbcFlavor, "test", in);
 		creator.setLobCreator(lobCreator);
-		CallableStatementCallback<Object> action = new CallableStatementCallback<>() {
-			@Override
-			public Object doInCallableStatement(CallableStatement cs) throws SQLException, DataAccessException {
-				log.debug("doInCallableStatement - made it to the action.");
-				return null;
-			}
-		};
+		CallableStatementCallback<Object> action = cs1 -> {
+            log.debug("doInCallableStatement - made it to the action.");
+            return null;
+        };
 		
 		replay(dataSource, conn, cs, lobCreator);
 		
@@ -446,16 +434,14 @@ public class InOutCallableStatementCreatorTestCase {
 			jdbcOps.execute(creator, action);
 			fail("execute should throw exception.");
 		} catch (DataAccessException e) {
-			log.debug("testInCombinationWithJdbcTemplateAndException - Expected exception: " + e.getMessage());
+			log.debug("testInCombinationWithJdbcTemplateAndException - Expected exception: {}", e.getMessage());
 		}
 		
 		verify(dataSource, conn, cs, lobCreator);
 
-		assertTrue("The input stream was not closed.", testList.size() > 0 );
-		log.debug("testInCombinationWithJdbcTemplateAndException - close was called on InputStream " + testList.size() + " times. That's to be expected.");
+        assertFalse("The input stream was not closed.", testList.isEmpty());
+		log.debug("testInCombinationWithJdbcTemplateAndException - close was called on InputStream {} times. That's to be expected.", testList.size());
 
 		log.info("testInCombinationWithJdbcTemplateAndException - stop");
 	}
-	
-
 }

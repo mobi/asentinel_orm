@@ -78,7 +78,6 @@ public class CollectionProxySerializationTestCase {
 		// if the proxy is not loaded like it is the case here the deserialization code should set a proper loader function and the parent id
 		// in the deserialized object using reflection. This is why it is recommended to force load any proxy before serialization
 
-		
 		// read
 		try (
 			ByteArrayInputStream byteIn = new ByteArrayInputStream(bytes);
@@ -90,6 +89,4 @@ public class CollectionProxySerializationTestCase {
 			assertTrue(EntityUtils.isLoadedProxy(list2)); // false positive 
 		}
 	}
-	
-	
 }

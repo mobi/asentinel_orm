@@ -1,8 +1,7 @@
 package com.asentinel.common.orm;
 
 import static com.asentinel.common.orm.TargetMembersHolder.findGetterAndSetterMethods;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -76,7 +75,7 @@ public class TargetMembersHolderFindGetterSetterTestCase {
 	public void testGetterNotFound() {
 		Field f = ReflectionUtils.findField(GetterNotFound.class, "id");
 		Method[] ms = findGetterAndSetterMethods(GetterNotFound.class, f);
-		assertEquals(null, ms[0]);
+        assertNull(ms[0]);
 		assertEquals("setId", ms[1].getName());
 	}
 
@@ -85,7 +84,7 @@ public class TargetMembersHolderFindGetterSetterTestCase {
 		Field f = ReflectionUtils.findField(SetterNotFound.class, "id");
 		Method[] ms = findGetterAndSetterMethods(SetterNotFound.class, f);
 		assertEquals("getId", ms[0].getName());
-		assertEquals(null, ms[1]);
+        assertNull(ms[1]);
 	}
 	
 	@Test

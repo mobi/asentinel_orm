@@ -18,13 +18,12 @@ public class ResultSetUtilsArraysTestCase {
 	private ResultSet rs;
 	
 	@Before
-	public void setup() throws SQLException {
+	public void setup() {
 		array = createMock(Array.class);
 
 		rs = createMock(ResultSet.class);
 	}
-	
-	
+
 	@Test
 	public void testGetStringArray() throws SQLException {
 		expect(rs.getArray(anyInt())).andReturn(array).anyTimes();
@@ -61,7 +60,6 @@ public class ResultSetUtilsArraysTestCase {
 		
 		assertNull(strings);
 	}
-	
 
 	@Test
 	public void testGetIntArray() throws SQLException {
@@ -83,10 +81,10 @@ public class ResultSetUtilsArraysTestCase {
 		expect(rs.getArray(anyInt())).andReturn(null).anyTimes();
 		
 		replay(rs, array);
-		int[] ints = ResultSetUtils.getIntArray(rs, 1);
+		int[] integers = ResultSetUtils.getIntArray(rs, 1);
 		verify(rs, array);
 		
-		assertEquals(0, ints.length);
+		assertEquals(0, integers.length);
 	}
 
 	@Test
@@ -94,10 +92,10 @@ public class ResultSetUtilsArraysTestCase {
 		expect(rs.getArray(anyInt())).andReturn(null).anyTimes();
 		
 		replay(rs, array);
-		int[] ints = ResultSetUtils.getIntArray(rs, 1, true);
+		int[] integers = ResultSetUtils.getIntArray(rs, 1, true);
 		verify(rs, array);
 		
-		assertNull(ints);
+		assertNull(integers);
 	}
 	
 
@@ -141,7 +139,7 @@ public class ResultSetUtilsArraysTestCase {
 	@Test
 	public void testGetDoubleArray() throws SQLException {
 		expect(rs.getArray(anyInt())).andReturn(array).anyTimes();
-		expect(array.getArray()).andReturn(new BigDecimal[]{new BigDecimal(1.1), new BigDecimal(2.2)});
+		expect(array.getArray()).andReturn(new BigDecimal[]{new BigDecimal("1.1"), new BigDecimal("2.2")});
 		array.free();
 		
 		replay(rs, array);
@@ -212,5 +210,4 @@ public class ResultSetUtilsArraysTestCase {
 		
 		assertNull(numbers);
 	}
-	
 }

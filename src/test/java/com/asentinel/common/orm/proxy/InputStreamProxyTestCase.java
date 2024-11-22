@@ -22,7 +22,7 @@ import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.orm.mappers.Table;
 
 /**
- * Tests the funtionality of the {@link InputStreamProxy}.
+ * Tests the functionality of the {@link InputStreamProxy}.
  * 
  * @author Razvan Popian
  */
@@ -58,7 +58,7 @@ public class InputStreamProxyTestCase {
 	@SuppressWarnings("resource")
 	@Test(expected = IllegalStateException.class)
 	public void failBecauseNotEntity() {
-		new InputStreamProxy(qEx, lh, new String(), "bytes");
+		new InputStreamProxy(qEx, lh, "", "bytes");
 	}
 	
 	

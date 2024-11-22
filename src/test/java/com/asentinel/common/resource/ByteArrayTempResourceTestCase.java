@@ -1,8 +1,5 @@
 package com.asentinel.common.resource;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -11,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.junit.Test;
 import org.springframework.util.FileCopyUtils;
+
+import static org.junit.Assert.*;
 
 public class ByteArrayTempResourceTestCase {
 	
@@ -25,8 +24,8 @@ public class ByteArrayTempResourceTestCase {
 		FileCopyUtils.copy(bytes, out);
 		
 		byte[] readBytes = FileCopyUtils.copyToByteArray(r.getInputStream());
-		log.debug("testWriteReadNoDeleteAfterRead - readBytes: " + Arrays.toString(readBytes));
-		assertTrue(Arrays.equals(bytes, readBytes));
+		log.debug("testWriteReadNoDeleteAfterRead - readBytes: {}", Arrays.toString(readBytes));
+        assertArrayEquals(bytes, readBytes);
 
 		assertFalse(r.isOpen());
 		assertTrue(r.isReadable());
@@ -43,7 +42,7 @@ public class ByteArrayTempResourceTestCase {
 				super.cleanup();
 				closed[0] = true;
 			}
-		};) {
+		}) {
 			
 		}
 		assertTrue(closed[0]);

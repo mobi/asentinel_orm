@@ -20,38 +20,27 @@ import com.asentinel.common.jdbc.ResultSetUtils;
 import com.asentinel.common.orm.proxy.entity.ProxyFactory;
 
 public class EntityBuilderWith2ProxyChildrenOfSameTypeTestCase {
-	private ResultSet rs = mock(ResultSet.class);
+	private final ResultSet rs = mock(ResultSet.class);
 
-	private EntityBuilder<Root> eb;
+	private final EntityBuilder<Root> eb;
 	
 	{
 		EntityDescriptor rootEd = new EntityDescriptor(Root.class, 
-				(rs, n) -> {
-					return rs.getObject("id");
-				},
-				(rs, n) -> {
-					Root r = new Root();
-					return r;
-				}, "rootMapper");
+				(rs, n) -> rs.getObject("id"),
+				(rs, n) -> new Root(), "rootMapper");
 		
 		EntityDescriptor child1Ed = new EntityDescriptor(Child1.class, 
-				(rs, n) -> {
-					return rs.getObject("child1Id");
-				},
-				(rs, n) -> {
-					return ProxyFactory.getInstance().newProxy(Child1.class, (id) -> {
-						assertEquals(10, id);
-						return new Child1("child");
-					});
-				}, "child1Mapper",
+				(rs, n) -> rs.getObject("child1Id"),
+				(rs, n) -> ProxyFactory.getInstance().newProxy(Child1.class, id -> {
+                    assertEquals(10, id);
+                    return new Child1("child");
+                }), "child1Mapper",
 				ReflectionUtils.findField(Root.class, "child1"));
 		
 		EntityDescriptor child2Ed = new EntityDescriptor(Child1.class, 
+				(rs, n) -> rs.getObject("child2Id"),
 				(rs, n) -> {
-					return rs.getObject("child2Id");
-				},
-				(rs, n) -> {
-					return ProxyFactory.getInstance().newProxy(Child1.class, (id) -> {
+					return ProxyFactory.getInstance().newProxy(Child1.class, id -> {
 						assertEquals(10, id);
 						return new Child1("child");
 					});

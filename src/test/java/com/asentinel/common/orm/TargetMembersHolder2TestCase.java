@@ -1,8 +1,7 @@
 package com.asentinel.common.orm;
 
 import static com.asentinel.common.orm.TargetMembersHolder.findFirstNonViewTableAnnotation;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -41,6 +40,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testSimple() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Simple.class);
+		assertNotNull(info);
 		assertEquals(Simple.class, info.getTargetClass());
 		assertEquals("Simple", info.getTableAnn().value());
 	}
@@ -48,6 +48,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testExtended1() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Extended1.class);
+		assertNotNull(info);
 		assertEquals(Simple.class, info.getTargetClass());
 		assertEquals("Simple", info.getTableAnn().value());
 	}
@@ -55,6 +56,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testExtended2() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Extended2.class);
+		assertNotNull(info);
 		assertEquals(Extended2.class, info.getTargetClass());
 		assertEquals("Simple", info.getTableAnn().value());
 	}
@@ -83,6 +85,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testExtended4() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Extended4.class);
+		assertNotNull(info);
 		assertEquals(Extended3.class, info.getTargetClass());
 		assertEquals("Simple", info.getTableAnn().value());
 	}
@@ -93,6 +96,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testVeryComplex() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(VeryComplex.class);
+		assertNotNull(info);
 		assertEquals(Complex.class, info.getTargetClass());
 		assertEquals("Simple", info.getTableAnn().value());
 	}
@@ -108,6 +112,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testImplementer1() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Implementer1.class);
+		assertNotNull(info);
 		assertEquals(Implementer1.class, info.getTargetClass());
 		assertEquals("Interface1", info.getTableAnn().value());
 	}
@@ -115,6 +120,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testImplementer2() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Implementer2.class);
+		assertNotNull(info);
 		assertEquals(Implementer2.class, info.getTargetClass());
 		assertEquals("Interface1", info.getTableAnn().value());
 	}
@@ -122,6 +128,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testImplementer3() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Implementer3.class);
+		assertNotNull(info);
 		assertEquals(Implementer3.class, info.getTargetClass());
 		assertEquals("Interface2", info.getTableAnn().value());
 	}
@@ -130,6 +137,7 @@ public class TargetMembersHolder2TestCase {
 	@Test
 	public void testBaseClassIsTableAnd2SubclassesAreViews() {
 		TableAnnotationInfo info = findFirstNonViewTableAnnotation(Class3.class);
+		assertNotNull(info);
 		assertEquals(Class1.class, info.getTargetClass());
 		assertEquals("Class1", info.getTableAnn().value());
 
@@ -185,8 +193,8 @@ public class TargetMembersHolder2TestCase {
 	static class Complex extends Simple {
 		
 	}
-	
-	static abstract class AbstractVeryComplex extends Complex {
+
+	abstract static class AbstractVeryComplex extends Complex {
 		
 	}
 
@@ -213,13 +221,13 @@ public class TargetMembersHolder2TestCase {
 	
 	// -------- interface level @Table annotation ------ //
 	
-	@Table(value = "Interface1", view = false)
-	static interface Interface1 {
+	@Table(value = "Interface1")
+    interface Interface1 {
 		
 	}
 	
-	@Table(value = "Interface2", view = false)
-	static interface Interface2 {
+	@Table(value = "Interface2")
+    interface Interface2 {
 		
 	}
 	

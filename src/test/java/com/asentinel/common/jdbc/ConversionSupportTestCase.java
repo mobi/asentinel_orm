@@ -38,7 +38,7 @@ public class ConversionSupportTestCase {
 	@Test
 	public void inputStreamEager() throws SQLException {
 		when(lh.getBlobAsBinaryStream(rs, "bytes")).thenReturn(bytes);
-		InputStream in = (InputStream) cs.getValue(Integer.valueOf(1), InputStream.class, rs, new ColumnMetadata("bytes"));
+		InputStream in = (InputStream) cs.getValue(1, InputStream.class, rs, new ColumnMetadata("bytes"));
 		assertSame(bytes, in);
 	}
 	

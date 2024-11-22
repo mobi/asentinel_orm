@@ -1,32 +1,5 @@
 package com.asentinel.common.orm.jql;
 
-import static com.asentinel.common.orm.EntityDescriptorNodeCallback.rootOnlyQuery;
-import static com.asentinel.common.orm.jql.data.Bill.C_PH_NUMBER;
-import static com.asentinel.common.orm.jql.data.Charge.C_CHARGE;
-import static com.asentinel.common.orm.jql.data.Invoice.C_ACCOUNT;
-import static com.asentinel.common.orm.jql.data.Invoice.C_NUMBER;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
-
 import com.asentinel.common.collections.tree.Node;
 import com.asentinel.common.collections.tree.SimpleNode;
 import com.asentinel.common.collections.tree.TreeUtils;
@@ -37,9 +10,7 @@ import com.asentinel.common.jdbc.flavors.SqlTemplates;
 import com.asentinel.common.jdbc.flavors.postgres.PostgresJdbcFlavor;
 import com.asentinel.common.orm.EntityBuilder;
 import com.asentinel.common.orm.EntityDescriptor;
-import com.asentinel.common.orm.EntityDescriptorNodeCallback;
 import com.asentinel.common.orm.EntityDescriptorNodeMatcher;
-import com.asentinel.common.orm.SimpleEntityDescriptor.Builder;
 import com.asentinel.common.orm.TargetMembersHolder;
 import com.asentinel.common.orm.ed.tree.DefaultEntityDescriptorTreeRepository;
 import com.asentinel.common.orm.ed.tree.EntityDescriptorTreeRepository;
@@ -50,10 +21,27 @@ import com.asentinel.common.orm.jql.data.OverrideBill;
 import com.asentinel.common.orm.jql.data.OverrideInvoice;
 import com.asentinel.common.orm.query.DefaultSqlFactory;
 import com.asentinel.common.orm.query.SqlFactory;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+
+import static com.asentinel.common.orm.EntityDescriptorNodeCallback.rootOnlyQuery;
+import static com.asentinel.common.orm.jql.data.Bill.C_PH_NUMBER;
+import static com.asentinel.common.orm.jql.data.Charge.C_CHARGE;
+import static com.asentinel.common.orm.jql.data.Invoice.C_ACCOUNT;
+import static com.asentinel.common.orm.jql.data.Invoice.C_NUMBER;
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.*;
 
 public class SqlBuilderTestCase {
-	
-	final static Logger log = LoggerFactory.getLogger(SqlBuilderTestCase.class);
+
+	static final Logger log = LoggerFactory.getLogger(SqlBuilderTestCase.class);
 	
 	EntityDescriptorTreeRepository edtr = new DefaultEntityDescriptorTreeRepository();
 	JdbcFlavor jdbcf = new PostgresJdbcFlavor();
@@ -100,7 +88,7 @@ public class SqlBuilderTestCase {
 		Node<EntityDescriptor> root = edtr.getEntityDescriptorTree(Charge.class, Charge.TABLE_ALIAS);
 		builder.select(Charge.TABLE_ALIAS);
 		CompiledSql cSql = builder.compile();
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sf.buildQuery(root), cSql.getSqlString());
 		assertEquals(0, cSql.getParameters().length);
 		assertEquals(0, cSql.getParametersList().size());
@@ -123,7 +111,6 @@ public class SqlBuilderTestCase {
 	public void testInitialQueryFail() {
 		builder.compile();
 	}
-	
 
 	@Test
 	public void testAliasAndRootAlias() {
@@ -131,7 +118,7 @@ public class SqlBuilderTestCase {
 			.column(Invoice.C_NUMBER).column(Invoice.C_ACCOUNT)
 		;
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Invoice.TABLE_ALIAS + "." + C_NUMBER + Invoice.TABLE_ALIAS + "." + C_ACCOUNT,
 				cSql.getSqlString().replace(" ", ""));
 		
@@ -139,7 +126,7 @@ public class SqlBuilderTestCase {
 			.column(C_PH_NUMBER)
 		;
 		cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testAliasAndRootAlias - cSql: " + cSql);
+		log.debug("testAliasAndRootAlias - cSql: {}", cSql);
 		assertEquals(Invoice.TABLE_ALIAS + "." + C_NUMBER 
 					+ Invoice.TABLE_ALIAS + "." + C_ACCOUNT
 					+ Bill.TABLE_ALIAS + "." + C_PH_NUMBER
@@ -149,7 +136,7 @@ public class SqlBuilderTestCase {
 		builder.rootAlias()
 			.column(C_CHARGE);
 		cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testAliasAndRootAlias - cSql: " + cSql);
+		log.debug("testAliasAndRootAlias - cSql: {}", cSql);
 		assertEquals(Invoice.TABLE_ALIAS + "." + C_NUMBER 
 					+ Invoice.TABLE_ALIAS + "." + C_ACCOUNT
 					+ Bill.TABLE_ALIAS + "." + C_PH_NUMBER
@@ -158,12 +145,11 @@ public class SqlBuilderTestCase {
 				cSql.getSqlString().replace(" ", ""));
 	}
 
-
 	@Test
 	public void testDefaultAlias() {
 		builder.column(C_CHARGE);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + "." + C_CHARGE,
 				cSql.getSqlString().replace(" ", ""));
 	}
@@ -199,15 +185,13 @@ public class SqlBuilderTestCase {
 				Invoice.class);
 		builder.compileAsIs(Charge.TABLE_ALIAS);
 	}
-	
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testAdvancedAliasFail1() {
 		builder.alias(Charge.class, Invoice.class, Invoice.class);
 		builder.compileAsIs(Charge.TABLE_ALIAS);
 	}
-	
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testAdvancedAliasFail2() {
 		builder.alias(Charge.class, new EntityDescriptorNodeMatcher(Bill.class, "wrong alias"), Invoice.class);
@@ -219,7 +203,7 @@ public class SqlBuilderTestCase {
 		builder.alias().column(Charge.C_CHARGE);
 		builder.compileAsIs(Charge.TABLE_ALIAS);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + "." + C_CHARGE,
 				cSql.getSqlString().replace(" ", ""));
 	}
@@ -229,18 +213,16 @@ public class SqlBuilderTestCase {
 		builder.alias((Object[]) null).column(Charge.C_CHARGE);
 		builder.compileAsIs(Charge.TABLE_ALIAS);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + "." + C_CHARGE,
 				cSql.getSqlString().replace(" ", ""));
 	}
-	
-
 	
 	@Test
 	public void testSeparator() {
 		builder.sep("_").column(C_CHARGE);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + "_" + C_CHARGE,
 				cSql.getSqlString().replace(" ", ""));
 	}
@@ -249,7 +231,7 @@ public class SqlBuilderTestCase {
 	public void testString() {
 		builder.where();
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(SqlBuilder.WHERE,
 				cSql.getSqlString());
 	}
@@ -258,7 +240,7 @@ public class SqlBuilderTestCase {
 	public void testIdColumn1() {
 		builder.id();
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + "." + Charge.C_ID,
 				cSql.getSqlString().trim());
 	}
@@ -267,7 +249,7 @@ public class SqlBuilderTestCase {
 	public void testIdColumn2() {
 		builder.alias(Charge.class, Bill.class).id();
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Bill.TABLE_ALIAS + "." + Bill.C_ID,
 				cSql.getSqlString().trim());
 	}
@@ -276,7 +258,7 @@ public class SqlBuilderTestCase {
 	public void testIdColumn3() {
 		builder.id(false);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sqlTemplates.getSqlForCaseInsensitiveColumn(Charge.TABLE_ALIAS, ".", Charge.C_ID),
 				cSql.getSqlString().trim());
 	}
@@ -285,7 +267,7 @@ public class SqlBuilderTestCase {
 	public void testIdColumn4() {
 		builder.alias(Charge.class, Bill.class).id();
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Bill.TABLE_ALIAS + "." + Bill.C_ID,
 				cSql.getSqlString().trim());
 	}
@@ -294,7 +276,7 @@ public class SqlBuilderTestCase {
 	public void testIdColumn5() {
 		builder.alias(Charge.class, Bill.class).id(false);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sqlTemplates.getSqlForCaseInsensitiveColumn(Bill.TABLE_ALIAS, ".", Bill.C_ID),
 				cSql.getSqlString().trim());
 	}
@@ -302,18 +284,17 @@ public class SqlBuilderTestCase {
 	@Test
 	public void testIdColumn6() {
 		builder.alias(Charge.class, Bill.class).id(true);
-		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sqlTemplates.getSqlForCaseSensitiveColumn(Bill.TABLE_ALIAS, ".", Bill.C_ID),
 				cSql.getSqlString().trim());
 	}
-	
-	
+
 	@Test
 	public void testColumn1() {
 		builder.alias(Charge.class, Bill.class).column(C_PH_NUMBER);
-		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Bill.TABLE_ALIAS + "." + C_PH_NUMBER,
 				cSql.getSqlString().trim());
 	}
@@ -321,8 +302,8 @@ public class SqlBuilderTestCase {
 	@Test
 	public void testColumn2() {
 		builder.alias(Charge.class, Bill.class).column(C_PH_NUMBER);
-		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(Bill.TABLE_ALIAS + "." + C_PH_NUMBER,
 				cSql.getSqlString().trim());
 	}
@@ -330,8 +311,8 @@ public class SqlBuilderTestCase {
 	@Test
 	public void testColumn3() {
 		builder.alias(Charge.class, Bill.class).column(C_PH_NUMBER, false);
-		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sqlTemplates.getSqlForCaseInsensitiveColumn(Bill.TABLE_ALIAS, ".", C_PH_NUMBER),
 				cSql.getSqlString().trim());
 	}
@@ -340,17 +321,16 @@ public class SqlBuilderTestCase {
 	public void testColumn4() {
 		builder.alias(Charge.class, Bill.class).column(C_PH_NUMBER, true);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sqlTemplates.getSqlForCaseSensitiveColumn(Bill.TABLE_ALIAS, ".", C_PH_NUMBER),
 				cSql.getSqlString().trim());
 	}
-	
 
 	@Test
 	public void testParam1() {
 		builder.param(10);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals("?",
 				cSql.getSqlString().trim());
 		assertEquals(1, cSql.getParametersList().size());
@@ -366,7 +346,6 @@ public class SqlBuilderTestCase {
 	public void testParam3() {
 		builder.param(Collections.emptyList());
 	}
-	
 
 	@Test
 	public void testParam4() {
@@ -374,7 +353,7 @@ public class SqlBuilderTestCase {
 		NumberArray testNArray = new NumberArray("test", testArray);
 		builder.in(testNArray);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("test - cSql: " + cSql);
+		log.debug("test - cSql: {}", cSql);
 		assertEquals(sqlTemplates.getSqlForInArray().trim(),
 				cSql.getSqlString().trim());
 		assertEquals(1, cSql.getParametersList().size());
@@ -385,7 +364,7 @@ public class SqlBuilderTestCase {
 	public void testParamString1() {
 		builder.param("test");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testParamString1 - cSql: " + cSql);
+		log.debug("testParamString1 - cSql: {}", cSql);
 		assertEquals("?",
 				cSql.getSqlString().trim());
 		assertEquals(1, cSql.getParametersList().size());
@@ -396,7 +375,7 @@ public class SqlBuilderTestCase {
 	public void testPlainSql1() {
 		builder.sql(" test ");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testPlainSql1 - cSql: " + cSql);
+		log.debug("testPlainSql1 - cSql: {}", cSql);
 		assertEquals("test",
 				cSql.getSqlString().trim());
 		assertEquals(0, cSql.getParameters().length);
@@ -406,7 +385,7 @@ public class SqlBuilderTestCase {
 	public void testPlainSql2() {
 		builder.sql(" test ", (Object[]) null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testPlainSql2 - cSql: " + cSql);
+		log.debug("testPlainSql2 - cSql: {}", cSql);
 		assertEquals("test",
 				cSql.getSqlString().trim());
 		assertEquals(0, cSql.getParameters().length);
@@ -416,7 +395,7 @@ public class SqlBuilderTestCase {
 	public void testPlainSql3() {
 		builder.sql(" test ", 10);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testPlainSql3 - cSql: " + cSql);
+		log.debug("testPlainSql3 - cSql: {}", cSql);
 		assertEquals("test",
 				cSql.getSqlString().trim());
 		assertEquals(1, cSql.getParameters().length);
@@ -433,13 +412,12 @@ public class SqlBuilderTestCase {
 		assertEquals(cSql.getSqlString(), cSql2.getSqlString().trim());
 		assertArrayEquals(cSql.getParameters(), cSql2.getParameters());
 	}
-	
-	
+
 	@Test
 	public void testUpperParam() {
 		builder.upperParam("test");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testUpperParam - cSql: " + cSql);
+		log.debug("testUpperParam - cSql: {}", cSql);
 		assertEquals("upper(?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -450,7 +428,7 @@ public class SqlBuilderTestCase {
 	public void testUpperColumn() {
 		builder.upperColumn("column");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testUpperColumn - cSql: " + cSql);
+		log.debug("testUpperColumn - cSql: {}", cSql);
 		assertEquals("upper(" + Charge.TABLE_ALIAS + ".column)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(0, cSql.getParameters().length);
@@ -460,7 +438,7 @@ public class SqlBuilderTestCase {
 	public void testLowerParam() {
 		builder.lowerParam("test");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testLowerParam - cSql: " + cSql);
+		log.debug("testLowerParam - cSql: {}", cSql);
 		assertEquals("lower(?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -471,18 +449,17 @@ public class SqlBuilderTestCase {
 	public void testLowerColumn() {
 		builder.lowerColumn("column");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testLowerColumn - cSql: " + cSql);
+		log.debug("testLowerColumn - cSql: {}", cSql);
 		assertEquals("lower(" + Charge.TABLE_ALIAS + ".column)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(0, cSql.getParameters().length);
 	}
-	
-	
+
 	@Test
 	public void testApplyLike_CaseSensitive() {
 		builder.applyLike("test_col", "abc");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyLike_CaseSensitive - cSql: " + cSql);
+		log.debug("testApplyLike_CaseSensitive - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + ".test_collike?",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -493,7 +470,7 @@ public class SqlBuilderTestCase {
 	public void testApplyLike_CaseInsensitive() {
 		builder.applyLike("test_col", "abc", false);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyLike_CaseInsensitive - cSql: " + cSql);
+		log.debug("testApplyLike_CaseInsensitive - cSql: {}", cSql);
 		assertEquals("upper(" + Charge.TABLE_ALIAS + ".test_col)likeupper(?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -504,19 +481,18 @@ public class SqlBuilderTestCase {
 	public void testApplyLike_Null() {
 		builder.applyLike("test_col", null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyLike_Null - cSql: " + cSql);
+		log.debug("testApplyLike_Null - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + ".test_collike?",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertNull(cSql.getParameters()[0]);
 	}
-	
 
 	@Test
 	public void testApplyStartsWith_CaseSensitive() {
 		builder.applyStartsWith("test_col", "abc");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyStartsWith_CaseSensitive - cSql: " + cSql);
+		log.debug("testApplyStartsWith_CaseSensitive - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + ".test_collike?",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -527,7 +503,7 @@ public class SqlBuilderTestCase {
 	public void testApplyStartsWith_CaseInsensitive() {
 		builder.applyStartsWith("test_col", "abc", false);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyStartsWith_CaseInsensitive - cSql: " + cSql);
+		log.debug("testApplyStartsWith_CaseInsensitive - cSql: {}", cSql);
 		assertEquals("upper(" + Charge.TABLE_ALIAS + ".test_col)likeupper(?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -538,7 +514,7 @@ public class SqlBuilderTestCase {
 	public void testApplyStartsWith_Null() {
 		builder.applyStartsWith("test_col", null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyStartsWith_Null - cSql: " + cSql);
+		log.debug("testApplyStartsWith_Null - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + ".test_collike?",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -549,7 +525,7 @@ public class SqlBuilderTestCase {
 	public void testApplyMultipleStartsWith_CaseSensitive() {
 		builder.applyMultipleStartsWith("abc", "test_col1", "test_col2");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyMultipleStartsWith_CaseSensitive - cSql: " + cSql);
+		log.debug("testApplyMultipleStartsWith_CaseSensitive - cSql: {}", cSql);
 		assertEquals("(" + Charge.TABLE_ALIAS + ".test_col1like?or" + Charge.TABLE_ALIAS + ".test_col2like?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(2, cSql.getParameters().length);
@@ -561,7 +537,7 @@ public class SqlBuilderTestCase {
 	public void testApplyMultipleStartsWith_CaseInsensitive() {
 		builder.applyMultipleStartsWith("abc", false, "test_col1", "test_col2");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyMultipleStartsWith_CaseInsensitive - cSql: " + cSql);
+		log.debug("testApplyMultipleStartsWith_CaseInsensitive - cSql: {}", cSql);
 		assertEquals("(upper(" + Charge.TABLE_ALIAS + ".test_col1)likeupper(?)orupper(" + Charge.TABLE_ALIAS + ".test_col2)likeupper(?))",
 				cSql.getSqlString().replace(" ", ""));		
 		assertEquals(2, cSql.getParameters().length);
@@ -573,7 +549,7 @@ public class SqlBuilderTestCase {
 	public void applyMultipleStartsWith_NullParam() {
 		builder.applyMultipleStartsWith(null, "test_col");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("applyMultipleStartsWith_NullParam - cSql: " + cSql);
+		log.debug("applyMultipleStartsWith_NullParam - cSql: {}", cSql);
 		assertEquals("(" + Charge.TABLE_ALIAS + ".test_collike?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -584,7 +560,7 @@ public class SqlBuilderTestCase {
 	public void applyMultipleStartsWith_NoColumns() {
 		builder.applyMultipleStartsWith("abc");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("applyMultipleStartsWith_NoColumns - cSql: " + cSql);
+		log.debug("applyMultipleStartsWith_NoColumns - cSql: {}", cSql);
 		assertEquals("", cSql.getSqlString());
 		assertEquals(0, cSql.getParameters().length);		
 	}
@@ -593,7 +569,7 @@ public class SqlBuilderTestCase {
 	public void testApplyMultipleContains_CaseInsensitive() {
 		builder.applyMultipleContains("abc", false, "test_col1", "test_col2");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyMultipleContains_CaseInsensitive - cSql: " + cSql);
+		log.debug("testApplyMultipleContains_CaseInsensitive - cSql: {}", cSql);
 		assertEquals("(upper(" + Charge.TABLE_ALIAS + ".test_col1)likeupper(?)orupper(" + Charge.TABLE_ALIAS + ".test_col2)likeupper(?))",
 				cSql.getSqlString().replace(" ", ""));		
 		assertEquals(2, cSql.getParameters().length);
@@ -605,7 +581,7 @@ public class SqlBuilderTestCase {
 	public void applyMultipleContains_NullParam() {
 		builder.applyMultipleContains(null, "test_col");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("applyMultipleContains_NullParam - cSql: " + cSql);
+		log.debug("applyMultipleContains_NullParam - cSql: {}", cSql);
 		assertEquals("(" + Charge.TABLE_ALIAS + ".test_collike?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -616,7 +592,7 @@ public class SqlBuilderTestCase {
 	public void applyMultipleContains_NoColumns() {
 		builder.applyMultipleContains("abc");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("applyMultipleContains_NoColumns - cSql: " + cSql);
+		log.debug("applyMultipleContains_NoColumns - cSql: {}", cSql);
 		assertEquals("", cSql.getSqlString());
 		assertEquals(0, cSql.getParameters().length);		
 	}
@@ -625,7 +601,7 @@ public class SqlBuilderTestCase {
 	public void testApplyContains_CaseSensitive() {
 		builder.applyContains("test_col", "abc");
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyContains_CaseSensitive - cSql: " + cSql);
+		log.debug("testApplyContains_CaseSensitive - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + ".test_collike?",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -636,7 +612,7 @@ public class SqlBuilderTestCase {
 	public void testApplyContains_CaseInsensitive() {
 		builder.applyContains("test_col", "abc", false);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyContains_CaseInsensitive - cSql: " + cSql);
+		log.debug("testApplyContains_CaseInsensitive - cSql: {}", cSql);
 		assertEquals("upper(" + Charge.TABLE_ALIAS + ".test_col)likeupper(?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -647,14 +623,13 @@ public class SqlBuilderTestCase {
 	public void testApplyContains_Null() {
 		builder.applyContains("test_col", null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testApplyContains_Null - cSql: " + cSql);
+		log.debug("testApplyContains_Null - cSql: {}", cSql);
 		assertEquals(Charge.TABLE_ALIAS + ".test_collike?",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertEquals("%%", cSql.getParameters()[0]);
 	}
-	
-	
+
 	@Test
 	public void testInWithOr_withObjects() {
 		Integer[] notNullParams = {1, 2, 3}; // tests null as well
@@ -663,7 +638,7 @@ public class SqlBuilderTestCase {
 		
 		builder.inObjects(Charge.C_ID, (Object[]) params);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withObjects - cSql: " + cSql);
+		log.debug("testInWithOr_withObjects - cSql: {}", cSql);
 		
 		assertEquals(String.format("(c.%s=?orc.%s=?orc.%s=?orc.%sisnull)", Charge.C_ID, Charge.C_ID, Charge.C_ID, Charge.C_ID), 
 				cSql.getSqlString().replace(" ", ""));
@@ -678,19 +653,18 @@ public class SqlBuilderTestCase {
 		
 		builder.idIn((Object[]) params);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withObjects - cSql: " + cSql);
+		log.debug("testInWithOr_withObjects - cSql: {}", cSql);
 		
 		assertEquals(String.format("(c.%s=?orc.%s=?orc.%s=?orc.%sisnull)", Charge.C_ID, Charge.C_ID, Charge.C_ID, Charge.C_ID), 
 				cSql.getSqlString().replace(" ", ""));
 		assertArrayEquals(notNullParams, cSql.getParameters());
 	}
-	
 
 	@Test
 	public void testInWithOr_withObjects_Null_Array() {
 		builder.inObjects("test_col", (Object[]) null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withObjects_Null_Array - cSql: " + cSql);
+		log.debug("testInWithOr_withObjects_Null_Array - cSql: {}", cSql);
 		
 		assertEquals(SqlBuilder.NO_RESULTS, cSql.getSqlString().trim());
 		assertEquals(0, cSql.getParameters().length);
@@ -700,7 +674,7 @@ public class SqlBuilderTestCase {
 	public void testInWithOr_withObjects_Empty_Array() {
 		builder.inObjects("test_col", new Object[0]);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withObjects_Empty_Array - cSql: " + cSql);
+		log.debug("testInWithOr_withObjects_Empty_Array - cSql: {}", cSql);
 		
 		assertEquals(SqlBuilder.NO_RESULTS, cSql.getSqlString().trim());
 		assertEquals(0, cSql.getParameters().length);
@@ -710,19 +684,18 @@ public class SqlBuilderTestCase {
 	public void testInWithOr_withObjects_Null_In_Array() {
 		builder.inObjects("test_col", new Object[]{null});
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withObjects_Null_In_Array - cSql: " + cSql);
+		log.debug("testInWithOr_withObjects_Null_In_Array - cSql: {}", cSql);
 		
 		assertEquals("(c.test_colisnull)", cSql.getSqlString().replace(" ", ""));
 		assertEquals(0, cSql.getParameters().length);
 	}
-	
 
 	@Test
 	public void testInWithOr_withPrimitives_ints() {
 		int[] params = {1, 2, 3};
 		builder.in("test_col", params);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withPrimitives_ints - cSql: " + cSql);
+		log.debug("testInWithOr_withPrimitives_ints - cSql: {}", cSql);
 		
 		assertEquals("(c.test_col=?orc.test_col=?orc.test_col=?)", 
 				cSql.getSqlString().replace(" ", ""));
@@ -733,19 +706,18 @@ public class SqlBuilderTestCase {
 	public void testInWithOr_withPrimitive_Null_Int_Array() {
 		builder.in("test_col", (int[]) null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withPrimitive_Null_Int_Array - cSql: " + cSql);
+		log.debug("testInWithOr_withPrimitive_Null_Int_Array - cSql: {}", cSql);
 		
 		assertEquals(SqlBuilder.NO_RESULTS, cSql.getSqlString().trim());
 		assertEquals(0, cSql.getParameters().length);
 	}
-	
 
 	@Test
 	public void testInWithOr_withPrimitives_longs() {
 		long[] params = {1, 2, 3};
 		builder.in("test_col", params);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withPrimitives_longs - cSql: " + cSql);
+		log.debug("testInWithOr_withPrimitives_longs - cSql: {}", cSql);
 		
 		assertEquals("(c.test_col=?orc.test_col=?orc.test_col=?)", 
 				cSql.getSqlString().replace(" ", ""));
@@ -756,7 +728,7 @@ public class SqlBuilderTestCase {
 	public void testInWithOr_withPrimitive_Null_Long_Array() {
 		builder.in("test_col", (int[]) null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testInWithOr_withPrimitive_Null_Long_Array - cSql: " + cSql);
+		log.debug("testInWithOr_withPrimitive_Null_Long_Array - cSql: {}", cSql);
 		
 		assertEquals(SqlBuilder.NO_RESULTS, cSql.getSqlString().trim());
 		assertEquals(0, cSql.getParameters().length);
@@ -766,7 +738,7 @@ public class SqlBuilderTestCase {
 	public void testBetween() {
 		builder.between(1, 2);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testBetween - cSql: " + cSql);
+		log.debug("testBetween - cSql: {}", cSql);
 		
 		assertEquals("between?and?", cSql.getSqlString().replace(" ", ""));
 		assertEquals(2, cSql.getParameters().length);
@@ -778,7 +750,7 @@ public class SqlBuilderTestCase {
 	public void testEqNotNull() {
 		builder.eq(10);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testEqNotNull - cSql: " + cSql);
+		log.debug("testEqNotNull - cSql: {}", cSql);
 		assertEquals("=?", cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertEquals(10, cSql.getParameters()[0]);
@@ -788,18 +760,17 @@ public class SqlBuilderTestCase {
 	public void testEqNull() {
 		builder.eq(null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testEqNull - cSql: " + cSql);
+		log.debug("testEqNull - cSql: {}", cSql);
 		assertEquals("=?", cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertNull(cSql.getParameters()[0]);
-
 	}
 	
 	@Test
 	public void testNeNotNull() {
 		builder.ne(10);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testNeNotNull - cSql: " + cSql);
+		log.debug("testNeNotNull - cSql: {}", cSql);
 		assertEquals("<>?", cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertEquals(10, cSql.getParameters()[0]);
@@ -809,7 +780,7 @@ public class SqlBuilderTestCase {
 	public void testNeNull() {
 		builder.ne(null);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("testNeNull - cSql: " + cSql);
+		log.debug("testNeNull - cSql: {}", cSql);
 		assertEquals("<>?", cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertNull(cSql.getParameters()[0]);
@@ -821,21 +792,17 @@ public class SqlBuilderTestCase {
 	public void testJoinConditionsOverride() {
 		Node<EntityDescriptor> root = edtr.getEntityDescriptorTree(OverrideInvoice.class);
 		String expectedSql = sf.buildQuery(root);
-		log.debug("testJoinConditionsOverride - expectedSql: " + expectedSql);
+		log.debug("testJoinConditionsOverride - expectedSql: {}", expectedSql);
 		
 		SqlBuilder<OverrideInvoice> sb = sbf.newSqlBuilder(OverrideInvoice.class);
-		CompiledSql cSql = sb.select(new EntityDescriptorNodeCallback() {
-			
-			@Override
-			public boolean customize(Node<EntityDescriptor> node, Builder builder) {
-				if (OverrideBill.class.equals(builder.getEntityClass())) {
-					builder.joinConditionsOverrideParam(10);
-				}
-				return false;
-			}
-		}).where().id().eq(20)
+		CompiledSql cSql = sb.select((node, builder) -> {
+            if (OverrideBill.class.equals(builder.getEntityClass())) {
+                builder.joinConditionsOverrideParam(10);
+            }
+            return false;
+        }).where().id().eq(20)
 			.compile();
-		log.debug("testJoinConditionsOverride - sql: " + cSql.getSqlString());
+		log.debug("testJoinConditionsOverride - sql: {}", cSql.getSqlString());
 		assertTrue(cSql.getSqlString().startsWith(expectedSql));
 		assertEquals(Arrays.asList(10, 20), cSql.getParametersList());
 	}
@@ -898,7 +865,7 @@ public class SqlBuilderTestCase {
 	public void coalesce() {
 		builder.coalesce("column", 100);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("coalesce - cSql: " + cSql);
+		log.debug("coalesce - cSql: {}", cSql);
 		assertEquals("coalesce(" + Charge.TABLE_ALIAS + ".column,?)",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
@@ -909,13 +876,12 @@ public class SqlBuilderTestCase {
 	public void coalesceUpper() {
 		builder.coalesce("column", "abc", true);
 		CompiledSql cSql = builder.compileAsIs(Charge.TABLE_ALIAS);		
-		log.debug("coalesce - cSql: " + cSql);
+		log.debug("coalesce - cSql: {}", cSql);
 		assertEquals("upper(coalesce(" + Charge.TABLE_ALIAS + ".column,?))",
 				cSql.getSqlString().replace(" ", ""));
 		assertEquals(1, cSql.getParameters().length);
 		assertEquals("abc", cSql.getParameters()[0]);
 	}
-	
 
 	// tests for from queries
 	
@@ -931,7 +897,7 @@ public class SqlBuilderTestCase {
 			.id()
 		.from();
 		CompiledSql cSql = builder.compile();
-		log.debug("test - cSql: " + cSql.getSqlString());
+		log.debug("test - cSql: {}", cSql.getSqlString());
 		assertEquals("select t0.c_id, t0.charge b.b_id, b.phonenumber t0.c_id from charge t0 left join bill b on t0.b_id = b.b_id left join invoice i on b.id = i.id".replace(" ", ""),
 				cSql.getSqlString().replace(" ", "").toLowerCase());
 		assertEquals(0, cSql.getParameters().length);
@@ -950,7 +916,7 @@ public class SqlBuilderTestCase {
 			.idWithAlias()
 		.from();
 		CompiledSql cSql = builder.compile();
-		log.debug("test - cSql: " + cSql.getSqlString());
+		log.debug("test - cSql: {}", cSql.getSqlString());
 		assertEquals(
 				("select t0.c_id t0_c_id, t0.charge t0_charge, b.b_id b_b_id, b.phoneNumber b_phoneNumber, "
 				+ "t0.c_id t0_c_id from charge t0 left join bill b on t0.b_id = b.b_id left join invoice i on b.id = i.id").replace(" ", "").toLowerCase(),
@@ -959,7 +925,6 @@ public class SqlBuilderTestCase {
 		assertEquals(0, cSql.getParametersList().size());
 	}
 
-	
 	// tests for the EntityDescriptorNodeMatcher rootOnlyQuery() method
 
 	@Test
@@ -969,14 +934,10 @@ public class SqlBuilderTestCase {
 		assertTrue(cSql.getSqlString().toLowerCase().contains("invoice"));
 	}
 
-
 	@Test
 	public void testRootOnlyQuery() {
 		CompiledSql cSql = builder.select(rootOnlyQuery()).compile();
 		assertFalse(cSql.getSqlString().toLowerCase().contains("bill"));
 		assertFalse(cSql.getSqlString().toLowerCase().contains("invoice"));
-		
 	}
-	
-	
 }

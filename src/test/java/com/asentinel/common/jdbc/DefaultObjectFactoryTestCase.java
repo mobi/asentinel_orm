@@ -1,8 +1,8 @@
 package com.asentinel.common.jdbc;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 public class DefaultObjectFactoryTestCase {
 	
@@ -50,12 +50,11 @@ public class DefaultObjectFactoryTestCase {
 	}
 	
 	@Test(expected = IllegalStateException.class)
-	public void abstractNoArgsPublicContructor() {
+	public void abstractNoArgsPublicConstructor() {
 		DefaultObjectFactory<AbstractNoArgsPublicContructor> f = new DefaultObjectFactory<>(AbstractNoArgsPublicContructor.class);
 		f.newObject();
 	}
-	
-	
+
 	private static class NoExplicitNoArgsConstructor {
 		
 	}
@@ -91,7 +90,7 @@ public class DefaultObjectFactoryTestCase {
 		}
 	}
 	
-	private static abstract class AbstractNoArgsPublicContructor {
+	private abstract static class AbstractNoArgsPublicContructor {
 		
 	}
 	
