@@ -1,9 +1,7 @@
 package com.asentinel.common.orm;
 
 import static com.asentinel.common.orm.EntityDescriptorUtils.match;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -22,7 +20,7 @@ public class EntityDescriptorUtilsMatchTestCase {
 	
 	@Test
 	public void noNode() {
-		assertFalse(match((Node<EntityDescriptor>) null, new Builder(Invoice.class)));
+		assertFalse(match(null, new Builder(Invoice.class)));
 	}
 	
 	@Test
@@ -45,7 +43,7 @@ public class EntityDescriptorUtilsMatchTestCase {
 				new EntityDescriptorNodeMatcher(Invoice.class))
 		);
 		// ensure build() was not called
-		assertTrue(b.getTableName() == null);
+        assertNull(b.getTableName());
 	}
 	
 	@Test
@@ -82,7 +80,7 @@ public class EntityDescriptorUtilsMatchTestCase {
 				new EntityDescriptorNodeMatcher(Bill.class))
 		);
 		// ensure build() was not called
-		assertTrue(b.getTableName() == null);
+        assertNull(b.getTableName());
 	}
 
 	@Test
@@ -130,7 +128,7 @@ public class EntityDescriptorUtilsMatchTestCase {
 				new EntityDescriptorNodeMatcher(Charge.class))
 		);
 		// ensure build() was not called
-		assertTrue(b.getTableName() == null);
+        assertNull(b.getTableName());
 	}
 
 	@Test

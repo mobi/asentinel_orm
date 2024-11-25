@@ -54,27 +54,27 @@ public class SimpleUpdaterTestCase {
 	
 	// we use this constant because the sequence next val instruction varies depending on the selected
 	// JdbcFlavor
-	private final static String SEQ_NEXT_VAL_PLACEHOLDER = "[SEQ]";
+	private static final String SEQ_NEXT_VAL_PLACEHOLDER = "[SEQ]";
 	
-	private final static String INSERT = "insert into table(id, insertable, field1, field2, dynamicField) values(?, ?, ?, ?, ?)";
-	private final static String INSERT_AUTO_ID = "insert into table(id, insertable, field1, field2, dynamicField) values(" + SEQ_NEXT_VAL_PLACEHOLDER+ ", ?, ?, ?, ?)";
-	private final static String INSERT_AUTO_ID_NO_SEQ = "insert into table(field1, field2, insertable, dynamicField) values(?, ?, ?, ?)";
-	private final static String UPDATE = "update table set updatable = ?, field1 = ?, field2 = ?, dynamicField = ? where id = ?";
-	private final static String UPDATE_INPUT_STREAMS = "update table set name = ?, bytes = ?, updatableBytes = ?, dynamicBytes = ? where id = ?";
-	private final static String UPDATE_INPUT_STREAMS_PROXIES = "update table set name = ? where id = ?";
-	private final static String INSERT_INPUT_STREAMS = "insert into table(name, bytes, insertableBytes, dynamicBytes) values(?, ?, ?, ?)";
+	private static final String INSERT = "insert into table(id, insertable, field1, field2, dynamicField) values(?, ?, ?, ?, ?)";
+	private static final String INSERT_AUTO_ID = "insert into table(id, insertable, field1, field2, dynamicField) values(" + SEQ_NEXT_VAL_PLACEHOLDER+ ", ?, ?, ?, ?)";
+	private static final String INSERT_AUTO_ID_NO_SEQ = "insert into table(field1, field2, insertable, dynamicField) values(?, ?, ?, ?)";
+	private static final String UPDATE = "update table set updatable = ?, field1 = ?, field2 = ?, dynamicField = ? where id = ?";
+	private static final String UPDATE_INPUT_STREAMS = "update table set name = ?, bytes = ?, updatableBytes = ?, dynamicBytes = ? where id = ?";
+	private static final String UPDATE_INPUT_STREAMS_PROXIES = "update table set name = ? where id = ?";
+	private static final String INSERT_INPUT_STREAMS = "insert into table(name, bytes, insertableBytes, dynamicBytes) values(?, ?, ?, ?)";
 	
-	private final static Number ID = 10;
+	private static final Number ID = (Number) 10;
 	
 	private final JdbcFlavor jdbcFlavor = new PostgresJdbcFlavor();
 	
 	private SqlQuery ex;
 	private Updater u;
 	
-	private Set<DynamicColumn> dynamicColumns = singleton(new DefaultDynamicColumn("dynamicField", Integer.class));
+	private final Set<DynamicColumn> dynamicColumns = singleton(new DefaultDynamicColumn("dynamicField", Integer.class));
 	
-	private Capture<String> cSql = Capture.newInstance();
-	private Capture<KeyHolder> cKeyHolder = Capture.newInstance();
+	private final Capture<String> cSql = Capture.newInstance();
+	private final Capture<KeyHolder> cKeyHolder = Capture.newInstance();
 	
 	
 	@Before
@@ -87,18 +87,18 @@ public class SimpleUpdaterTestCase {
 	public void testInsertAutoIdForTableMappedBean() {
 		Bean b = new Bean(0, 20, 30, 40, 50, 60);
 		
-		expect(ex.update(capture(cSql), aryEq(new String[] {"id"}), capture(cKeyHolder),
+		expect(ex.update((String) capture(cSql), aryEq(new String[] {"id"}), capture(cKeyHolder),
 				eq(b.insertable), eq(b.field1), eq(b.field2), eq(b.dynamicField)))
 			.andAnswer(new IAnswer<Integer>() {
 
 				@Override
-				public Integer answer() throws Throwable {
+				public Integer answer() {
 					Object[] args = getCurrentArguments();
 					for (Object arg: args) {
 						if (arg instanceof GeneratedKeyHolder) {
 							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
 							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
+							generatedKeys.add(new HashMap<>());
 							generatedKeys.get(0).put("", ID);
 							return 1;
 						}
@@ -111,10 +111,10 @@ public class SimpleUpdaterTestCase {
 		;
 		
 		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(dynamicColumns));
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
 		verify(ex);
 		assertEquals(1, count);
-		assertEquals(ID, b.id);		
+		assertEquals(ID, (Number) b.id);
 		assertEquals(INSERT_AUTO_ID.replaceAll("\\s", "").toLowerCase(), 
 				cSql.getValue().replaceAll("\\s", "")
 				.replace(jdbcFlavor.getSqlTemplates().getSqlForNextSequenceVal("seq"), SEQ_NEXT_VAL_PLACEHOLDER)
@@ -151,7 +151,7 @@ public class SimpleUpdaterTestCase {
 		;
 		
 		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(dynamicColumns));
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
 		verify(ex);
 		assertEquals(1, count);
 		assertEquals(ID, b.id);		
@@ -172,7 +172,7 @@ public class SimpleUpdaterTestCase {
 			.andAnswer(new IAnswer<Integer>() {
 
 				@Override
-				public Integer answer() throws Throwable {
+				public Integer answer() {
 					Object[] args = getCurrentArguments();
 					for (Object arg: args) {
 						if (arg instanceof GeneratedKeyHolder) {
@@ -191,7 +191,7 @@ public class SimpleUpdaterTestCase {
 		;
 		
 		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(dynamicColumns));
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
 		verify(ex);
 		assertEquals(1, count);
 		assertEquals(ID, b.id);
@@ -214,7 +214,7 @@ public class SimpleUpdaterTestCase {
 		
 		
 		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(UpdateType.INSERT, dynamicColumns));
+		int count = u.update(b, new UpdateSettings<>(UpdateType.INSERT, dynamicColumns));
 		verify(ex);
 		assertEquals(1, count);
 		assertEquals(INSERT.replaceAll("\\s", "").toLowerCase(), 
@@ -282,7 +282,7 @@ public class SimpleUpdaterTestCase {
 		b.getField2();
 		
 		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(dynamicColumns));
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
 		verify(ex);
 		assertEquals(1, count);
 		assertEquals(UPDATE.replaceAll("\\s", "").toLowerCase(), 
@@ -299,7 +299,7 @@ public class SimpleUpdaterTestCase {
 			.andReturn(1);
 		
 		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(dynamicColumns));
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
 		verify(ex);
 		assertEquals(1, count);
 		assertEquals(UPDATE.replaceAll("\\s", "").toLowerCase(), 
@@ -374,7 +374,7 @@ public class SimpleUpdaterTestCase {
 		replay(ex);
 		int count = u.update(b, new UpdateSettings<DynamicColumn>(singleton(new DefaultDynamicColumn("dynamicBytes", InputStream.class))));
 		verify(ex);
-		assertEquals(ID, b.id);
+		assertEquals(ID, (Number) b.id);
 		assertEquals(1, count);
 	}
 	
@@ -393,7 +393,7 @@ public class SimpleUpdaterTestCase {
 						if (arg instanceof GeneratedKeyHolder) {
 							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
 							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
+							generatedKeys.add(new HashMap<>());
 							generatedKeys.get(0).put("", ID);
 							return 1;
 						}
@@ -408,7 +408,7 @@ public class SimpleUpdaterTestCase {
 		replay(ex);
 		int count = u.update(b, new UpdateSettings<DynamicColumn>(singleton(new DefaultDynamicColumn("dynamicBytes", InputStream.class))));
 		verify(ex);
-		assertEquals(ID, b.id);
+		assertEquals(ID, (Number) b.id);
 		assertEquals(1, count);
 	}
 	

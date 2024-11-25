@@ -39,7 +39,7 @@ import org.junit.Test;
  */
 public class AnnotationRowMapperTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(AnnotationRowMapperTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(AnnotationRowMapperTestCase.class);
 	
 	private ResultSet rs;
 	private Map<String, Object> mapValues;
@@ -47,12 +47,12 @@ public class AnnotationRowMapperTestCase {
 	@Before
 	public void setup() throws SQLException {
 		rs = createMock(ResultSet.class);
-		mapValues = new LinkedHashMap<String, Object>();
+		mapValues = new LinkedHashMap<>();
 
 		mapValues.put(COL_INT_VAL, 20);
 		mapValues.put(COL_INT_OBJ, 30);
-		mapValues.put(COL_LONG_VAL, 100l);
-		mapValues.put(COL_LONG_OBJ, 200l);
+		mapValues.put(COL_LONG_VAL, 100L);
+		mapValues.put(COL_LONG_OBJ, 200L);
 		mapValues.put(COL_DOUBLE_VAL, 1.1d);
 		mapValues.put(COL_DOUBLE_OBJ, 2.2d);
 		mapValues.put(COL_BOOL_VAL, "Y");
@@ -69,9 +69,9 @@ public class AnnotationRowMapperTestCase {
 		expect(rs.getLong(COL_LONG_OBJ)).andReturn((Long) mapValues.get(COL_LONG_OBJ));
 		expect(rs.getDouble(COL_DOUBLE_VAL)).andReturn((Double) mapValues.get(COL_DOUBLE_VAL));
 		expect(rs.getDouble(COL_DOUBLE_OBJ)).andReturn((Double) mapValues.get(COL_DOUBLE_OBJ));
-		expect(rs.getObject(COL_BOOL_VAL)).andReturn((String) mapValues.get(COL_BOOL_VAL));
-		expect(rs.getObject(COL_BOOL_OBJ)).andReturn((String) mapValues.get(COL_BOOL_OBJ));
-		expect(rs.getObject(COL_STRING)).andReturn((String) mapValues.get(COL_STRING));
+		expect(rs.getObject(COL_BOOL_VAL)).andReturn(mapValues.get(COL_BOOL_VAL));
+		expect(rs.getObject(COL_BOOL_OBJ)).andReturn(mapValues.get(COL_BOOL_OBJ));
+		expect(rs.getObject(COL_STRING)).andReturn(mapValues.get(COL_STRING));
 		expect(rs.getTimestamp(COL_DATE)).andReturn((Timestamp) mapValues.get(COL_DATE));
 		expect(rs.getBigDecimal(COL_BIG_DECIMAL)).andReturn((BigDecimal) mapValues.get(COL_BIG_DECIMAL));
 		expect(rs.getBigDecimal(COL_BIG_INTEGER)).andReturn((BigDecimal) mapValues.get(COL_BIG_INTEGER));
@@ -81,7 +81,7 @@ public class AnnotationRowMapperTestCase {
 	}
 	
 	private void validateBean1(Bean1 bean1) {
-		log.debug("validateBean1 - Bean1 instance: " + bean1);
+		log.debug("validateBean1 - Bean1 instance: {}", bean1);
 		assertEquals(mapValues.get(COL_PK), bean1.getPk());
 		assertEquals(mapValues.get(COL_INT_VAL), bean1.getIntVal());
 		assertEquals(mapValues.get(COL_INT_OBJ), bean1.getIntObj());
@@ -101,7 +101,7 @@ public class AnnotationRowMapperTestCase {
 	public void testNormalFieldOperationWithBean1() throws SQLException {
 		mapValues.put(COL_PK, 10);
 		expect(rs.getInt(COL_PK)).andReturn((Integer) mapValues.get(COL_PK));
-		AnnotationRowMapper<Bean1> mapper = new AnnotationRowMapper<Bean1>(Bean1.class);
+		AnnotationRowMapper<Bean1> mapper = new AnnotationRowMapper<>(Bean1.class);
 		replay(rs);
 		Bean1 bean1 = mapper.mapRow(rs, 1);
 		verify(rs);
@@ -109,7 +109,7 @@ public class AnnotationRowMapperTestCase {
 	}
 
 	private void validateBean3(Bean3 bean3) {
-		log.debug("validateBean3 - Bean1 instance: " + bean3);
+		log.debug("validateBean3 - Bean1 instance: {}", bean3);
 		assertEquals(mapValues.get(COL_PK), bean3.getPk());
 		assertEquals(mapValues.get(COL_INT_VAL), bean3.getIntVal());
 		assertEquals(mapValues.get(COL_INT_OBJ), bean3.getIntObj());
@@ -128,35 +128,33 @@ public class AnnotationRowMapperTestCase {
 	/**
 	 * Tests that the {@link AnnotationRowMapper} works properly if the 
 	 * target class @Column annotations have the allowNull flag set to true
-	 * and the resultset column values are not null.<br>
-	 * The other scenario where the resultset column values are null is tested
+	 * and the result-set column values are not null.<br>
+	 * The other scenario where the result set column values are null is tested
 	 * by the {@link AnnotationRowMapper3NullValuesTestCase} test case.
 	 */
 	@Test
 	public void testNormalFieldOperationWithBean3() throws SQLException {
 		mapValues.put(COL_PK, 10);
 		expect(rs.getInt(COL_PK)).andReturn((Integer) mapValues.get(COL_PK));
-		AnnotationRowMapper<Bean3> mapper = new AnnotationRowMapper<Bean3>(Bean3.class);
+		AnnotationRowMapper<Bean3> mapper = new AnnotationRowMapper<>(Bean3.class);
 		replay(rs);
 		Bean3 bean3 = mapper.mapRow(rs, 1);
 		verify(rs);
 		validateBean3(bean3);
 	}
-	
 
 	@Test
 	public void testNormalFieldOperationIgnorePk() throws SQLException {
 		mapValues.put(COL_PK, Integer.MAX_VALUE);
-		AnnotationRowMapper<Bean1> mapper = new AnnotationRowMapper<Bean1>(Bean1.class, true);
+		AnnotationRowMapper<Bean1> mapper = new AnnotationRowMapper<>(Bean1.class, true);
 		replay(rs);
 		Bean1 bean1 = mapper.mapRow(rs, 1);
 		verify(rs);
 		validateBean1(bean1);
 	}
 
-	
 	private void validateBean2(Bean2 bean2) {
-		log.debug("validateBean2 - Bean2 instance: " + bean2);
+		log.debug("validateBean2 - Bean2 instance: {}", bean2);
 		assertEquals(mapValues.get(COL_PK), bean2.getPk());
 		assertEquals(mapValues.get(COL_INT_VAL), bean2.getIntVal());
 		assertEquals(mapValues.get(COL_INT_OBJ), bean2.getIntObj());
@@ -172,12 +170,11 @@ public class AnnotationRowMapperTestCase {
 		assertEquals(mapValues.get(COL_NUMBER), bean2.getNumber());
 	}
 	
-	
 	@Test
 	public void testNormalMethodOperation() throws SQLException {
 		mapValues.put(COL_PK, 10);
 		expect(rs.getInt(COL_PK)).andReturn((Integer) mapValues.get(COL_PK));
-		AnnotationRowMapper<Bean2> mapper = new AnnotationRowMapper<Bean2>(Bean2.class);
+		AnnotationRowMapper<Bean2> mapper = new AnnotationRowMapper<>(Bean2.class);
 		replay(rs);
 		Bean2 bean2 = mapper.mapRow(rs, 1);
 		verify(rs);
@@ -187,12 +184,10 @@ public class AnnotationRowMapperTestCase {
 	@Test
 	public void testNormalMethodOperationIgnorePk() throws SQLException {
 		mapValues.put(COL_PK, Integer.MAX_VALUE);
-		AnnotationRowMapper<Bean2> mapper = new AnnotationRowMapper<Bean2>(Bean2.class, true);
+		AnnotationRowMapper<Bean2> mapper = new AnnotationRowMapper<>(Bean2.class, true);
 		replay(rs);
 		Bean2 bean2 = mapper.mapRow(rs, 1);
 		verify(rs);
 		validateBean2(bean2);
 	}
-	
-	
 }

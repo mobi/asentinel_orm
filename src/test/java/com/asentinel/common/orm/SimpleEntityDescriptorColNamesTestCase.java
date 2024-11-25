@@ -59,7 +59,7 @@ public class SimpleEntityDescriptorColNamesTestCase {
 		SimpleEntityDescriptor ed = new SimpleEntityDescriptor(E.class);
 		assertEquals("A", ed.getTableName());
 		Map<String, List<String>> map = ed.getColumnNames()
-				.stream().collect(Collectors.groupingBy(x -> x.toLowerCase()));
+				.stream().collect(Collectors.groupingBy(String::toLowerCase));
 		for (List<String> cols: map.values()) {
 			assertEquals(1, cols.size());
 		}

@@ -11,7 +11,7 @@ import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.orm.mappers.Table;
 
 public class EDTRDuplicateTableAliasTestCase {
-	private final static Logger log = LoggerFactory.getLogger(EDTRDuplicateTableAliasTestCase.class);
+	private static final Logger log = LoggerFactory.getLogger(EDTRDuplicateTableAliasTestCase.class);
 	
 	EntityDescriptorTreeRepository edtr = new DefaultEntityDescriptorTreeRepository();
 	
@@ -21,7 +21,7 @@ public class EDTRDuplicateTableAliasTestCase {
 			edtr.getEntityDescriptorTree(A.class);
 			fail("Should have thrown exception because we have a duplicated table alias.");
 		} catch (IllegalArgumentException e) {
-			log.debug("test1 - Expected exception: " + e.getMessage());
+			log.debug("test1 - Expected exception: {}", e.getMessage());
 		}
 	}
 	
@@ -31,7 +31,7 @@ public class EDTRDuplicateTableAliasTestCase {
 			edtr.getEntityDescriptorTree(A1.class);
 			fail("Should have thrown exception because we have a duplicated table alias.");
 		} catch (IllegalArgumentException e) {
-			log.debug("test2 - Expected exception: " + e.getMessage());
+			log.debug("test2 - Expected exception: {}", e.getMessage());
 		}
 	}
 	
@@ -41,11 +41,10 @@ public class EDTRDuplicateTableAliasTestCase {
 			edtr.getEntityDescriptorTree(A2.class, "A2");
 			fail("Should have thrown exception because we have a duplicated table alias.");
 		} catch (IllegalArgumentException e) {
-			log.debug("test3 - Expected exception: " + e.getMessage());
+			log.debug("test3 - Expected exception: {}", e.getMessage());
 		}
 	}
 
-	
 	@Table("A")
 	private static class A {
 		@PkColumn("id")
@@ -134,6 +133,4 @@ public class EDTRDuplicateTableAliasTestCase {
 		int pk;
 		
 	}
-	
 }
-

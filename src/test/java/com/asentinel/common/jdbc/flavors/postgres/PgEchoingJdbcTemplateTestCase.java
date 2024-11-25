@@ -22,11 +22,11 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 
 public class PgEchoingJdbcTemplateTestCase {
 	
-	final static String DEBUG = "DEBUG";
-	final static String LOG = "LOG";
-	final static String INFO = "INFO";
-	final static String NOTICE = "NOTICE";
-	final static String WARNING = "WARNING"; 
+	static final String DEBUG = "DEBUG";
+	static final String LOG = "LOG";
+	static final String INFO = "INFO";
+	static final String NOTICE = "NOTICE";
+	static final String WARNING = "WARNING"; 
 	
 	Logger log = mock(Logger.class);
 	
@@ -108,8 +108,8 @@ public class PgEchoingJdbcTemplateTestCase {
 	 */
 	@Test
 	public void nullParamSet() throws SQLException {
-		PgEchoingJdbcTemplate t = new PgEchoingJdbcTemplate();
-		PreparedStatementSetter pss = t.newArgPreparedStatementSetter(new Object[] {null});
+		PgEchoingJdbcTemplate template = new PgEchoingJdbcTemplate();
+		PreparedStatementSetter pss = template.newArgPreparedStatementSetter(new Object[] {null});
 		
 		PreparedStatement ps = mock(PreparedStatement.class);
 		pss.setValues(ps);

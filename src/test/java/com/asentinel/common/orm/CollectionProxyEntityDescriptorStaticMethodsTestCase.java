@@ -1,20 +1,5 @@
 package com.asentinel.common.orm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
-
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
 import com.asentinel.common.collections.tree.Node;
 import com.asentinel.common.collections.tree.SimpleNode;
 import com.asentinel.common.jdbc.ReusableRowMappers;
@@ -24,6 +9,18 @@ import com.asentinel.common.orm.jql.SqlBuilderFactory;
 import com.asentinel.common.orm.mappers.IntRowMapper;
 import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.orm.mappers.Table;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CollectionProxyEntityDescriptorStaticMethodsTestCase {
 

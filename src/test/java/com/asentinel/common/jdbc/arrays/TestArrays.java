@@ -80,69 +80,67 @@ public class TestArrays {
 		
 		assertSame(jdbcArray, a.getArrayToPass());
 	}
-	
 
 	@Test
 	public void testToString1() {
-		Integer[] ints = new Integer[Array.NO_ITEMS_IN_LOG - 1];
-		for (int i=0; i<ints.length; i++) {
-			ints[i] = i;
+		Integer[] integers = new Integer[Array.NO_ITEMS_IN_LOG - 1];
+		for (int i=0; i<integers.length; i++) {
+			integers[i] = i;
 		}
-		NumberArray array = new NumberArray("x", ints);
+		NumberArray array = new NumberArray("x", integers);
 		String logTxt = array.toString();
-		log.debug("testToString1 - logTxt: " + logTxt);
-		assertTrue(logTxt.contains(Arrays.toString(ints)));
+		log.debug("testToString1 - logTxt: {}", logTxt);
+		assertTrue(logTxt.contains(Arrays.toString(integers)));
 	}
 
-	
 	@Test
 	public void testToString0() {
-		Integer[] ints = new Integer[Array.NO_ITEMS_IN_LOG];
-		for (int i=0; i<ints.length; i++) {
-			ints[i] = i;
+		Integer[] integers = new Integer[Array.NO_ITEMS_IN_LOG];
+		for (int i=0; i<integers.length; i++) {
+			integers[i] = i;
 		}
-		NumberArray array = new NumberArray("x", ints);
+		NumberArray array = new NumberArray("x", integers);
 		String logTxt = array.toString();
-		log.debug("testToString1 - logTxt: " + logTxt);
-		assertTrue(logTxt.contains(Arrays.toString(ints)));
+		log.debug("testToString1 - logTxt: {}", logTxt);
+		assertTrue(logTxt.contains(Arrays.toString(integers)));
 	}
 	
 
 	@Test
 	public void testToString2() {
-		Integer[] ints = new Integer[Array.NO_ITEMS_IN_LOG + 1];
-		for (int i=0; i<ints.length; i++) {
-			ints[i] = i;
+		Integer[] integers = new Integer[Array.NO_ITEMS_IN_LOG + 1];
+		for (int i=0; i<integers.length; i++) {
+			integers[i] = i;
 		}
-		NumberArray array = new NumberArray("x", ints);
+		NumberArray array = new NumberArray("x", integers);
 		String logTxt = array.toString();
-		log.debug("testToString2 - logTxt: " + logTxt);
-		assertTrue(logTxt.contains(Arrays.toString(Arrays.copyOf(ints, Array.NO_ITEMS_IN_LOG))));
+		log.debug("testToString2 - logTxt: {}", logTxt);
+		assertTrue(logTxt.contains(Arrays.toString(Arrays.copyOf(integers, Array.NO_ITEMS_IN_LOG))));
 	}
 
 	@Test
 	public void testToStringWithNull() {
 		NumberArray array = new NumberArray("x", (Number[]) null);
 		String logTxt = array.toString();
-		log.debug("testToStringWithNull - logTxt: " + logTxt);
+		log.debug("testToStringWithNull - logTxt: {}", logTxt);
 		assertTrue(logTxt.contains("null"));
 	}
 	
 	@Test
 	public void testNumberArrayWithIntArray() {
-		int[] ints = {1,2,3};
-		NumberArray a = new NumberArray("test", ints);
-		assertEquals(ints.length, a.getObjects().length);
+		int[] integers = {1,2,3};
+		NumberArray a = new NumberArray("test", integers);
+		assertEquals(integers.length, a.getObjects().length);
 		
-		for (int i = 0; i < ints.length; i++) {
-			assertEquals(ints[i], a.getObjects()[i]);
+		for (int i = 0; i < integers.length; i++) {
+			assertEquals(integers[i], a.getObjects()[i]);
 		}
 	}
 	
 	@Test
 	public void testNumberArrayWithNullIntArray() {
-		int[] ints = null;
-		NumberArray a = new NumberArray("test", ints);
+		int[] integers = null;
+		NumberArray a = new NumberArray("test", integers);
 		assertNull(a.getObjects());
 	}
 	
@@ -157,7 +155,7 @@ public class TestArrays {
 		strings[1] = testStr;
 		StringArray a = new StringArray("test", strings);
 		String logTxt = a.toString();
-		log.debug("testStringArrayWithLongString - logTxt: " + logTxt);
+		log.debug("testStringArrayWithLongString - logTxt: {}", logTxt);
 	}
 	
 	@Test
@@ -165,19 +163,18 @@ public class TestArrays {
 		String[] strings = {"aaa", "bbb", "ccc"};
 		StringArray a = new StringArray("test", strings);
 		String logTxt = a.toString();
-		log.debug("testStringArray - logTxt: " + logTxt);
+		log.debug("testStringArray - logTxt: {}", logTxt);
 		for (String s: strings) {
 			assertTrue(logTxt.contains(s));
 		}
 	}
-	
 
 	@Test
 	public void testStringArrayWithOverflow() {
 		String[] strings = {"aaa", "bbb", "ccc", "ddd", "eee", "fff", "ggg"};
 		StringArray a = new StringArray("test", strings);
 		String logTxt = a.toString();
-		log.debug("testStringArrayWithOverflow - logTxt: " + logTxt);
+		log.debug("testStringArrayWithOverflow - logTxt: {}", logTxt);
 		for (int i=0; i < Array.NO_ITEMS_IN_LOG; i++) {
 			assertTrue(logTxt.contains(strings[i]));
 		}
@@ -191,7 +188,7 @@ public class TestArrays {
 		String[] strings = {};
 		StringArray a = new StringArray("test", strings);
 		String logTxt = a.toString();
-		log.debug("testEmptyStringArray - logTxt: " + logTxt);
+		log.debug("testEmptyStringArray - logTxt: {}", logTxt);
 	}
 	
 	@Test
@@ -199,7 +196,6 @@ public class TestArrays {
 		String[] strings = null;
 		StringArray a = new StringArray("test", strings);
 		String logTxt = a.toString();
-		log.debug("testNullStringArray - logTxt: " + logTxt);
+		log.debug("testNullStringArray - logTxt: {}", logTxt);
 	}
-	
 }

@@ -15,7 +15,7 @@ import com.asentinel.common.util.Utils;
 
 public class JdbcUtilsTestCase {
 	
-	private final static Logger log = LoggerFactory.getLogger(JdbcUtilsTestCase.class);	
+	private static final Logger log = LoggerFactory.getLogger(JdbcUtilsTestCase.class);
 	
 	@Test
 	public void testPrepareStringForLogging1() {
@@ -37,8 +37,7 @@ public class JdbcUtilsTestCase {
 		String result = JdbcUtils.prepareStringForLogging(testStr);
 		assertEquals("'" + testStr + "'", result);
 	}
-	
-	
+
 	@Test
 	public void testPrepareStringForLogging3() {
 		String testStr = "";
@@ -79,16 +78,14 @@ public class JdbcUtilsTestCase {
 				"['abc', 10, true, null, SqlParamVal [type=91, value=%s], SqlParamVal [type=12, value='abc2'], null]", 
 				String.valueOf(d));
 		String result = JdbcUtils.parametersToString(true, params);
-		log.debug("testParametersToString - string: " + result) ;
+		log.debug("testParametersToString - string: {}", result) ;
 		assertEquals(expected, result);
 	}
 	
 	@Test
 	public void testParametersToStringWithLongStrings() {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < 210; i++) {
-			sb.append("a");
-		}
+		StringBuilder sb = new StringBuilder()
+				.append("a".repeat(210));
 		Object[] params = new Object[] {
 			sb.toString(),
 			new SqlParameterValue(Types.VARCHAR, sb.toString()),
@@ -96,7 +93,7 @@ public class JdbcUtilsTestCase {
 		String expected = 
 				"[String[length=210, 'aaaaaaaaaa ...'], SqlParamVal [type=12, value=String[length=210, 'aaaaaaaaaa ...']]]";
 		String result = JdbcUtils.parametersToString(true, params);
-		log.debug("testParametersToString - string: " + result) ;
+		log.debug("testParametersToString - string: {}", result) ;
 		assertEquals(expected, result);
 	}
 	
@@ -104,28 +101,28 @@ public class JdbcUtilsTestCase {
 	@Test
 	public void testParametersToStringWithNull() {
 		String result = JdbcUtils.parametersToString(true, (Object[]) null);
-		log.debug("testParametersToString - string: " + result) ;
+		log.debug("testParametersToString - string: {}", result) ;
 		assertEquals("null", result);
 	}
 
 	@Test
 	public void testParametersToStringWithEmpty() {
 		String result = JdbcUtils.parametersToString(true);
-		log.debug("testParametersToString - string: " + result) ;
+		log.debug("testParametersToString - string: {}", result) ;
 		assertEquals("[]", result);
 	}
 	
 	@Test
 	public void testParametersToStringWithEmptyNoBrackets() {
 		String result = JdbcUtils.parametersToString(false);
-		log.debug("testParametersToString - string: " + result) ;
+		log.debug("testParametersToString - string: {}", result) ;
 		assertEquals("", result);
 	}
 	
 	@Test
 	public void testParametersToStringWithNullSeparator() {
 		String result = JdbcUtils.parametersToString(null, true, 1, 2);
-		log.debug("testParametersToString - string: " + result) ;
+		log.debug("testParametersToString - string: {}", result) ;
 		assertEquals("[1, 2]", result);
 	}
 	
@@ -133,7 +130,7 @@ public class JdbcUtilsTestCase {
 	public void testParametersToStringWithTemporal() {
 		LocalDate d = LocalDate.now();
 		String result = JdbcUtils.parametersToString(false, d);
-		log.debug("testParametersToStringWithTemporal - string: " + result) ;
+		log.debug("testParametersToStringWithTemporal - string: {}", result) ;
 		assertEquals(String.valueOf(Utils.toDate(d)), result);
 	}
 	

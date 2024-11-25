@@ -23,8 +23,8 @@ public class DynamicColumnsRowMapperTestCase {
 	@Test
 	public void normalOperation() throws SQLException {
 		DynamicColumnsRowMapper<DefaultDynamicColumn, TestBean> mapper 
-			= new DynamicColumnsRowMapper<>(dynamicColumns, 
-					() -> new TestBean(/* normally here we would inject the dynamic columns in the real bean*/),
+			= new DynamicColumnsRowMapper<>(dynamicColumns,
+					TestBean::new, //normally here we would inject the dynamic columns in the real bean
 					false,
 					"t_");
 	
@@ -41,9 +41,9 @@ public class DynamicColumnsRowMapperTestCase {
 	
 	@Test
 	public void ignorePk() throws SQLException {
-		DynamicColumnsRowMapper<DefaultDynamicColumn, TestBean> mapper 
-		= new DynamicColumnsRowMapper<>(dynamicColumns, 
-				() -> new TestBean(/* normally here we would inject the dynamic columns in the real bean*/),
+		DynamicColumnsRowMapper<DefaultDynamicColumn, TestBean> mapper
+		= new DynamicColumnsRowMapper<>(dynamicColumns,
+                TestBean::new, //normally here we would inject the dynamic columns in the real bean
 				"t_");
 	
 		when(rs.next()).thenReturn(true);
@@ -77,7 +77,5 @@ public class DynamicColumnsRowMapperTestCase {
 		public Object getValue(DefaultDynamicColumn column) {
 			return dynamicColumn;
 		}
-		
 	}
-
 }

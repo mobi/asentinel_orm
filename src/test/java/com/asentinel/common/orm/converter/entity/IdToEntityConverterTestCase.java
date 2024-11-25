@@ -1,19 +1,16 @@
 package com.asentinel.common.orm.converter.entity;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.Field;
-
+import com.asentinel.common.orm.OrmOperations;
+import com.asentinel.common.orm.mappers.PkColumn;
+import com.asentinel.common.orm.mappers.Table;
 import org.junit.Test;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.util.ReflectionUtils;
 
-import com.asentinel.common.orm.OrmOperations;
-import com.asentinel.common.orm.mappers.PkColumn;
-import com.asentinel.common.orm.mappers.Table;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class IdToEntityConverterTestCase {
 
@@ -38,9 +35,8 @@ public class IdToEntityConverterTestCase {
 		when(ormOps.getProxy(TestEntityIntObject.class, 10)).thenReturn(new TestEntityIntObject(10));
 		TestEntityIntObject e = conversionService.convert(10, TestEntityIntObject.class);
 		assertNotNull(e);
-		assertEquals(10l, e.id.longValue());
+		assertEquals(10L, e.id.longValue());
 	}
-
 
 	@Test
 	public void testStringIdInt() {
@@ -53,15 +49,15 @@ public class IdToEntityConverterTestCase {
 	@Test
 	public void testEmptyStringIdInt() {
 		TestEntityInt e = conversionService.convert("", TestEntityInt.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 
 	@Test
 	public void testNullIdInt() {
-		// in this case the converter is not even called
+		// in this case, the converter is not even called
 		TestEntityInt e = conversionService.convert(null, TestEntityInt.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
@@ -70,38 +66,36 @@ public class IdToEntityConverterTestCase {
 		// in this case the converter is called
 		Object e = conversionService.convert(null,
 				TypeDescriptor.valueOf(Integer.class),
-				new TypeDescriptor((Field) ReflectionUtils.findField(TestEntityIntHolder.class, "testEntityInt")));
-		verifyZeroInteractions(ormOps);
+				new TypeDescriptor(ReflectionUtils.findField(TestEntityIntHolder.class, "testEntityInt")));
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
-	
-	
+
 	@Test
 	public void testZeroIdInt() {
 		TestEntityInt e = conversionService.convert(0, TestEntityInt.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
 	@Test
 	public void testNegativeIdInt() {
 		TestEntityInt e = conversionService.convert(-1, TestEntityInt.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
-	
-	
+
 	@Test
 	public void testStringZeroIdInt() {
 		TestEntityInt e = conversionService.convert("0", TestEntityInt.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 
 	@Test
 	public void testStringNegativeIdInt() {
 		TestEntityInt e = conversionService.convert("-1", TestEntityInt.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
@@ -114,29 +108,26 @@ public class IdToEntityConverterTestCase {
 		assertNotNull(e);
 	}
 
-	
-	
 	// long id 
 	@Test
 	public void testExactIdTypeMatchLong() {
-		when(ormOps.getProxy(TestEntityLong.class, 10l)).thenReturn(new TestEntityLong(10l));
-		TestEntityLong e = conversionService.convert(10l, TestEntityLong.class);
+		when(ormOps.getProxy(TestEntityLong.class, 10L)).thenReturn(new TestEntityLong(10L));
+		TestEntityLong e = conversionService.convert(10L, TestEntityLong.class);
 		assertNotNull(e);
 		assertEquals(10, e.id);
 	}
 	
 	@Test
 	public void testExactIdTypeMatchLongObject() {
-		when(ormOps.getProxy(TestEntityLongObject.class, 10l)).thenReturn(new TestEntityLongObject(10l));
-		TestEntityLongObject e = conversionService.convert(10l, TestEntityLongObject.class);
+		when(ormOps.getProxy(TestEntityLongObject.class, 10L)).thenReturn(new TestEntityLongObject(10L));
+		TestEntityLongObject e = conversionService.convert(10L, TestEntityLongObject.class);
 		assertNotNull(e);
-		assertEquals(10l, e.id.longValue());
+		assertEquals(10L, e.id.longValue());
 	}
-	
 
 	@Test
 	public void testStringIdLong() {
-		when(ormOps.getProxy(TestEntityLong.class, 10l)).thenReturn(new TestEntityLong(10));
+		when(ormOps.getProxy(TestEntityLong.class, 10L)).thenReturn(new TestEntityLong(10));
 		TestEntityLong e = conversionService.convert("10", TestEntityLong.class);
 		assertNotNull(e);
 		assertEquals(10, e.id);
@@ -145,58 +136,54 @@ public class IdToEntityConverterTestCase {
 	@Test
 	public void testEmptyStringIdLong() {
 		TestEntityLong e = conversionService.convert("", TestEntityLong.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 
 	@Test
 	public void testNullIdLong() {
-		// in this case the converter is not even called
+		// in this case, the converter is not even called
 		TestEntityLong e = conversionService.convert(null, TestEntityLong.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
 	@Test
 	public void testZeroIdLong() {
-		TestEntityLong e = conversionService.convert(0l, TestEntityLong.class);
-		verifyZeroInteractions(ormOps);
+		TestEntityLong e = conversionService.convert(0L, TestEntityLong.class);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
 	@Test
 	public void testNegativeIdLong() {
-		TestEntityLong e = conversionService.convert(-1l, TestEntityLong.class);
-		verifyZeroInteractions(ormOps);
+		TestEntityLong e = conversionService.convert(-1L, TestEntityLong.class);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
-	
-	
+
 	@Test
 	public void testStringZeroIdLong() {
 		TestEntityLong e = conversionService.convert("0", TestEntityLong.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
 	@Test
 	public void testStringNegativeIdLong() {
 		TestEntityLong e = conversionService.convert("-1", TestEntityLong.class);
-		verifyZeroInteractions(ormOps);
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
 	
 	@Test
 	public void testValidZeroIdLong() {
-		when(ormOps.getProxy(TestEntityLong.class, 0l)).thenReturn(new TestEntityLong(0l));
+		when(ormOps.getProxy(TestEntityLong.class, 0L)).thenReturn(new TestEntityLong(0L));
 		conversionService = new DefaultConversionService();
 		conversionService.addConverter(new IdToEntityConverter(ormOps, false));
-		TestEntityLong e = conversionService.convert(0l, TestEntityLong.class);
+		TestEntityLong e = conversionService.convert(0L, TestEntityLong.class);
 		assertNotNull(e);
 	}
-	
-	
-	
 
 	// String id 
 	@Test
@@ -217,21 +204,19 @@ public class IdToEntityConverterTestCase {
 	
 	@Test
 	public void testNullIdStringToProperty() {
-		// in this case the converter is called
+		// in this case, the converter is called
 		Object e = conversionService.convert(null,
 				TypeDescriptor.valueOf(String.class),
-				new TypeDescriptor((Field) ReflectionUtils.findField(TestEntityIntHolder.class, "testEntityInt")));
-		verifyZeroInteractions(ormOps);
+				new TypeDescriptor(ReflectionUtils.findField(TestEntityIntHolder.class, "testEntityInt")));
+		verifyNoInteractions(ormOps);
 		assertNull(e);
 	}
-	
-	
-	
+
 	// converter not found test
 	
 	@Test(expected = ConverterNotFoundException.class)
 	public void testLongId() {
-		conversionService.convert(new Long(10), TestEntityInt.class);
+		conversionService.convert(10L, TestEntityInt.class);
 	}
 
 	@Test(expected = ConverterNotFoundException.class)
@@ -243,8 +228,7 @@ public class IdToEntityConverterTestCase {
 	public void testNoConverterForNumber() {
 		conversionService.convert(10, TestEntityNumber.class);
 	}
-	
-	
+
 	// helper entity classes
 	
 	class TestEntityIntHolder {
@@ -289,7 +273,6 @@ public class IdToEntityConverterTestCase {
 		}
 	}
 
-	
 	@Table("Test")
 	static class TestEntityLong {
 		@PkColumn("id")
@@ -319,7 +302,6 @@ public class IdToEntityConverterTestCase {
 			return "TestEntityLongObject [id=" + id + "]";
 		}
 	}
-	
 
 	@Table("Test")
 	static class TestEntityString {
@@ -350,5 +332,4 @@ public class IdToEntityConverterTestCase {
 			return "TestEntityNumber [id=" + id + "]";
 		}
 	}
-	
 }

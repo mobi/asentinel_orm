@@ -18,25 +18,22 @@ public class BlobStub implements Blob {
 	}
 
 	@Override
-	public void free() throws SQLException {
-		// TODO Auto-generated method stub
-		
+	public void free() {
+
 	}
 
 	@Override
-	public InputStream getBinaryStream() throws SQLException {
+	public InputStream getBinaryStream() {
 		return new ByteArrayInputStream(bytes);
 	}
 
 	@Override
-	public InputStream getBinaryStream(long pos, long length)
-			throws SQLException {
-		// TODO Auto-generated method stub
+	public InputStream getBinaryStream(long pos, long length) {
 		return null;
 	}
 
 	@Override
-	public byte[] getBytes(long pos, int length) throws SQLException {
+	public byte[] getBytes(long pos, int length) {
 		return bytes;
 	}
 
@@ -46,40 +43,32 @@ public class BlobStub implements Blob {
 	}
 
 	@Override
-	public long position(byte[] pattern, long start) throws SQLException {
-		// TODO Auto-generated method stub
+	public long position(byte[] pattern, long start) {
 		return 0;
 	}
 
 	@Override
-	public long position(Blob pattern, long start) throws SQLException {
-		// TODO Auto-generated method stub
+	public long position(Blob pattern, long start) {
 		return 0;
 	}
 
 	@Override
-	public OutputStream setBinaryStream(long pos) throws SQLException {
-		// TODO Auto-generated method stub
+	public OutputStream setBinaryStream(long pos) {
 		return null;
 	}
 
 	@Override
-	public int setBytes(long pos, byte[] bytes) throws SQLException {
-		// TODO Auto-generated method stub
+	public int setBytes(long pos, byte[] bytes) {
 		return 0;
 	}
 
 	@Override
-	public int setBytes(long pos, byte[] bytes, int offset, int len)
-			throws SQLException {
-		// TODO Auto-generated method stub
+	public int setBytes(long pos, byte[] bytes, int offset, int len) {
 		return 0;
 	}
 
 	@Override
-	public void truncate(long len) throws SQLException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void truncate(long len) {
 
+	}
 }

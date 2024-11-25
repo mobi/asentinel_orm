@@ -23,15 +23,13 @@ import com.asentinel.common.orm.proxy.entity.ProxyFactory;
 
 public class EntityBuilderWithCircularReferenceProxyTestCase {
 	
-	private ResultSet rs = mock(ResultSet.class);
+	private final ResultSet rs = mock(ResultSet.class);
 	
-	private EntityBuilder<Inventory> eb;
+	private final EntityBuilder<Inventory> eb;
 	
 	{
 		EntityDescriptor rootEd = new EntityDescriptor(Inventory.class, 
-				(rs, n) -> {
-					return rs.getObject("id");
-				},
+				(rs, n) -> rs.getObject("id"),
 				(rs, n) -> {
 					Inventory i = new Inventory();
 					i.number = rs.getString("number");
@@ -39,11 +37,9 @@ public class EntityBuilderWithCircularReferenceProxyTestCase {
 				}, "rootMapper");
 		
 		EntityDescriptor childEd = new EntityDescriptor(Inventory.class, 
+				(rs, n) -> rs.getObject("parentId"),
 				(rs, n) -> {
-					return rs.getObject("parentId");
-				},
-				(rs, n) -> {
-					return ProxyFactory.getInstance().newProxy(Inventory.class, (id) -> {
+					return ProxyFactory.getInstance().newProxy(Inventory.class, id -> {
 						assertEquals(2, id);
 						return new Inventory((int) id, "parentInventoryNo");
 					});
@@ -64,7 +60,7 @@ public class EntityBuilderWithCircularReferenceProxyTestCase {
 	 * 	2			parentInventoryNo			null
 	 * </pre>
 	 * 
-	 * The expected result for the resultset above is that the {@link EntityBuilder}
+	 * The expected result for the result set above is that the {@link EntityBuilder}
 	 * returns 2 entities. The first one has the id 1 and the parent is a proxy with id 2. 
 	 * The second entity is a proxy with id 2 and is the same as the parent of the first one.
 	 * <br>
@@ -106,7 +102,7 @@ public class EntityBuilderWithCircularReferenceProxyTestCase {
 	
 
 	/**
-	 * This test processes the following resultset:
+	 * This test processes the following result set:
 	 * 
 	 * <pre>
 	 * 	id			number						parentId
@@ -114,7 +110,7 @@ public class EntityBuilderWithCircularReferenceProxyTestCase {
 	 * 	1			childInventoryNo			2
 	 * </pre>
 	 * 
-	 * The expected result for the resultset above is that the {@link EntityBuilder}
+	 * The expected result for the result set above is that the {@link EntityBuilder}
 	 * returns 2 entities. The first one has the id 2 and the parent is {@code null}. 
 	 * The second entity has the id 2 and the parent is exactly the first entity.
 	 */
@@ -190,7 +186,5 @@ public class EntityBuilderWithCircularReferenceProxyTestCase {
 		public Inventory getParent() {
 			return parent;
 		}
-		
-		
 	}
 }

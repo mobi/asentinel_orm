@@ -58,7 +58,7 @@ public class ConverterTestCase {
 		
 		Object[] objects = new Object[]{
 								1123,
-								1123l,
+                				1123L,
 								1123.12d,
 								"test",
 								df1.parse(df1.format(new Date())),
@@ -86,7 +86,7 @@ public class ConverterTestCase {
 		
 		Object[] objects = new Object[]{
 								1123,
-								1123l,
+                				1123L,
 								1123.12d,
 								"test",
 								df1.parse(df1.format(new Date())),
@@ -98,7 +98,7 @@ public class ConverterTestCase {
 	}
 
 	@Test
-	public void testStandardConverterToDate_WithConversionService() throws ConversionException, ParseException {
+	public void testStandardConverterToDate_WithConversionService() throws ConversionException {
 		ConversionService conversionService = Mockito.mock(ConversionService.class);
 		Date date = new Date();
 		when(conversionService.convert(anyString(), eq(Date.class)))
@@ -130,28 +130,28 @@ public class ConverterTestCase {
 		
 		try{
 			converter.convertToInteger(s, null);
-			assertTrue(false);
+            fail();
 		} catch (ConversionException e){
 			assertTrue(e.isParseError());
 		}
 
 		try{
 			converter.convertToLong(s, null);
-			assertTrue(false);
+            fail();
 		} catch (ConversionException e){
 			assertTrue(e.isParseError());
 		}
 
 		try{
 			converter.convertToDouble(s, null);
-			assertTrue(false);
+            fail();
 		} catch (ConversionException e){
 			assertTrue(e.isParseError());
 		}
 
 		try{
 			converter.convertToDate(s, null);
-			assertTrue(false);
+            fail();
 		} catch (ConversionException e){
 			assertTrue(e.isParseError());
 		}
@@ -177,20 +177,23 @@ public class ConverterTestCase {
 	private void testNumericConversionErrors(String intValue, String doubleValue, Converter converter){
 		try{
 			converter.convertToInteger(intValue,  null);
-			assertTrue(false);
-		} catch (ConversionException e){
+            fail();
+		} catch (ConversionException e) {
+			//do nothing, exception expected
 		}
 		
 		try{
 			converter.convertToLong(intValue,  null);
-			assertTrue(false);
-		} catch (ConversionException e){
+            fail();
+		} catch (ConversionException e) {
+			//do nothing, exception expected
 		}
 		
 		try{
 			converter.convertToDouble(doubleValue,  null);
-			assertTrue(false);
-		} catch (ConversionException e){
+            fail();
+		} catch (ConversionException e) {
+			//do nothing, exception expected
 		}
 		
 	}
@@ -215,7 +218,7 @@ public class ConverterTestCase {
 			assertNull(converter.convertToDate(null, 0));
 			assertNull(converter.convertToBoolean(null, 0));
 		} catch (Exception e) {
-			assertFalse("Should not throw exception.", true);
+            fail("Should not throw exception.");
 		}
 		System.out.println("ConverterTestCase#testStandardConverterNullValues stop");
 	}
@@ -226,7 +229,7 @@ public class ConverterTestCase {
 		try {
 			converter.convertToEntity("1", null, TEntity.class);
 		} catch (ConversionException ce) {
-			
+			//do nothing, exception expected
 		}
 	}
 	
@@ -237,7 +240,7 @@ public class ConverterTestCase {
 		try {
 			assertNull(converter.convertToEntity(null, null, TEntity.class));
 		} catch (ConversionException ce) {
-			
+			//do nothing, exception expected
 		}
 	}
 	
@@ -252,7 +255,7 @@ public class ConverterTestCase {
 			TEntity entity = converter.convertToEntity("1", null, TEntity.class);
 			assertNotNull(entity);
 		} catch (ConversionException ce) {
-			
+			//do nothing, exception expected
 		}
 	}
 	
@@ -270,7 +273,7 @@ public class ConverterTestCase {
 	}
 	
 	
-	class TEntity {
+	static class TEntity {
 		private int id;
 
 		public int getId() {

@@ -1,6 +1,5 @@
 package com.asentinel.common.orm;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,7 +22,7 @@ import com.asentinel.common.orm.proxy.entity.ProxyFactory;
 
 public class EntityUtilsTestCase {
 	
-	private static final Integer ENTITY_ID = Integer.valueOf(10);
+	private static final Integer ENTITY_ID = 10;
 	
 	@Test
 	public void testIsEntityClass() {
@@ -41,7 +40,7 @@ public class EntityUtilsTestCase {
 			EntityUtils.getEntityId(entity);
 			fail("The entity is not a real entity, the test should fail.");
 		} catch (IllegalArgumentException e) {
-			
+			// nothing for now
 		}
 	}
 
@@ -52,7 +51,7 @@ public class EntityUtilsTestCase {
 			EntityUtils.setEntityId(entity, ENTITY_ID);
 			fail("The entity is not a real entity, the test should fail.");
 		} catch (IllegalArgumentException e) {
-			
+			// nothing for now
 		}
 	}
 
@@ -126,8 +125,7 @@ public class EntityUtilsTestCase {
 		ReflectionUtils.setField(loader, entity, f);
 		assertFalse(EntityUtils.isLoadedProxy(entity)); // the loader field is set at this time
 	}
-	
-	
+
 	@Test
 	public void testProxyNo() {
 		assertFalse(EntityUtils.isProxy(new Object()));
@@ -154,7 +152,6 @@ public class EntityUtilsTestCase {
 		
 		EntityUtils.loadProxy(entity);
 		assertTrue(EntityUtils.isLoadedProxy(entity));
-		
 	}
 
 	// ------------------------------------------------------- //
@@ -183,7 +180,6 @@ public class EntityUtilsTestCase {
 			return entityId;
 		}
 	}
-	
 
 	private static class TestEntityWithMethodReflection {
 
@@ -230,5 +226,4 @@ public class EntityUtilsTestCase {
 		@PkColumn("id")
 		private long id;
 	}
-
 }

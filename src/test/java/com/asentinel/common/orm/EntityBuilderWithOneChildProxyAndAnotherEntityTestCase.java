@@ -20,41 +20,28 @@ import com.asentinel.common.jdbc.ResultSetUtils;
 import com.asentinel.common.orm.proxy.entity.ProxyFactory;
 
 public class EntityBuilderWithOneChildProxyAndAnotherEntityTestCase {
-	private ResultSet rs = mock(ResultSet.class);
+	private final ResultSet rs = mock(ResultSet.class);
 	
-	private Node<EntityDescriptor> rootNode = new SimpleNode<>();
-	private Node<EntityDescriptor> child1Node = new SimpleNode<>();
-	private Node<EntityDescriptor> child2Node = new SimpleNode<>();
+	private final Node<EntityDescriptor> rootNode = new SimpleNode<>();
+	private final Node<EntityDescriptor> child1Node = new SimpleNode<>();
+	private final Node<EntityDescriptor> child2Node = new SimpleNode<>();
 	
 	{
 		EntityDescriptor rootEd = new EntityDescriptor(Root.class, 
-				(rs, n) -> {
-					return rs.getObject("id");
-				},
-				(rs, n) -> {
-					Root r = new Root();
-					return r;
-				}, "rootMapper");
+				(rs, n) -> rs.getObject("id"),
+				(rs, n) -> new Root(), "rootMapper");
 		
 		EntityDescriptor child1Ed = new EntityDescriptor(Child.class, 
-				(rs, n) -> {
-					return rs.getObject("child1Id");
-				},
-				(rs, n) -> {
-					return ProxyFactory.getInstance().newProxy(Child.class, (id) -> {
-						assertEquals(10, id);
-						return new Child("child1");
-					});
-				}, "child1Mapper",
+				(rs, n) -> rs.getObject("child1Id"),
+				(rs, n) -> ProxyFactory.getInstance().newProxy(Child.class, id -> {
+                    assertEquals(10, id);
+                    return new Child("child1");
+                }), "child1Mapper",
 				ReflectionUtils.findField(Root.class, "child1"));
 		
 		EntityDescriptor child2Ed = new EntityDescriptor(Child.class, 
-				(rs, n) -> {
-					return rs.getObject("child2Id");
-				},
-				(rs, n) -> {
-						return new Child(rs.getString("description2"));
-				}, "child2Mapper",
+				(rs, n) -> rs.getObject("child2Id"),
+				(rs, n) -> new Child(rs.getString("description2")), "child2Mapper",
 				ReflectionUtils.findField(Root.class, "child2"));		
 		
 		rootNode.setValue(rootEd);

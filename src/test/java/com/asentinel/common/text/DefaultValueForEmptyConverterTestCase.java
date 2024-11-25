@@ -21,7 +21,7 @@ public class DefaultValueForEmptyConverterTestCase {
 	public void testDefaultValue() throws ConversionException {
 		assertEquals(0, c.convertToInteger("", null).intValue());
 		assertEquals(0, c.convertToLong("", null).longValue());
-		assertEquals(0, c.convertToDouble("", null).doubleValue(), 0.00001);
+		assertEquals(0, c.convertToDouble("", null), 0.00001);
 		assertEquals(false, c.convertToBoolean("", null));
 		assertEquals("", c.convertToString("", null));
 		assertNull(c.convertToDate("", null));
@@ -29,7 +29,7 @@ public class DefaultValueForEmptyConverterTestCase {
 
 		assertEquals(0, c.convertToInteger(null, null).intValue());
 		assertEquals(0, c.convertToLong(null, null).longValue());
-		assertEquals(0, c.convertToDouble(null, null).doubleValue(), 0.00001);
+		assertEquals(0, c.convertToDouble(null, null), 0.00001);
 		assertEquals(false, c.convertToBoolean(null, null));
 		assertEquals("", c.convertToString(null, null));
 		assertNull(c.convertToDate(null, null));
@@ -41,7 +41,7 @@ public class DefaultValueForEmptyConverterTestCase {
 	@Test
 	public void testNonDefaultValue() throws ConversionException {
 		when(m.convertToInteger("10", null)).thenReturn(10);
-		when(m.convertToLong("10", null)).thenReturn(10l);
+		when(m.convertToLong("10", null)).thenReturn(10L);
 		when(m.convertToDouble("10", null)).thenReturn(10d);
 		when(m.convertToBoolean("true", null)).thenReturn(true);
 		when(m.convertToString("test", null)).thenReturn("test-converted");
@@ -50,12 +50,10 @@ public class DefaultValueForEmptyConverterTestCase {
 		
 		assertEquals(10, c.convertToInteger("10", null).intValue());
 		assertEquals(10, c.convertToLong("10", null).longValue());
-		assertEquals(10, c.convertToDouble("10", null).doubleValue(), 0.00001);
+		assertEquals(10, c.convertToDouble("10", null), 0.00001);
 		assertEquals(true, c.convertToBoolean("true", null));
 		assertEquals("test-converted", c.convertToString("test", null));
 		assertEquals(Utils.toDate(LocalDate.of(2000, 1, 1)), c.convertToDate("1/1/2000", null));
 		assertEquals("abc-entity", c.convertToEntity("abc", null, String.class));
 	}
-	
-
 }

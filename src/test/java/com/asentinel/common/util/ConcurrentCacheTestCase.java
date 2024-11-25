@@ -33,16 +33,11 @@ public class ConcurrentCacheTestCase {
     @Test
     public void test() {
     	for (int t = 0; t < CLIENT_COUNT; t++) {
-    		pool.execute(new Runnable() {
-
-				@Override
-				public void run() {
-					await();
-					cache.get(100, c);
-					await();
-				}
-    			
-    		});
+    		pool.execute(() -> {
+                await();
+                cache.get(100, c);
+                await();
+            });
     	}
     	await();
     	await();
@@ -62,7 +57,7 @@ public class ConcurrentCacheTestCase {
     	}
 
 		@Override
-		public String call() throws Exception {
+		public String call() {
 			callCount.incrementAndGet();
 			return String.valueOf(key);
 		}

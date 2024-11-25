@@ -1,16 +1,13 @@
 package com.asentinel.common.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class ListUtilsTestCase {
 	private static final Logger log = LoggerFactory.getLogger(ListUtilsTestCase.class);
@@ -21,8 +18,10 @@ public class ListUtilsTestCase {
 		List<Integer> list = new ArrayList<Integer>();
 		try {
 			ListUtils.toMultiRowList(list, 0);
-			assertFalse("Should not get here.", true);
-		} catch (Exception e) {}
+            fail("Should not get here.");
+		} catch (Exception e) {
+			//do nothing, exception expected
+		}
 		for (int c=1; c <= 10; c++) {
 			for(int i=0; i<10; i++) {
 				int rowCount = list.size() / c + (list.size() % c != 0?1:0);
@@ -51,7 +50,6 @@ public class ListUtilsTestCase {
 		}
 		
 		log.info("testMakeMultiRowListSymetric stop");
-		
 	}
 	
 	@Test
@@ -104,10 +102,10 @@ public class ListUtilsTestCase {
 		// invalid ints
 		csvString = "1,aaa";
 		try {
-			listInteger = ListUtils.toList(csvString, Integer.class);
+			ListUtils.toList(csvString, Integer.class);
 			fail("Should not get here.");
 		} catch(NumberFormatException e) {
-			log.debug("Expected exception: " + e.getMessage());
+			log.debug("Expected exception: {}", e.getMessage());
 		}
 		log.debug("testToList done for invalid ints");
 

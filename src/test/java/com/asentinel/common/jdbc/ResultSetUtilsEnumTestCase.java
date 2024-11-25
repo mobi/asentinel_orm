@@ -50,7 +50,6 @@ public class ResultSetUtilsEnumTestCase {
 		ResultSetUtils.getEnum(rs, "enum", PlainEnum.class);
 	}
 
-
 	// EnumIdEnum
 	
 	@Test
@@ -78,8 +77,7 @@ public class ResultSetUtilsEnumTestCase {
 		
 		ResultSetUtils.getEnum(rs, "enum", EnumIdEnum.class);
 	}
-	
-	
+
 	// StringEnumIdEnum
 	
 	@Test
@@ -156,5 +154,4 @@ public class ResultSetUtilsEnumTestCase {
 			return id;
 		}
 	}
-
 }

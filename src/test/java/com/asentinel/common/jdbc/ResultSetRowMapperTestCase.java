@@ -49,11 +49,8 @@ public class ResultSetRowMapperTestCase {
 		rch.processRow(rs1);
 		expectLastCall().times(2);
 		ResultSetRowMapper m = new ResultSetRowMapper(
-			new ResultSetSqlParameter[] {
-				new ResultSetSqlParameter(rch),
-				null
-			}
-		);
+                new ResultSetSqlParameter(rch),
+                null);
 		expect(rs.getObject(1)).andReturn(rs1);
 		expect(rs1.getFetchSize()).andReturn(10).anyTimes();
 		expect(rs1.next()).andReturn(true);
@@ -107,5 +104,4 @@ public class ResultSetRowMapperTestCase {
 		
 		m.mapRow(rs, -10);
 	}
-	
 }

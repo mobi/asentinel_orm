@@ -83,14 +83,13 @@ public class HelpersTestCase {
 		expect(jdbcFlavor.getPreparedStatementParametersSetter()).andReturn(new DefaultPreparedStatementParametersSetter()).anyTimes();
 
 		CustomBatchPreparedStatementSetter psSetter = new SimpleUpdater(jdbcFlavor, qEx)
-			.new CustomBatchPreparedStatementSetter(list, UpdateType.INSERT, insertableMembers, dynamicColumns
-			);
+			.new CustomBatchPreparedStatementSetter(list, UpdateType.INSERT, insertableMembers, dynamicColumns);
 		
-		ps.setObject(1, 10l);
+		ps.setObject(1, 10L);
 		ps.setObject(2, 100);
 		ps.setString(3, "test1");
 		ps.setString(4, "dynamic1");
-		ps.setObject(1, 20l);
+		ps.setObject(1, 20L);
 		ps.setObject(2, 200);
 		ps.setString(3, "test2");
 		ps.setString(4, "dynamic2");
@@ -105,11 +104,9 @@ public class HelpersTestCase {
 		
 		assertEquals(list.size(), psSetter.getBatchSize());
 		assertNull(ReflectionTestUtils.getField(psSetter, "lobCreator"));
-		assertEquals(Arrays.asList(10l, 100, "test1", "dynamic1", 20l, 200, "test2", "dynamic2"), ReflectionTestUtils.getField(psSetter, "allArgs"));
+		assertEquals(Arrays.asList(10L, 100, "test1", "dynamic1", 20L, 200, "test2", "dynamic2"), ReflectionTestUtils.getField(psSetter, "allArgs"));
 	}
-	
-	
-	
+
 	@Test
 	public void testCustomBatchPreparedStatementCreator() throws SQLException {
 		expect(jdbcFlavor.preprocessKeyColumnNames("id")).andReturn(new String[] {"id"});
@@ -138,13 +135,12 @@ public class HelpersTestCase {
 
 		assertNull(ReflectionTestUtils.getField(psc, "lobCreator"));
 		assertEquals(Arrays.asList(100, "test1", "dynamic1", 200, "test2", "dynamic2"), ReflectionTestUtils.getField(psc, "allArgs"));
-
 	}
 	
 	@Test
 	public void testCustomBatchPreparedStatementCallback() throws DataAccessException, SQLException {
 		CustomBatchPreparedStatementCallback action = new SimpleUpdater(jdbcFlavor, qEx)
-				.new CustomBatchPreparedStatementCallback(list, pkMember, new UpdateSettings<DynamicColumn>(emptyList()));
+				.new CustomBatchPreparedStatementCallback(list, pkMember, new UpdateSettings<>(emptyList()));
 		
 		expect(ps.executeBatch()).andReturn(new int[]{Statement.SUCCESS_NO_INFO});
 		expect(ps.getGeneratedKeys()).andReturn(rs);
@@ -168,8 +164,7 @@ public class HelpersTestCase {
 		assertEquals(100, list.get(0).id);
 		assertEquals(200, list.get(1).id);
 	}
-	
-	
+
 	@Test
 	public void testCustomBatchPreparedStatementCallback_Wrong_Ids() throws DataAccessException, SQLException {
 		CustomBatchPreparedStatementCallback action = new SimpleUpdater(jdbcFlavor, qEx)

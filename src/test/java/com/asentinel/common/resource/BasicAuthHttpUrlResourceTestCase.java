@@ -29,18 +29,18 @@ public class BasicAuthHttpUrlResourceTestCase {
 		verify(con).setRequestMethod("HEAD");
 		verify(con).setRequestProperty ("Authorization", "Basic " + new String(Base64.getEncoder().encode(("razvan:test").getBytes())));
 	}
-	
-	
+
 	@Test
 	public void testGetInputStreamOk() throws IOException {
 		ByteArrayInputStream in = new ByteArrayInputStream(new byte[1]);
 		when(con.getInputStream()).thenReturn(in);
 		BasicAuthHttpUrlResource r = new BasicAuthHttpUrlResource("http://test.com", "razvan", "test") {
-			URLConnection openConnectionInternal() throws IOException {
+			@Override
+			URLConnection openConnectionInternal() {
 				return con;
 			}
 		};
-		log.debug("res: " + r);
+		log.debug("res: {}", r);
 		assertSame(in, r.getInputStream());
 		verify(con).setRequestProperty ("Authorization", "Basic " + new String(Base64.getEncoder().encode(("razvan:test").getBytes())));
 	}
@@ -49,7 +49,8 @@ public class BasicAuthHttpUrlResourceTestCase {
 	public void testGetInputStreamException() throws IOException {
 		when(con.getInputStream()).thenThrow(new IOException());
 		BasicAuthHttpUrlResource r = new BasicAuthHttpUrlResource("http://test.com", "razvan", "test") {
-			URLConnection openConnectionInternal() throws IOException {
+			@Override
+			URLConnection openConnectionInternal() {
 				return con;
 			}
 		};
@@ -59,5 +60,4 @@ public class BasicAuthHttpUrlResourceTestCase {
 			verify(con).disconnect();
 		}
 	}
-	
 }

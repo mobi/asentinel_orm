@@ -9,7 +9,7 @@ public class SimpleNodeNodeAwareTestCase {
 	@Test
 	public void testNodeAware1() {
 		NodeAwareObject value1 = new NodeAwareObject();
-		Node<NodeAwareObject> node = new SimpleNode<NodeAwareObject>(value1);
+		Node<NodeAwareObject> node = new SimpleNode<>(value1);
 		assertSame(node, value1.getNode());		
 		
 		node.setValue(null);
@@ -20,16 +20,15 @@ public class SimpleNodeNodeAwareTestCase {
 	public void testNodeAware2() {
 		NodeAwareObject value1 = new NodeAwareObject();
 		NodeAwareObject value2 = new NodeAwareObject();
-		Node<NodeAwareObject> node = new SimpleNode<NodeAwareObject>(value1);
+		Node<NodeAwareObject> node = new SimpleNode<>(value1);
 		assertSame(node, value1.getNode());		
 		
 		node.setValue(value2);
 		assertSame(node, value2.getNode());
 		assertNull(value1.getNode());
 	}
-	
-	
-	private class NodeAwareObject implements NodeAware<NodeAwareObject> {
+
+	private static class NodeAwareObject implements NodeAware<NodeAwareObject> {
 		
 		private Node<NodeAwareObject> node;
 
@@ -41,7 +40,5 @@ public class SimpleNodeNodeAwareTestCase {
 		public void setNode(Node<NodeAwareObject> node) {
 			this.node = node;
 		}
-		
 	}
-
 }

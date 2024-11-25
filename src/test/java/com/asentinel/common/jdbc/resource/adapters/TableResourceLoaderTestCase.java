@@ -1,24 +1,17 @@
 package com.asentinel.common.jdbc.resource.adapters;
 
-import static com.asentinel.common.jdbc.resource.adapters.TableResourceLoader.getLocationElements;
-import static com.asentinel.common.jdbc.resource.adapters.TableResourceLoader.matches;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.Map;
-
-import org.junit.Test;
-import org.springframework.core.io.ResourceLoader;
-
 import com.asentinel.common.jdbc.SqlQuery;
 import com.asentinel.common.jdbc.flavors.TableIntrospector;
 import com.asentinel.common.resource.ByteArrayTempResource;
+import org.junit.Test;
+import org.springframework.core.io.ResourceLoader;
+
+import java.util.Map;
+
+import static com.asentinel.common.jdbc.resource.adapters.TableResourceLoader.getLocationElements;
+import static com.asentinel.common.jdbc.resource.adapters.TableResourceLoader.matches;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class TableResourceLoaderTestCase {
 	
@@ -107,7 +100,7 @@ public class TableResourceLoaderTestCase {
 	}
 
 	@Test
-	public void existing() throws IOException {
+	public void existing() {
 		when(tableIntrospector.supports("table", "value")).thenReturn(true);
 		
 		var l = "db://table/key,value";

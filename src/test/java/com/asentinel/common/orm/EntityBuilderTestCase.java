@@ -85,10 +85,10 @@ public class EntityBuilderTestCase extends EntityBuilderTSupport {
 		rs.close();
 		
 		Node<EntityDescriptor> ed = 
-			new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(InvoiceParentEntity.class, new InvoiceParentEntity.InvoiceRowMapper(), "InvoiceId") )
+			new SimpleNode<>(EntityDescriptor.forColumnPk(InvoiceParentEntity.class, new InvoiceParentEntity.InvoiceRowMapper(), "InvoiceId") )
 				.addChild(
-						new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(BillParentEntity.class, new BillParentEntity.BillRowMapper(), "BillId"))
-							.addChild(new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(Charge.class, new Charge.ChargeRowMapper(), "ChargeId")))
+						new SimpleNode<>(EntityDescriptor.forColumnPk(BillParentEntity.class, new BillParentEntity.BillRowMapper(), "BillId"))
+							.addChild(new SimpleNode<>(EntityDescriptor.forColumnPk(Charge.class, new Charge.ChargeRowMapper(), "ChargeId")))
 						)
 					;
 		runForNode(ed, rs, rs);
@@ -100,14 +100,14 @@ public class EntityBuilderTestCase extends EntityBuilderTSupport {
 		// Columns:
 		// InvoiceId, InvoiceNumber, BillId, ItemNumber, ChargeId, Value
 		
-		Map<String, Integer> map = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> map = new LinkedHashMap<>();
 		int i = 1;
 		map.put("i_InvoiceId", i++);
 		map.put("i_InvoiceNumber", i++);
 		map.put("b_BillId", i++);
 		map.put("b_ItemNumber", i++);
 		map.put("c_ChargeId", i++);
-		map.put("c_Value", i++);
+		map.put("c_Value", i);
 		
 		ResultSetMetaData meta = createMock(ResultSetMetaData.class);
 		expect(meta.getColumnCount()).andReturn(map.size()).anyTimes();
@@ -182,14 +182,14 @@ public class EntityBuilderTestCase extends EntityBuilderTSupport {
 		im.ignore("InvoiceId");
 		PrefixReflectionRowMapper<BillParentEntity> ib = new PrefixReflectionRowMapper<>(BillParentEntity.class, "b_");
 		ib.ignore("BillId");
-		PrefixReflectionRowMapper<Charge> ic = new PrefixReflectionRowMapper<Charge>(Charge.class, "c_");
+		PrefixReflectionRowMapper<Charge> ic = new PrefixReflectionRowMapper<>(Charge.class, "c_");
 		ic.ignore("ChargeId");
 
 		Node<EntityDescriptor> ed = 
-				new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(InvoiceParentEntity.class, im, "i_InvoiceId") )
+				new SimpleNode<>(EntityDescriptor.forColumnPk(InvoiceParentEntity.class, im, "i_InvoiceId") )
 					.addChild(
-							new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(BillParentEntity.class, ib, "b_BillId"))
-								.addChild(new SimpleNode<EntityDescriptor>(EntityDescriptor.forColumnPk(Charge.class, ic, "c_ChargeId")))
+							new SimpleNode<>(EntityDescriptor.forColumnPk(BillParentEntity.class, ib, "b_BillId"))
+								.addChild(new SimpleNode<>(EntityDescriptor.forColumnPk(Charge.class, ic, "c_ChargeId")))
 							)
 						;
 		runForNode(ed, rs, rs, meta);

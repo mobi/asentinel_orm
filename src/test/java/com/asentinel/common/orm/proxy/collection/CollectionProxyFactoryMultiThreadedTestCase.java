@@ -48,7 +48,7 @@ public class CollectionProxyFactoryMultiThreadedTestCase {
 		await();
 		await();
 		
-		// ensure all tasks completed succesfully
+		// ensure all tasks completed successfully
 		assertEquals(THREADS, counter.get());
 	}
 	
@@ -66,7 +66,7 @@ public class CollectionProxyFactoryMultiThreadedTestCase {
 			try {
 				sleep();
 				ArrayList<?> list = CollectionProxyFactory.getInstance().newProxy(ArrayList.class, 
-						(id) -> {
+						id -> {
 							counter.incrementAndGet();
 							return target; 
 						},
@@ -81,7 +81,6 @@ public class CollectionProxyFactoryMultiThreadedTestCase {
 				await();
 			}
 		}
-		
 	}
 	
 	private Integer[] createArray(int n) {
@@ -92,7 +91,6 @@ public class CollectionProxyFactoryMultiThreadedTestCase {
 		return a;
 	}
 
-	
 	private void await() {
 		try {
 			cb.await();
@@ -108,5 +106,4 @@ public class CollectionProxyFactoryMultiThreadedTestCase {
 			throw new RuntimeException(e);
 		}
 	}
-
 }

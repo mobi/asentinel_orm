@@ -16,17 +16,17 @@ import org.springframework.util.StringUtils;
 import com.asentinel.common.jdbc.ObjectFactory;
 
 public class SimpleEntityDescriptorBuilderTest {
-	private final static Logger log = LoggerFactory.getLogger(SimpleEntityDescriptorBuilderTest.class);
+	private static final Logger log = LoggerFactory.getLogger(SimpleEntityDescriptorBuilderTest.class);
 	
 	private void printDescriptor(SimpleEntityDescriptor descriptor) {
-		log.debug("testDefault - entityClass: " + descriptor.getEntityClass());
-		log.debug("testDefault - name: " + descriptor.getName());
-		log.debug("testDefault - pkName: " + descriptor.getPkName());
-		log.debug("testDefault - fkName:" + descriptor.getFkName());
-		log.debug("testDefault - relationType: " + descriptor.getParentRelationType());
-		log.debug("testDefault - tableName: " + descriptor.getTableName());
-		log.debug("testDefault - tableAlias: " + descriptor.getTableAlias());
-		log.debug("testDefault - columnAliasSeparator: " + descriptor.getColumnAliasSeparator());
+		log.debug("testDefault - entityClass: {}", descriptor.getEntityClass());
+		log.debug("testDefault - name: {}", descriptor.getName());
+		log.debug("testDefault - pkName: {}", descriptor.getPkName());
+		log.debug("testDefault - fkName: {}", descriptor.getFkName());
+		log.debug("testDefault - relationType: {}", descriptor.getParentRelationType());
+		log.debug("testDefault - tableName: {}", descriptor.getTableName());
+		log.debug("testDefault - tableAlias: {}", descriptor.getTableAlias());
+		log.debug("testDefault - columnAliasSeparator: {}", descriptor.getColumnAliasSeparator());
 	}
 	
 	@Test
@@ -48,19 +48,13 @@ public class SimpleEntityDescriptorBuilderTest {
 	@Test
 	public void testBuilder1() {
 		Member targetMember = SimpleEntityDescriptorBuilderTest.class.getMethods()[0];
-		ObjectFactory<Entity> entityFactory = new ObjectFactory<Entity>() {
-			@Override
-			public Entity newObject() throws IllegalStateException {
-				return new Entity() {
-					@Override
-					public void setEntityId(Object object) {}
-					
-					@Override
-					public Object getEntityId() {return null;}
-				};
-			}
-			
-		};
+		ObjectFactory<Entity> entityFactory = () -> new Entity() {
+            @Override
+            public void setEntityId(Object object) {}
+
+            @Override
+            public Object getEntityId() {return null;}
+        };
 		SimpleEntityDescriptor descriptor 
 			= new SimpleEntityDescriptor.Builder(InvoiceParentEntity.class)
 				.name("Test")
@@ -122,7 +116,7 @@ public class SimpleEntityDescriptorBuilderTest {
 				.build();
 			fail("Should throw exception.");
 		} catch(IllegalArgumentException e) {
-			log.debug("Expected exception: "  + e.getMessage());
+			log.debug("Expected exception: {}", e.getMessage());
 		}
 	}
 	

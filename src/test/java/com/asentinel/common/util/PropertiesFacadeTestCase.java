@@ -1,8 +1,5 @@
 package com.asentinel.common.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DateFormat;
@@ -20,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.*;
+
 public class PropertiesFacadeTestCase {
 	private static final Logger log = LoggerFactory.getLogger(PropertiesFacadeTestCase.class);
 	
@@ -33,25 +32,24 @@ public class PropertiesFacadeTestCase {
 	private static final double DOUBLE_VALUE = 10.10;
 	private static final float FLOAT_VALUE = 11.11f;
 	
-	private Date DATE_VALUE;
-	private LocalDate LOCAL_DATE_VALUE;
+	private Date dateValue;
+	private LocalDate localDateValue;
 	
 	private DateFormat df; 
 	private DateTimeFormatter dtf;
 	private Properties props;
-	
-	
+
 	
 	@Before
 	public void setUp() {
 		df = new SimpleDateFormat(DATE_FORMAT);
 		dtf = DateTimeFormatter.ofPattern(DATE_FORMAT);
 		try {
-			DATE_VALUE = df.parse(df.format(new Date()));
+			dateValue = df.parse(df.format(new Date()));
 		} catch (ParseException e) {
 			throw new RuntimeException("Failed to create the test date.", e);
 		}
-		LOCAL_DATE_VALUE = LocalDate.now();
+		localDateValue = LocalDate.now();
 		props = new Properties();
 		
 		props.setProperty("string.key", "  " + STRING_VALUE + "  ");
@@ -60,28 +58,28 @@ public class PropertiesFacadeTestCase {
 		props.setProperty("boolean.key", "  " + (BOOLEAN_VALUE?"on":"off") + "  ");
 		props.setProperty("empty.boolean.key", EMPTY_VALUE);
 		
-		props.setProperty("integer.key", "  " + String.valueOf(INTEGER_VALUE) + "  ");
+		props.setProperty("integer.key", "  " + INTEGER_VALUE + "  ");
 		props.setProperty("empty.integer.key", EMPTY_VALUE);
 		props.setProperty("invalid.integer.key", "xxx");
 
-		props.setProperty("long.key", "  " + String.valueOf(LONG_VALUE) + "  ");
+		props.setProperty("long.key", "  " + LONG_VALUE + "  ");
 		props.setProperty("empty.long.key", EMPTY_VALUE);
 		props.setProperty("invalid.long.key", "xxx");
 
-		props.setProperty("double.key", "  " + String.valueOf(DOUBLE_VALUE) + "  ");
+		props.setProperty("double.key", "  " + DOUBLE_VALUE + "  ");
 		props.setProperty("empty.double.key", EMPTY_VALUE);
 		props.setProperty("invalid.double.key", "xxx");
 
-		props.setProperty("float.key", "  " + String.valueOf(FLOAT_VALUE) + "  ");
+		props.setProperty("float.key", "  " + FLOAT_VALUE + "  ");
 		props.setProperty("empty.float.key", EMPTY_VALUE);
 		props.setProperty("invalid.float.key", "xxx");
 		
-		props.setProperty("date.key", "  " + df.format(DATE_VALUE) + "  ");
+		props.setProperty("date.key", "  " + df.format(dateValue) + "  ");
 		props.setProperty("empty.date.key", EMPTY_VALUE);
 		props.setProperty("invalid.date.key", "xxx");
 		
 		try {
-			props.setProperty("local.date.key", "  " + LOCAL_DATE_VALUE.format(dtf) + "  ");
+			props.setProperty("local.date.key", "  " + localDateValue.format(dtf) + "  ");
 		} catch (DateTimeException e) {
 			throw new RuntimeException("Failed to create the test date.", e);
 		}
@@ -101,12 +99,12 @@ public class PropertiesFacadeTestCase {
 		log.debug("testGetProperties - Passed for String");
 		
 		assertEquals(BOOLEAN_VALUE, facade.getBoolean("boolean.key"));
-		assertEquals(false, facade.getBoolean("boolean.empty.key"));
-		assertEquals(true, facade.getBoolean("boolean.empty.key", true));
-		assertEquals(false, facade.getBoolean("boolean.empty.key", false));
-		assertEquals(false, facade.getBoolean("inexistent"));
-		assertEquals(true, facade.getBoolean("inexistent", true));
-		assertEquals(false, facade.getBoolean("inexistent", false));
+        assertFalse(facade.getBoolean("boolean.empty.key"));
+        assertTrue(facade.getBoolean("boolean.empty.key", true));
+        assertFalse(facade.getBoolean("boolean.empty.key", false));
+        assertFalse(facade.getBoolean("inexistent"));
+        assertTrue(facade.getBoolean("inexistent", true));
+        assertFalse(facade.getBoolean("inexistent", false));
 		log.debug("testGetProperties - Passed for boolean");
 		
 		assertEquals(INTEGER_VALUE, facade.getInt("integer.key"));
@@ -117,8 +115,7 @@ public class PropertiesFacadeTestCase {
 		assertEquals(0, facade.getInt("invalid.integer.key"));
 		assertEquals(15, facade.getInt("invalid.integer.key", 15));
 		log.debug("testGetProperties - Passed for int");
-		
-		
+
 		assertEquals(LONG_VALUE, facade.getLong("long.key"));
 		assertEquals(0, facade.getLong("long.empty.key"));
 		assertEquals(15, facade.getLong("long.empty.key", 15));
@@ -127,7 +124,6 @@ public class PropertiesFacadeTestCase {
 		assertEquals(0, facade.getLong("invalid.long.key"));
 		assertEquals(15, facade.getLong("invalid.long.key", 15));
 		log.debug("testGetProperties - Passed for long");
-		
 
 		assertEquals(DOUBLE_VALUE, facade.getDouble("double.key"), 0.01);
 		assertEquals(0d, facade.getDouble("double.empty.key"), 0.01);
@@ -137,8 +133,7 @@ public class PropertiesFacadeTestCase {
 		assertEquals(0d, facade.getDouble("invalid.double.key"), 0.01);
 		assertEquals(15d, facade.getDouble("invalid.double.key", 15d), 0.01);
 		log.debug("testGetProperties - Passed for double");
-		
-		
+
 		assertEquals(FLOAT_VALUE, facade.getFloat("float.key"), 0.01);
 		assertEquals(0f, facade.getFloat("float.empty.key"), 0.01);
 		assertEquals(15f, facade.getFloat("float.empty.key", 15f), 0.01);
@@ -147,15 +142,14 @@ public class PropertiesFacadeTestCase {
 		assertEquals(0f, facade.getFloat("invalid.float.key"), 0.01);
 		assertEquals(15f, facade.getFloat("invalid.float.key", 15f), 0.01);
 		log.debug("testGetProperties - Passed for float");
-		
 
 		Date defaultDate = df.parse(df.format(new Date()));
-		assertEquals(DATE_VALUE, facade.getDate("date.key", df));
-		assertEquals(null, facade.getDate("date.empty.key", df));
+		assertEquals(dateValue, facade.getDate("date.key", df));
+        assertNull(facade.getDate("date.empty.key", df));
 		assertEquals(defaultDate, facade.getDate("date.empty.key", df, defaultDate));
-		assertEquals(null, facade.getDate("inexistent", df));
+        assertNull(facade.getDate("inexistent", df));
 		assertEquals(defaultDate, facade.getDate("inexistent", df, defaultDate));
-		assertEquals(null, facade.getDate("invalid.date.key", df));
+        assertNull(facade.getDate("invalid.date.key", df));
 		assertEquals(defaultDate, facade.getDate("invalid.date.key", df, defaultDate));
 		log.debug("testGetProperties - Passed for date");
 
@@ -178,21 +172,20 @@ public class PropertiesFacadeTestCase {
 		log.debug("testGetProperties - Passed for BigInteger");
 		
 		LocalDate defaultLocalDate = LocalDate.now();
-		assertEquals(LOCAL_DATE_VALUE, facade.getLocalDate("local.date.key", dtf));
-		assertEquals(null, facade.getLocalDate("local.date.empty.key", dtf));
+		assertEquals(localDateValue, facade.getLocalDate("local.date.key", dtf));
+        assertNull(facade.getLocalDate("local.date.empty.key", dtf));
 		assertEquals(defaultLocalDate, facade.getLocalDate("local.date.empty.key", dtf, defaultLocalDate));
-		assertEquals(null, facade.getLocalDate("inexistent", dtf));
+        assertNull(facade.getLocalDate("inexistent", dtf));
 		assertEquals(defaultLocalDate, facade.getLocalDate("inexistent", dtf, defaultLocalDate));
-		assertEquals(null, facade.getLocalDate("invalid.local.date.key", dtf));
+        assertNull(facade.getLocalDate("invalid.local.date.key", dtf));
 		assertEquals(defaultLocalDate, facade.getLocalDate("invalid.local.date.key", dtf, defaultLocalDate));
 		log.debug("testGetProperties - Passed for LocalDate");
 		
 		log.info("testGetProperties stop");
 	}
-	
-	
+
 	@Test
-	public void testGetRequiredProperties() throws ParseException {
+	public void testGetRequiredProperties() {
 		log.info("testGetRequiredProperties start");
 		PropertiesFacade facade = new PropertiesFacade(props);
 		assertEquals(STRING_VALUE, facade.getRequiredString("string.key"));
@@ -200,13 +193,13 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredString("string.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredString("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for String");
 		
@@ -215,13 +208,13 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredBoolean("boolean.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredBoolean("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for boolean");
 		
@@ -230,19 +223,19 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredInt("integer.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredInt("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredInt("invalid.integer.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for int");
 		
@@ -251,19 +244,19 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredLong("long.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredLong("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredLong("invalid.long.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for long");
 		
@@ -272,19 +265,19 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredDouble("double.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredDouble("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredDouble("invalid.double.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for double");
 
@@ -293,41 +286,41 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredFloat("float.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredFloat("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredFloat("invalid.float.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for float");
 		
 
-		assertEquals(DATE_VALUE, facade.getRequiredDate("date.key", df));
+		assertEquals(dateValue, facade.getRequiredDate("date.key", df));
 		try {
 			facade.getRequiredDate("date.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredDate("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredDate("invalid.date.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for date");
 		
@@ -336,19 +329,19 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredBigDecimal("double.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredBigDecimal("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredBigDecimal("invalid.double.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for BigDecimal");
 
@@ -357,40 +350,40 @@ public class PropertiesFacadeTestCase {
 			facade.getRequiredBigInteger("integer.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredBigInteger("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredBigInteger("invalid.integer.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for BigInteger");
 		
-		assertEquals(LOCAL_DATE_VALUE, facade.getRequiredLocalDate("local.date.key", dtf));
+		assertEquals(localDateValue, facade.getRequiredLocalDate("local.date.key", dtf));
 		try {
 			facade.getRequiredLocalDate("local.date.empty.key");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredLocalDate("inexistent");
 			fail("Should not get to this point.");
 		} catch (MissingResourceException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		try {
 			facade.getRequiredLocalDate("invalid.local.date.key");
 			fail("Should not get to this point.");
 		} catch (IllegalStateException e) {
-			log.debug("testGetRequiredProperties - Expected exception: " + e.getMessage());
+			log.debug("testGetRequiredProperties - Expected exception: {}", e.getMessage());
 		}
 		log.debug("testGetProperties - Passed for LocalDate");
 
@@ -403,19 +396,17 @@ public class PropertiesFacadeTestCase {
 		PropertiesFacade facade = new PropertiesFacade(props);
 		
 		log.debug("testPropertyExists - Test existent key");
-		assertEquals(true, facade.propertyExists("string.key"));
+        assertTrue(facade.propertyExists("string.key"));
 		
 		log.debug("testPropertyExists - Test inexistent key");
-		assertEquals(false, facade.propertyExists("inexistent.key"));
+        assertFalse(facade.propertyExists("inexistent.key"));
 		
 		log.debug("testPropertyExists - Test for null parameter");
 		try {
 			facade.propertyExists(null);
 			fail("Should not get to this point.");
 		} catch (NullPointerException e) {
-			log.debug("testPropertyExists - Expected exception: " + e.getMessage());
+			log.debug("testPropertyExists - Expected exception: {}", e.getMessage());
 		}
 	}
-
-
 }

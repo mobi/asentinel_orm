@@ -31,14 +31,14 @@ public class EntityBuilderWithSimpleEntityDescriptorsTestCase extends EntityBuil
 		// Columns:
 		// InvoiceId, InvoiceNumber, BillId, ItemNumber, ChargeId, Value
 		
-		Map<String, Integer> map = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> map = new LinkedHashMap<>();
 		int i = 1;
 		map.put("i_InvoiceId", i++);
 		map.put("i_InvoiceNumber", i++);
 		map.put("b_BillId", i++);
 		map.put("b_ItemNumber", i++);
 		map.put("c_ChargeId", i++);
-		map.put("c_Value", i++);
+		map.put("c_Value", i);
 		
 		ResultSetMetaData meta = createMock(ResultSetMetaData.class);
 		expect(meta.getColumnCount()).andReturn(map.size()).anyTimes();
