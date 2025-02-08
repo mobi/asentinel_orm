@@ -392,6 +392,10 @@ public class SimpleEntityDescriptor extends EntityDescriptor implements QueryRea
 		public final Builder entityClass(Class<?> entityClass) {
 			Assert.assertNotNull(entityClass, "entityClass");
 			this.clazz = entityClass;
+			
+			// we clear the table name so that it is picked up from the entityClass parameter,
+			// see #preBuild()
+			this.tableName = null;
 			return this;
 		}
 
