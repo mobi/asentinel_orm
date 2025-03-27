@@ -123,7 +123,8 @@ public abstract class ProxyFactorySupport {
 		});
 		if (finalMethods.length() > 0) {
 			log.warn("checkForFinalMethods - Class " + clazz.getName() + " has the following final methods:\n" + finalMethods);
-			log.warn("checkForFinalMethods - These methods can not be intercepted and therefore will not trigger the lazy load.");
+			log.warn("checkForFinalMethods - These methods can not be intercepted and therefore will not trigger the lazy load, "
+					+ "unless a non-final instance method is called inside them.");
 		}
 	}
 	
