@@ -1,5 +1,7 @@
 package com.asentinel.common.jdbc;
 
+import static com.asentinel.common.orm.TargetMember.getTypeDescriptor;
+
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,7 +10,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * <code>RowMapper</code> implementation that attempts to extract each field from
@@ -130,7 +131,7 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 					throw new SQLException(errorText);
 				}
 			} else {
-				Object value = getValue(object, method, rs, columnMetadata);
+				Object value = getValue(object, getTypeDescriptor(method), rs, columnMetadata);
 				setValue(object, method, value);
 			}
 		}

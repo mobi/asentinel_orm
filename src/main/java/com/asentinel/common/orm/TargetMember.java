@@ -5,6 +5,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.springframework.core.convert.Property;
+import org.springframework.core.convert.TypeDescriptor;
+
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.util.Assert;
@@ -21,6 +24,8 @@ public class TargetMember {
 	
 	private final Method getMethod;
 	private final Method setMethod;
+	
+	private final TypeDescriptor typeDescriptor;
 	
 	public TargetMember(AnnotatedElement member, Annotation annotation) {
 		this(member, annotation, null, null);
@@ -46,6 +51,13 @@ public class TargetMember {
 		this.annotation = annotation;
 		this.getMethod = getMethod;
 		this.setMethod = setMethod;
+		if (annotation instanceof Column || annotation instanceof PkColumn) {
+			// we only need type descriptors for @Column/@PkColumn annotated members
+			// see ConversionSupport
+			this.typeDescriptor = getTypeDescriptor(member, getMethod);
+		} else {
+			this.typeDescriptor = null;
+		}
 	}
 
 	public AnnotatedElement getAnnotatedElement() {
@@ -102,11 +114,34 @@ public class TargetMember {
 			throw new IllegalStateException("Expected Field or Method. Found " + member.getClass().getName());					
 		}
 	}
+	
+	// FIXME: can return null for @Child so we need to refactor, create a TargetColumnMember
+	public TypeDescriptor getTypeDescriptor() {
+		return typeDescriptor;
+	}
 
 	@Override
 	public String toString() {
 		return "TargetMember [member=" + member + ", annotation="
 				+ annotation.toString() + "]";
 	}
+	
+	protected static TypeDescriptor getTypeDescriptor(AnnotatedElement member, Method getter) {
+		if (member instanceof Field) {
+			return TypeDescriptor.nested((Field) member, 0);
+		} else if (member instanceof Method) {
+			Method method = (Method) member;
+			if (method.getParameterTypes().length != 1) {
+				throw new IllegalArgumentException("The method " + method + " should have exactly one parameter.");
+			}			
+			Class<?> cls = method.getParameterTypes()[0];
+			return TypeDescriptor.nested(new Property(cls, getter, (Method) member), 0);
+		} else {
+			throw new IllegalArgumentException("The member " + member + " is neither a field nor a method.");
+		}
+	}
 
+	public static TypeDescriptor getTypeDescriptor(AnnotatedElement member) {
+		return getTypeDescriptor(member, null);
+	}
 }

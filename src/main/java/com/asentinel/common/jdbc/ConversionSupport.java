@@ -31,6 +31,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Date;
 
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.asentinel.common.orm.proxy.InputStreamProxy;
@@ -46,64 +48,91 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	
 	public static final Class<InputStream> INPUT_STREAM_TYPE = InputStream.class;
 	
+	private volatile ConversionService conversionService;
+
+	/**
+	 * @see #setConversionService(ConversionService)
+	 */
+	public ConversionService getConversionService() {
+		return conversionService;
+	}
+
+
+	/**
+	 * Sets a {@code ConversionService} implementation to be used as fallback when
+	 * the resultset value can not be converted to the target field type. Allows
+	 * mapping custom database types and/or custom domain types.
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
+
+
 	/**
 	 * This method reads the value of the specified column from the resultset. It
 	 * can be overridden by subclasses to customize the extraction.
 	 * 
-	 * @param parentObject   the object to which the field that we are reading from
-	 *                       the {@code ResultSet} belongs to.
-	 * @param cls            the type to convert to.
-	 * @param rs             the {@code ResultSet}.
-	 * @param columnMetadata information about the {@code ResultSet} column to read.
+	 * @param parentObject         the object to which the field that we are reading
+	 *                             from the {@code ResultSet} belongs to.
+	 * @param targetTypeDescriptor the type to convert to.
+	 * @param rs                   the {@code ResultSet}.
+	 * @param columnMetadata       information about the {@code ResultSet} column to
+	 *                             read.
 	 * @return the value extracted from the {@code ResultSet} specified column
 	 * 
 	 * @throws SQLException
 	 */
+	protected Object getValue(Object parentObject, TypeDescriptor targetTypeDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+		try {
+			return getValueInternal(parentObject, targetTypeDescriptor, rs, columnMetadata);
+		} catch (ClassCastException | SQLException e) {
+			throw new SQLException("Can not convert SQL type to argument type for element " + targetTypeDescriptor + " .", e);
+		}
+	}
+
+
 	@SuppressWarnings({"rawtypes", "unchecked" })
-	protected Object getValue(Object parentObject, Class<?> cls, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
-		// TODO: integrate the Spring Converter Framework to make the type conversions more flexible
-		// This may only work for AnnotationRowMapper. The @PkColumn/@Column annotations should
-		// allow the user to specify what converter to use for reading data from the DB and
-		// what converter to user for writing data
+	private Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+		Class<?> targetType = targetDescriptor.getType();
 		String column = columnMetadata.getResultsetName();
 		boolean allowNull = columnMetadata.isAllowNull();
-		if (cls == int.class) {
+		if (targetType == int.class) {
 			return getIntObject(rs, column);
-		} else if (cls == String.class) {
+		} else if (targetType == String.class) {
 			return getStringObject(rs, column, allowNull);
-		} else if (cls == double.class) {
+		} else if (targetType == double.class) {
 			return getDoubleObject(rs, column);
-		} else if (cls == boolean.class) {
+		} else if (targetType == boolean.class) {
 			return getBooleanObject(rs, column);
-		} else if (cls == Date.class) {
+		} else if (targetType == Date.class) {
 			return getDateObject(rs, column);
-		} else if (cls == LocalDate.class) {
+		} else if (targetType == LocalDate.class) {
 			return getLocalDate(rs, column);
-		} else if (cls == LocalTime.class) {
+		} else if (targetType == LocalTime.class) {
 			return getLocalTime(rs, column);
-		} else if (cls == LocalDateTime.class) {
+		} else if (targetType == LocalDateTime.class) {
 			return getLocalDateTime(rs, column);
-		} else if (cls == long.class) {
+		} else if (targetType == long.class) {
 			return getLongObject(rs, column);
-		} else if (cls == Integer.class) {
+		} else if (targetType == Integer.class) {
 			return getIntObject(rs, column, allowNull);
-		} else if (cls == Double.class) {			
+		} else if (targetType == Double.class) {			
 			return getDoubleObject(rs, column, allowNull);
-		} else if (cls == Boolean.class ) {			
+		} else if (targetType == Boolean.class ) {			
 			return getBooleanObject(rs, column, allowNull);
-		} else if (cls == Long.class) {			
+		} else if (targetType == Long.class) {			
 			return getLongObject(rs, column, allowNull);
-		} else if (cls == BigDecimal.class) {
+		} else if (targetType == BigDecimal.class) {
 			return getBigDecimalObject(rs, column, allowNull);
-		} else if (cls == BigInteger.class) {
+		} else if (targetType == BigInteger.class) {
 			return getBigIntegerObject(rs, column, allowNull);
-		} else if (cls == Number.class) {
+		} else if (targetType == Number.class) {
 			return getBigDecimalObject(rs, column, allowNull);
-		} else if (Enum.class.isAssignableFrom(cls)) {
-			return getEnum(rs, column, (Class<Enum>) cls);
-		} else if (cls == byte[].class) {
+		} else if (Enum.class.isAssignableFrom(targetType)) {
+			return getEnum(rs, column, (Class<Enum>) targetType);
+		} else if (targetType == byte[].class) {
 			return getBlobAsBytes(rs, column, getLobHandler());
-		} else if (cls == INPUT_STREAM_TYPE) {
+		} else if (targetType == INPUT_STREAM_TYPE) {
 			// TODO: load eager if the column is present in resultset, lazy otherwise
 			if (getQueryExecutor() == null) {
 				// eager load the blob
@@ -113,28 +142,40 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 				// the parentObject must be a annotated entity (with @Table and @PkColumn)
 				return new InputStreamProxy(getQueryExecutor(), getLobHandler(), parentObject, columnMetadata.getMappedName());
 			}
-		} else if (cls == String[].class) {
+		} else if (targetType == String[].class) {
 			return getStringArray(rs, column, allowNull);
-		} else if (cls == int[].class) {
+		} else if (targetType == int[].class) {
 			return getIntArray(rs, column, allowNull);
-		} else if (cls == long[].class) {
+		} else if (targetType == long[].class) {
 			return getLongArray(rs, column, allowNull);
-		} else if (cls == double[].class) {
+		} else if (targetType == double[].class) {
 			return getDoubleArray(rs, column, allowNull);
-		} else if (cls == BigDecimal[].class) {
+		} else if (targetType == BigDecimal[].class) {
 			Number[] numbers = getNumberArray(rs, column, allowNull);
 			if (numbers instanceof BigDecimal[]) {
 				return (BigDecimal[]) numbers;
 			} else {
 				throw new SQLException("Unable to convert to BigDecimal[]");
 			}
-		} else if (cls == BigInteger[].class) {
+		} else if (targetType == BigInteger[].class) {
 			return getBigIntegerArray(rs, column, allowNull);
-		} else if (cls == Number[].class) {
+		} else if (targetType == Number[].class) {
 			return getNumberArray(rs, column, allowNull);
 		// TODO: add support for Date[], Boolean[]
 		} else {
-			throw new SQLException("Unsupported property type " + cls.getName() + ".");
+			// we fallback to the conversion service if one is available
+			if (conversionService != null) {
+				Object object = rs.getObject(column);
+				if (object == null) {
+					return null;
+				}
+				TypeDescriptor sourceDescriptor = TypeDescriptor.valueOf(object.getClass());
+				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
+					return conversionService.convert(object, sourceDescriptor, targetDescriptor);
+				}
+			}
+			// no luck with the conversion service, we error out
+			throw new SQLException("Unsupported property type " + targetType.getName() + ".");
 		}
 	}
 	
@@ -149,5 +190,4 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 				&& rowMapper instanceof ConversionSupport
 				&& ((ConversionSupport) rowMapper).getQueryExecutor() != null;
 	}
-	
 }

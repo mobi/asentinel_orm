@@ -201,11 +201,11 @@ public class AnnotationRowMapper<T> extends AbstractReflectionRowMapper<T> {
 			AnnotatedElement element = entry.getValue().getAnnotatedElement();
 			if (element instanceof Field) {
 				Field field = (Field) element; 
-				Object value = getValue(object, field, rs, entry.getKey());
+				Object value = getValue(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
 				setValue(object, field, value);
 			} else if (element instanceof Method) {
 				Method method = (Method) element; 
-				Object value = getValue(object, method, rs, entry.getKey());
+				Object value = getValue(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
 				setValue(object, method, value);
 			} else {
 				throw new IllegalStateException("Expected Field or Method. Found " + element.getClass().getName() + ".");

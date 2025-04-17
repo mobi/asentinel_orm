@@ -5,6 +5,9 @@ import static java.util.Collections.unmodifiableSet;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.springframework.core.convert.TypeDescriptor;
+
+import com.asentinel.common.text.FieldIdTypeDescriptor;
 import com.asentinel.common.util.Assert;
 
 /**
@@ -16,6 +19,7 @@ public class DefaultDynamicColumn implements DynamicColumn {
 	private final String name;
 	private final Class<?> type;
 	private final Set<DynamicColumnFlags> flags;
+	private final TypeDescriptor typeDescriptor;
 	
 	public DefaultDynamicColumn(String name, Class<?> type) {
 		this(name, type, null);
@@ -30,6 +34,7 @@ public class DefaultDynamicColumn implements DynamicColumn {
 			flags = EnumSet.noneOf(DynamicColumnFlags.class);
 		}
 		this.flags = unmodifiableSet(flags);
+		this.typeDescriptor = new FieldIdTypeDescriptor(this, getDynamicColumnType());
 	}
 	
 	@Override
@@ -45,6 +50,11 @@ public class DefaultDynamicColumn implements DynamicColumn {
 	@Override
 	public Set<DynamicColumnFlags> getDynamicColumnFlags() {
 		return flags;
+	}
+	
+	@Override
+	public TypeDescriptor getTypeDescriptor() {
+		return typeDescriptor;
 	}
 	
 	@Override

@@ -3,8 +3,11 @@ package com.asentinel.common.orm.mappers.dynamic;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.springframework.core.convert.TypeDescriptor;
+
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
+import com.asentinel.common.text.FieldIdTypeDescriptor;
 
 /**
  * Equivalent for the {@link Column} annotation in the dynamic columns world.
@@ -48,6 +51,15 @@ public interface DynamicColumn {
 	 */
 	default Set<DynamicColumnFlags> getDynamicColumnFlags() {
 		return EnumSet.noneOf(DynamicColumnFlags.class);
+	}
+	
+	/**
+	 * @return a {@link TypeDescriptor} for this column that can be used for
+	 *         converting the resultset value (database value) to a java domain
+	 *         type.
+	 */
+	default TypeDescriptor getTypeDescriptor() {
+		return new FieldIdTypeDescriptor(this, getDynamicColumnType());
 	}
 	
 	public enum DynamicColumnFlags {

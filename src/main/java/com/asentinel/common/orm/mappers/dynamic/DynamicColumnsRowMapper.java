@@ -50,7 +50,7 @@ public class DynamicColumnsRowMapper<C extends DynamicColumn, T extends DynamicC
 		// process dynamic columns
 		for (C column: dynamicColumns) {
 			Object value = getValue(
-					object, column.getDynamicColumnType(), 
+					object, column.getTypeDescriptor(), 
 					rs, new ColumnMetadata(getColumnPrefix(), column.getDynamicColumnName(), column.isDynamicColumnAllowNull())
 			);
 			object.setValue(column, value);

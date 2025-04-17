@@ -1,7 +1,6 @@
 package com.asentinel.common.jdbc;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -74,34 +73,6 @@ public abstract class AbstractReflectionRowMapper<T> extends ConversionSupport i
 	
 	// Helper methods for subclasses:
 	
-	private String createSQLExceptionMessage(Member member) {
-		return "Can not convert SQL type to argument type for element '" + member + "' ."; 
-	}
-	
-	/**
-	 * This method reads the value of the specified column from the resultset. It
-	 * can be overridden by subclasses to customize the extraction.
-	 *
-	 * @param object         the object that is being mapped for the current row.
-	 * @param method         the method that will be called to set the value of the
-	 *                       column
-	 * @param rs             the resultset
-	 * @param columnMetadata information about the {@code ResultSet} column to read.
-	 * @return the value extracted from the resultset specified column
-	 * @throws SQLException
-	 */
-	protected Object getValue(T object, Method method, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
-		if (method.getParameterTypes().length != 1) {
-			throw new IllegalArgumentException("The method " + method + " should have exactly one parameter.");
-		}
-		Class<?> cls = method.getParameterTypes()[0]; 
-		try {
-			return getValue(object, cls, rs, columnMetadata);
-		} catch (ClassCastException | SQLException e) {
-			throw new SQLException(createSQLExceptionMessage(method), e);
-		}
-	}
-	
 	/**
 	 * Sets the value in the target object. Subclasses can override this method
 	 * to customize the call.
@@ -121,27 +92,6 @@ public abstract class AbstractReflectionRowMapper<T> extends ConversionSupport i
 					+ ".", e);
 		}
 	}
-
-	/**
-	 * This method reads the value of the specified column from the resultset. It
-	 * can be overridden by subclasses to customize the extraction.
-	 * 
-	 * @param object         the object that is being mapped for the current row.
-	 * @param field          the field on which the value of the column will be set.
-	 * @param rs             the resultset.
-	 * @param columnMetadata information about the {@code ResultSet} column to read.
-	 * @return the value extracted from the resultset specified column.
-	 * @throws SQLException
-	 */
-	protected Object getValue(T object, Field field, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
-		Class<?> cls = field.getType(); 
-		try {
-			return getValue(object, cls, rs, columnMetadata);
-		} catch (ClassCastException | SQLException e) {
-			throw new SQLException(createSQLExceptionMessage(field), e);
-		}
-	}
-	
 
 	/**
 	 * Sets the value in the target object. Subclasses can override this method
