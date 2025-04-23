@@ -29,6 +29,7 @@ import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
  * This is a feature, it allows for example to override the <code>Column</code> annotation attributes in a subclass.
  * 
  * @see Table
+ * @see DbType
  * @see AnnotationRowMapper
  * @see TargetMembers
  * @see TargetMembersHolder
@@ -41,7 +42,7 @@ import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Column {
-
+	
 	/**
 	 * @return the name of the column.
 	 */
@@ -70,4 +71,16 @@ public @interface Column {
 	 *         default is {@code true}.
 	 */
 	boolean updatable() default true;
+	
+	/*
+	 * We are future proofing the database column type. We can potentially add additional attributes
+	 * to the DbType annotation without changing this annotation.
+	 */
+	
+	/**
+	 * @return information about the mapped database column type of the annotated
+	 *         member. It should be used only if the mapped database column is of
+	 *         some special type or a user defined type.
+	 */
+	DbType dbType() default @DbType;
 }

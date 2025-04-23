@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -54,9 +56,12 @@ import com.asentinel.common.orm.TargetChildMember;
 import com.asentinel.common.orm.TargetMember;
 import com.asentinel.common.orm.TargetMembers;
 import com.asentinel.common.orm.TargetMembersHolder;
+import com.asentinel.common.orm.mappers.Column;
+import com.asentinel.common.orm.mappers.DbType;
 import com.asentinel.common.orm.mappers.dynamic.DynamicColumn;
 import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
 import com.asentinel.common.orm.proxy.InputStreamProxy;
+import com.asentinel.common.text.FieldIdTypeDescriptor;
 import com.asentinel.common.util.Assert;
 
 /**
@@ -100,6 +105,7 @@ public class SimpleUpdater implements Updater {
 	private NewEntityDetector newEntityDetector = new SimpleNewEntityDetector();
 	private BooleanParameterConverter<?> booleanParameterConverter = new DefaultBooleanParameterConverter();
 	private NewRowOnUpsertDetector newRowOnUpsertDetector;
+	private ConversionService conversionService;
 
 	public SimpleUpdater(JdbcFlavor jdbcFlavor, SqlQuery queryEx) {
 		Assert.assertNotNull(jdbcFlavor, "jdbcFlavor");
@@ -154,7 +160,23 @@ public class SimpleUpdater implements Updater {
 	public void setNewRowOnUpsertDetector(NewRowOnUpsertDetector newRowOnUpsertDetector) {
 		this.newRowOnUpsertDetector = newRowOnUpsertDetector;
 	}
+
 	
+	public ConversionService getConversionService() {
+		return conversionService;
+	}
+
+	/**
+	 * Sets a {@code ConversionService} to be used for {@code Column} annotated
+	 * members that need special custom conversion to their corresponding database
+	 * type.
+	 * 
+	 * @see Column#dbType()
+	 * @see DbType
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
 	
 	@Override
 	public int update(Object entity, UpdateSettings<? extends DynamicColumn> settings) {
@@ -740,6 +762,16 @@ public class SimpleUpdater implements Updater {
 				argument = EntityUtils.getEntityId(argument);
 			}
 			// else the value to go to the db is null
+		} else {
+			// see if we need special conversion
+			if (conversionService != null
+					&& StringUtils.hasText(targetMember.getColumnAnnotation().dbType().value())) {
+				TypeDescriptor sourceDescriptor = targetMember.getTypeDescriptor();
+				TypeDescriptor targetDescriptor = new FieldIdTypeDescriptor(targetMember, Object.class);
+				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
+					argument = conversionService.convert(argument, sourceDescriptor, targetDescriptor);
+				}
+			}
 		}
 		if (argument instanceof Boolean) {
 			argument = booleanParameterConverter.asObject((Boolean) argument);
