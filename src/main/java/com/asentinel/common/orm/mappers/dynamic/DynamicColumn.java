@@ -62,6 +62,17 @@ public interface DynamicColumn {
 		return new FieldIdTypeDescriptor(this, getDynamicColumnType());
 	}
 	
+	/**
+	 * @return information about the mapped database column type of the dynamic
+	 *         column. It should be used only if the mapped database column is of
+	 *         some special type or a user defined type. Returns {@code null} by
+	 *         default to indicate that the default conversion should be used (i.e.
+	 *         no {@code ConversionService} conversion should be triggered).
+	 */
+	default DynamicDbType getDynamicDbType() {
+		return null;
+	}
+	
 	public enum DynamicColumnFlags {
 		ALLOW_NULL, ENTITY_FK
 	}

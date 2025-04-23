@@ -765,6 +765,7 @@ public class SimpleUpdater implements Updater {
 		} else {
 			// see if we need special conversion
 			if (conversionService != null
+					&& argument != null
 					&& StringUtils.hasText(targetMember.getColumnAnnotation().dbType().value())) {
 				TypeDescriptor sourceDescriptor = targetMember.getTypeDescriptor();
 				TypeDescriptor targetDescriptor = new FieldIdTypeDescriptor(targetMember, Object.class);
@@ -787,10 +788,21 @@ public class SimpleUpdater implements Updater {
 		}
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Object argument = ((DynamicColumnsEntity) entity).getValue(dynamicColumn);
+		if (argument != null && EntityUtils.isEntityClass(argument.getClass())) {
+			argument = EntityUtils.getEntityId(argument);
+		} else {
+			if (conversionService != null
+					&& argument != null
+					&& dynamicColumn.getDynamicDbType() != null) {
+				TypeDescriptor sourceDescriptor = dynamicColumn.getTypeDescriptor();
+				TypeDescriptor targetDescriptor = new FieldIdTypeDescriptor(dynamicColumn, Object.class);
+				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
+					argument = conversionService.convert(argument, sourceDescriptor, targetDescriptor);
+				}
+			}
+		}
 		if (argument instanceof Boolean) {
 			argument = booleanParameterConverter.asObject((Boolean) argument);
-		} else if (argument != null && EntityUtils.isEntityClass(argument.getClass())) {
-			argument = EntityUtils.getEntityId(argument);
 		}
 		return argument;
 	}

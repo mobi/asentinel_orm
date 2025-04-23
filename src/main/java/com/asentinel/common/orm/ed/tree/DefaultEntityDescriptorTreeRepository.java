@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.StringUtils;
 
@@ -16,6 +17,7 @@ import com.asentinel.common.collections.tree.Node;
 import com.asentinel.common.collections.tree.SimpleNode;
 import com.asentinel.common.collections.tree.TreeUtils;
 import com.asentinel.common.collections.tree.TreeUtils.NodeMatcher;
+import com.asentinel.common.jdbc.ConversionSupport;
 import com.asentinel.common.jdbc.flavors.JdbcFlavor;
 import com.asentinel.common.orm.AutoLazyLoader;
 import com.asentinel.common.orm.EntityDescriptor;
@@ -70,6 +72,9 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 	// helper for automatic lazy loading circular references
 	private final AutoLazyLoader autoLazyLoader = new AutoLazyLoader();
 
+	
+	private ConversionService conversionService;
+
 	/**
 	 * Default constructor. No {@code LobHandler} is set so
 	 * there will be no support for LOBs in the resulting trees.
@@ -105,7 +110,21 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 	public void setSqlBuilderFactory(SqlBuilderFactory sqlBuilderFactory) {
 		this.sqlBuilderFactory = sqlBuilderFactory;
 	}
+
 	
+	public ConversionService getConversionService() {
+		return conversionService;
+	}
+
+	/**
+	 * Sets the {@code ConversionService} to be used for special database types
+	 * when reading result sets.
+	 * 
+	 * @see ConversionSupport
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
 
 	@Override
 	public Node<EntityDescriptor> getEntityDescriptorTree(
@@ -151,7 +170,8 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(clazz)
 			.tableAlias(getTableAlias(rootTableAlias, new IndexHolder(0)))
 			.queryExecutor(Optional.ofNullable(sqlBuilderFactory).map(SqlBuilderFactory::getSqlQuery).orElse(null))
-			.lobHandler(lobHandler);
+			.lobHandler(lobHandler)
+			.conversionService(conversionService);
 		Node<EntityDescriptor> root = new SimpleNode<>();
 		if (!processNodeCallbackChain(root, builder, nodeCallbacks)) {
 			throw new IllegalArgumentException("The root node value was transformed to a non QueryReady implementation "
@@ -238,6 +258,7 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 				.forceManyAsOneInPaginatedQueries(childAnn.forceManyAsOneInPaginatedQueries())
 				.queryExecutor(Optional.ofNullable(sqlBuilderFactory).map(SqlBuilderFactory::getSqlQuery).orElse(null))
 				.lobHandler(lobHandler)
+				.conversionService(conversionService)
 				.targetMember(member)
 				;
 			if (builder instanceof ManyToManyEntityDescriptor.Builder) {

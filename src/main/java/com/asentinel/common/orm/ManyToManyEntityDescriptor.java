@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.StringUtils;
 
@@ -222,6 +223,12 @@ public class ManyToManyEntityDescriptor extends SimpleEntityDescriptor implement
 		public Builder lobHandler(LobHandler lobHandler) {
 			return (Builder) super.lobHandler(lobHandler);
 		}
+		
+		@Override
+		public Builder conversionService(ConversionService conversionService) {
+			return (Builder) super.conversionService(conversionService);
+		}
+
 				
 		// specific Builder methods
 				
