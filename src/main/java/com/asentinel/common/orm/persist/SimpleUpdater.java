@@ -57,11 +57,11 @@ import com.asentinel.common.orm.TargetMember;
 import com.asentinel.common.orm.TargetMembers;
 import com.asentinel.common.orm.TargetMembersHolder;
 import com.asentinel.common.orm.mappers.Column;
-import com.asentinel.common.orm.mappers.DbType;
+import com.asentinel.common.orm.mappers.SqlParam;
+import com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor;
 import com.asentinel.common.orm.mappers.dynamic.DynamicColumn;
 import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
 import com.asentinel.common.orm.proxy.InputStreamProxy;
-import com.asentinel.common.text.FieldIdTypeDescriptor;
 import com.asentinel.common.util.Assert;
 
 /**
@@ -171,8 +171,8 @@ public class SimpleUpdater implements Updater {
 	 * members that need special custom conversion to their corresponding database
 	 * type.
 	 * 
-	 * @see Column#dbType()
-	 * @see DbType
+	 * @see Column#sqlParam()
+	 * @see SqlParam
 	 */
 	public void setConversionService(ConversionService conversionService) {
 		this.conversionService = conversionService;
@@ -766,9 +766,9 @@ public class SimpleUpdater implements Updater {
 			// see if we need special conversion
 			if (conversionService != null
 					&& argument != null
-					&& StringUtils.hasText(targetMember.getColumnAnnotation().dbType().value())) {
+					&& StringUtils.hasText(targetMember.getColumnAnnotation().sqlParam().value())) {
 				TypeDescriptor sourceDescriptor = targetMember.getTypeDescriptor();
-				TypeDescriptor targetDescriptor = new FieldIdTypeDescriptor(targetMember, Object.class);
+				TypeDescriptor targetDescriptor = new SqlParameterTypeDescriptor(targetMember.getColumnAnnotation().sqlParam());
 				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
 					argument = conversionService.convert(argument, sourceDescriptor, targetDescriptor);
 				}
@@ -793,9 +793,9 @@ public class SimpleUpdater implements Updater {
 		} else {
 			if (conversionService != null
 					&& argument != null
-					&& dynamicColumn.getDynamicDbType() != null) {
+					&& dynamicColumn.getSqlParameter() != null) {
 				TypeDescriptor sourceDescriptor = dynamicColumn.getTypeDescriptor();
-				TypeDescriptor targetDescriptor = new FieldIdTypeDescriptor(dynamicColumn, Object.class);
+				TypeDescriptor targetDescriptor = new SqlParameterTypeDescriptor(dynamicColumn.getSqlParameter());
 				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
 					argument = conversionService.convert(argument, sourceDescriptor, targetDescriptor);
 				}

@@ -759,6 +759,10 @@ public class SimpleEntityDescriptor extends EntityDescriptor implements QueryRea
 			return queryEx;
 		}
 		
+		public ConversionService getConversionService() {
+			return conversionService;
+		}
+		
 		@Override
 		public String toString() {
 			return "Builder [clazz=" + (clazz == null ? null : clazz.getName()) + "]";

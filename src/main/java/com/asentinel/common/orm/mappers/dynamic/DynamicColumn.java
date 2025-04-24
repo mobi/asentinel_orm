@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.jdbc.core.SqlParameter;
 
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
@@ -69,7 +70,7 @@ public interface DynamicColumn {
 	 *         default to indicate that the default conversion should be used (i.e.
 	 *         no {@code ConversionService} conversion should be triggered).
 	 */
-	default DynamicDbType getDynamicDbType() {
+	default SqlParameter getSqlParameter() {
 		return null;
 	}
 	
