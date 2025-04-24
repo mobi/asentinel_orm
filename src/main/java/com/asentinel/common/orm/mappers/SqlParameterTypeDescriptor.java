@@ -7,7 +7,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.util.StringUtils;
 
+import com.asentinel.common.orm.mappers.dynamic.DynamicColumn;
 import com.asentinel.common.orm.persist.SimpleUpdater;
 import com.asentinel.common.util.Assert;
 
@@ -74,6 +76,20 @@ public class SqlParameterTypeDescriptor extends TypeDescriptor {
 		return "SqlParameterTypeDescriptor ["
 				+ "sqlParameterTypeName=" + sqlParameter.getTypeName()
 				+ "]";
+	}
+	
+	public static boolean isCustomConversion(Column column) {
+		if (column == null) {
+			return false;
+		}
+		return StringUtils.hasText(column.sqlParam().value());
+	}
+	
+	public static boolean isCustomConversion(DynamicColumn column) {
+		if (column == null) {
+			return false;
+		}
+		return column.getSqlParameter() != null;
 	}
 
 }

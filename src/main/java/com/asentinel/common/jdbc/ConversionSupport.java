@@ -74,7 +74,7 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	 * 
 	 * @param parentObject         the object to which the field that we are reading
 	 *                             from the {@code ResultSet} belongs to.
-	 * @param targetTypeDescriptor the type to convert to.
+	 * @param targetDescriptor the type to convert to.
 	 * @param rs                   the {@code ResultSet}.
 	 * @param columnMetadata       information about the {@code ResultSet} column to
 	 *                             read.
@@ -82,17 +82,17 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	 * 
 	 * @throws SQLException
 	 */
-	protected Object getValue(Object parentObject, TypeDescriptor targetTypeDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+	protected final Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		try {
-			return getValueInternal(parentObject, targetTypeDescriptor, rs, columnMetadata);
+			return getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
 		} catch (ClassCastException | SQLException e) {
-			throw new SQLException("Can not convert SQL type to argument type for element " + targetTypeDescriptor + " .", e);
+			throw new SQLException("Can not convert SQL type to argument type for element " + targetDescriptor + " .", e);
 		}
 	}
 
 
 	@SuppressWarnings({"rawtypes", "unchecked" })
-	private Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+	protected Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		Class<?> targetType = targetDescriptor.getType();
 		String column = columnMetadata.getResultsetName();
 		boolean allowNull = columnMetadata.isAllowNull();
@@ -164,19 +164,24 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 		// TODO: add support for Date[], Boolean[]
 		} else {
 			// we fallback to the conversion service if one is available
-			if (conversionService != null) {
-				Object object = rs.getObject(column);
-				if (object == null) {
-					return null;
-				}
-				TypeDescriptor sourceDescriptor = TypeDescriptor.valueOf(object.getClass());
-				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
-					return conversionService.convert(object, sourceDescriptor, targetDescriptor);
-				}
-			}
-			// no luck with the conversion service, we error out
-			throw new SQLException("Unsupported property type " + targetType.getName() + ".");
+			return customConvert(targetDescriptor, rs, column);
 		}
+	}
+
+
+	protected final Object customConvert(TypeDescriptor targetDescriptor, ResultSet rs, String column) throws SQLException {
+		if (conversionService != null) {
+			Object object = rs.getObject(column);
+			if (object == null) {
+				return null;
+			}
+			TypeDescriptor sourceDescriptor = TypeDescriptor.valueOf(object.getClass());
+			if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
+				return conversionService.convert(object, sourceDescriptor, targetDescriptor);
+			}
+		}
+		// no luck with the conversion service, we error out
+		throw new SQLException("Unsupported property type " +  targetDescriptor.getType().getName() + ".");
 	}
 	
 	

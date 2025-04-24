@@ -20,7 +20,7 @@ import com.asentinel.common.util.Assert;
 public class DefaultDynamicColumn implements DynamicColumn {
 	private final String name;
 	private final Class<?> type;
-	private  SqlParameter sqlParameter;
+	private final SqlParameter sqlParameter;
 	private final Set<DynamicColumnFlags> flags;
 	private final TypeDescriptor typeDescriptor;
 	

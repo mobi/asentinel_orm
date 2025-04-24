@@ -1,5 +1,6 @@
 package com.asentinel.common.orm.persist;
 
+import static com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor.isCustomConversion;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.partitioningBy;
@@ -766,7 +767,7 @@ public class SimpleUpdater implements Updater {
 			// see if we need special conversion
 			if (conversionService != null
 					&& argument != null
-					&& StringUtils.hasText(targetMember.getColumnAnnotation().sqlParam().value())) {
+					&& isCustomConversion(targetMember.getColumnAnnotation())) {
 				TypeDescriptor sourceDescriptor = targetMember.getTypeDescriptor();
 				TypeDescriptor targetDescriptor = new SqlParameterTypeDescriptor(targetMember.getColumnAnnotation().sqlParam());
 				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
@@ -793,7 +794,7 @@ public class SimpleUpdater implements Updater {
 		} else {
 			if (conversionService != null
 					&& argument != null
-					&& dynamicColumn.getSqlParameter() != null) {
+					&& isCustomConversion(dynamicColumn)) {
 				TypeDescriptor sourceDescriptor = dynamicColumn.getTypeDescriptor();
 				TypeDescriptor targetDescriptor = new SqlParameterTypeDescriptor(dynamicColumn.getSqlParameter());
 				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
