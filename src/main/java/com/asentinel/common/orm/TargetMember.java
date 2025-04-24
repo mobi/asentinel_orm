@@ -51,9 +51,18 @@ public class TargetMember {
 		this.annotation = annotation;
 		this.getMethod = getMethod;
 		this.setMethod = setMethod;
-		if (annotation instanceof Column || annotation instanceof PkColumn) {
-			// we only need type descriptors for @Column/@PkColumn annotated members
-			// see ConversionSupport
+		if (annotation instanceof Column 
+				|| annotation instanceof PkColumn
+				|| member instanceof Field) {
+			/* 
+			 * We create TypeDescriptors for :
+			 * 	- any field (including @Child annotated fields)
+			 *  - any @PkColumn annotated member
+			 *  - any annotated @Column member
+			 *  
+			 *  but so far we only need type descriptors for @Column/@PkColumn annotated members
+			 *  see ConversionSupport and/or SimpleUpdater
+			 */
 			this.typeDescriptor = getTypeDescriptor(member, getMethod);
 		} else {
 			this.typeDescriptor = null;
@@ -115,14 +124,21 @@ public class TargetMember {
 		}
 	}
 	
-	// FIXME: can return null for @Child so we need to refactor, create a TargetColumnMember
+	// FIXME: can return null for @Child and so it arguably breaks the Liskov substitution principle so we need to refactor, possibly create a TargetColumnMember
+	// although this seems to break backwards compatibility for the APIs of the TargetXxxx classes
+	
+	/**
+	 * @return the {@code TypeDescriptor} for this member assuming one could be
+	 *         created on construction. Otherwise it returns {@code null}. Always
+	 *         returns {@code null} for {@code Child} annotated <b>methods</b>.
+	 */
 	public TypeDescriptor getTypeDescriptor() {
 		return typeDescriptor;
 	}
 
 	@Override
 	public String toString() {
-		return "TargetMember [member=" + member + ", annotation="
+		return this.getClass().getSimpleName() + " [member=" + member + ", annotation="
 				+ annotation.toString() + "]";
 	}
 	
