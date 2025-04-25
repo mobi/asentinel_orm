@@ -48,26 +48,40 @@ public final class JdbcUtils  {
 	public final static int LOG_MAX_SIZE = 200;
 	final static int LOG_MAX_SHOW_IF_TOO_LONG = 10;
 	
-	
 	/**
-	 * @return a String that is used for logging. If the string is longer than
-	 * 		{@value #LOG_MAX_SHOW_IF_TOO_LONG}, the string length and first
-	 * 		{@value #LOG_MAX_SHOW_IF_TOO_LONG} characters are returned in a string. 
-	 * 		Otherwise the entire string (quoted) is returned.
+	 * @see #prepareObjectForLogging(Object, String, String)
 	 */
 	public static String prepareStringForLogging(CharSequence s) {
-		if (s == null) {
+		return prepareObjectForLogging(s, "'", "'");
+	}
+
+	/**
+	 * @return a {@code String} that is used for logging. If the
+	 *         {@code Object#toString()} representation of the {@code o} parameter
+	 *         is longer than {@value #LOG_MAX_SIZE}, the string length and first
+	 *         {@value #LOG_MAX_SHOW_IF_TOO_LONG} characters are returned in a
+	 *         string. Otherwise the entire string representation of the object
+	 *         parameter is returned.
+	 */
+	public static String prepareObjectForLogging(Object o, String sd, String ed) {
+		if (o == null) {
 			return "null";
 		}
-		StringBuilder sb = new StringBuilder();		
+		StringBuilder sb = new StringBuilder();
+		String s = o.toString();
 		if (s.length() <= LOG_MAX_SIZE) {
-			return sb.append("'").append(s).append("'").toString();
+			if (o instanceof CharSequence) {
+				return sb.append(sd).append(s).append(ed).toString();
+			}
+			return s;
 		}
-		sb.append("String[length=")
+		sb.append(o.getClass().getSimpleName())
+			.append("[length=")
 			.append(s.length()).append(", ")
-			.append("'").append(s.subSequence(0, LOG_MAX_SHOW_IF_TOO_LONG)).append(" ...'")
+			.append(sd).append(s.subSequence(0, LOG_MAX_SHOW_IF_TOO_LONG)).append(" ...").append(ed)
 			.append("]");
 		return sb.toString();
+		
 	}
 	
 	/**
@@ -98,14 +112,14 @@ public final class JdbcUtils  {
 		}
 		for (Object p: params) {
     		if (p instanceof CharSequence) {
-    			sb.append(JdbcUtils.prepareStringForLogging((CharSequence) p));
+    			sb.append(prepareStringForLogging((CharSequence) p));
     		} else if (p instanceof SqlParameterValue) {
     			SqlParameterValue spv = (SqlParameterValue) p;
     			sb.append("SqlParamVal [")
     				.append("type=").append(spv.getSqlType())
     				.append(", value=");
     			if (spv.getValue() instanceof CharSequence) {
-    				sb.append(JdbcUtils.prepareStringForLogging((CharSequence) spv.getValue()));
+    				sb.append(prepareStringForLogging((CharSequence) spv.getValue()));
     			} else {
 	    			sb.append(spv.getValue());
     			}
@@ -123,7 +137,7 @@ public final class JdbcUtils  {
     				sb.append(p);
     			}
     		} else {
-    			sb.append(p);
+    			sb.append(prepareObjectForLogging(p, "<", ">"));
     		}
     		sb.append(separator);
 		}

@@ -812,7 +812,7 @@ public final class ResultSetUtils {
 		return getIntArray(rs.getArray(col), allowNull);
 	}
 
-	private static int[] getIntArray(Array array, boolean allowNull) throws SQLException {
+	public static int[] getIntArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
@@ -841,7 +841,7 @@ public final class ResultSetUtils {
 		return getLongArray(rs.getArray(col), allowNull);
 	}
 
-	private static long[] getLongArray(Array array, boolean allowNull) throws SQLException {
+	public static long[] getLongArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
@@ -871,7 +871,7 @@ public final class ResultSetUtils {
 		return getDoubleArray(rs.getArray(col), allowNull);
 	}
 
-	private static double[] getDoubleArray(Array array, boolean allowNull) throws SQLException {
+	public static double[] getDoubleArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
@@ -900,7 +900,7 @@ public final class ResultSetUtils {
 		return getBigIntegerArray(rs.getArray(col), allowNull);
 	}
 
-	private static BigInteger[] getBigIntegerArray(Array array, boolean allowNull) throws SQLException {
+	public static BigInteger[] getBigIntegerArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
