@@ -22,7 +22,7 @@ import java.util.Date;
 /**
  * Method annotated bean.
  */
-public class Bean2 {
+class Bean2 {
 	
 	private int pk;
 	private int intVal;
@@ -40,11 +40,11 @@ public class Bean2 {
 	private Number number;
 	
 	
-	public Bean2() {
+	Bean2() {
 		this.pk = Integer.MAX_VALUE;
 	}
 	
-	public int getPk() {
+	int getPk() {
 		return pk;
 	}
 	
@@ -54,7 +54,7 @@ public class Bean2 {
 		this.pk = pk;
 	}
 
-	public int getIntVal() {
+	int getIntVal() {
 		return intVal;
 	}
 
@@ -64,111 +64,111 @@ public class Bean2 {
 		this.intVal = intVal;
 	}
 
-	public Integer getIntObj() {
+	Integer getIntObj() {
 		return intObj;
 	}
 
 	@Column(COL_INT_OBJ)
-	public void setIntObj(Integer intObj) {
+	void setIntObj(Integer intObj) {
 		this.intObj = intObj;
 	}
 
-	public long getLongVal() {
+	long getLongVal() {
 		return longVal;
 	}
 
 	@Column(COL_LONG_VAL)
-	public void setLongVal(long longVal) {
+	void setLongVal(long longVal) {
 		this.longVal = longVal;
 	}
 
-	public Long getLongObj() {
+	Long getLongObj() {
 		return longObj;
 	}
 
 	@Column(COL_LONG_OBJ)
-	public void setLongObj(Long longObj) {
+	void setLongObj(Long longObj) {
 		this.longObj = longObj;
 	}
 
-	public double getDoubleVal() {
+	double getDoubleVal() {
 		return doubleVal;
 	}
 
 	@Column(COL_DOUBLE_VAL)
-	public void setDoubleVal(double doubleVal) {
+	void setDoubleVal(double doubleVal) {
 		this.doubleVal = doubleVal;
 	}
 
-	public Double getDoubleObj() {
+	Double getDoubleObj() {
 		return doubleObj;
 	}
 
 	@Column(COL_DOUBLE_OBJ)
-	public void setDoubleObj(Double doubleObj) {
+	void setDoubleObj(Double doubleObj) {
 		this.doubleObj = doubleObj;
 	}
 
-	public boolean isBoolVal() {
+	boolean isBoolVal() {
 		return boolVal;
 	}
 
 	@Column(COL_BOOL_VAL)
-	public void setBoolVal(boolean boolVal) {
+	void setBoolVal(boolean boolVal) {
 		this.boolVal = boolVal;
 	}
 
-	public Boolean getBoolObj() {
+	Boolean getBoolObj() {
 		return boolObj;
 	}
 
 	@Column(COL_BOOL_OBJ)
-	public void setBoolObj(Boolean boolObj) {
+	void setBoolObj(Boolean boolObj) {
 		this.boolObj = boolObj;
 	}
 
-	public String getString() {
+	String getString() {
 		return string;
 	}
 
 	@Column(COL_STRING)
-	public void setString(String string) {
+	void setString(String string) {
 		this.string = string;
 	}
 
-	public Date getDate() {
+	Date getDate() {
 		return date;
 	}
 
 	@Column(COL_DATE)
-	public void setDate(Date date) {
+	void setDate(Date date) {
 		this.date = date;
 	}
 
-	public BigDecimal getBigDecimal() {
+	BigDecimal getBigDecimal() {
 		return bigDecimal;
 	}
 
 	@Column(COL_BIG_DECIMAL)
-	public void setBigDecimal(BigDecimal bigDecimal) {
+	void setBigDecimal(BigDecimal bigDecimal) {
 		this.bigDecimal = bigDecimal;
 	}
 
-	public BigInteger getBigInteger() {
+	BigInteger getBigInteger() {
 		return bigInteger;
 	}
 
 	@Column(COL_BIG_INTEGER)
-	public void setBigInteger(BigInteger bigInteger) {
+	void setBigInteger(BigInteger bigInteger) {
 		this.bigInteger = bigInteger;
 	}
 
-	public Number getNumber() {
+	Number getNumber() {
 		return number;
 	}
 
 	@Column(COL_NUMBER)
-	public void setNumber(Number number) {
+	void setNumber(Number number) {
 		this.number = number;
 	}
 
