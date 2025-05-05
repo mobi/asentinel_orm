@@ -51,11 +51,18 @@ public @interface Column {
 	String value();
 	
 	/**
-	 * @return whether to set the target member to <code>null</code> if the corresponding resultset column
-	 * 		is <code>null</code> or to set it to a default value. For example for numeric fields the default
-	 * 		value is <code>0</code>. See {@link ConversionSupport} for details. Please note that for primitive
-	 * 		types setting this flag to <code>true</code> will have no effect (ie. if the value in the resultset is <code>null</code>
-	 * 		the value set in the primitive target member will still be the default value for that type).
+	 * @return whether to set the target member to <code>null</code> if the
+	 *         corresponding resultset column is <code>null</code> or to set it to a
+	 *         default value. For example for numeric fields the default value is
+	 *         <code>0</code>. See {@link ConversionSupport} for details. Please
+	 *         note that setting this to {@code true} will have no effect for the
+	 *         following:
+	 *         <li>primitive types - if the value in the resultset is
+	 *         <code>null</code> the value set in the primitive target member will
+	 *         still be the default value for that type;
+	 *         <li>custom types (types having the {@link #sqlParam()} set) - if the
+	 *         value in the resultset is {@code null} then {@code null} will be set
+	 *         in the annotated member.
 	 * 
 	 * @see ConversionSupport
 	 * @see ResultSetUtils
