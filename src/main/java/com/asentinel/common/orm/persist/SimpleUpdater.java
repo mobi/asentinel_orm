@@ -104,7 +104,10 @@ public class SimpleUpdater implements Updater {
 	private final SqlQuery queryEx;
 
 	private NewEntityDetector newEntityDetector = new SimpleNewEntityDetector();
+	
+	@Deprecated(forRemoval = true, since = "1.71.0")
 	private BooleanParameterConverter<?> booleanParameterConverter = new DefaultBooleanParameterConverter();
+	
 	private NewRowOnUpsertDetector newRowOnUpsertDetector;
 	private ConversionService conversionService;
 
@@ -133,6 +136,12 @@ public class SimpleUpdater implements Updater {
 		this.newEntityDetector = newEntityDetector;
 	}
 
+	/**
+	 * @deprecated in favor of the {@code ConversionService}. Booleans can be
+	 *             converted to whatever the database supports using the
+	 *             {@code ConversionService}.
+	 */
+	@Deprecated(forRemoval = true, since = "1.71.0")
 	public BooleanParameterConverter<?> getBooleanParameterConverter() {
 		return booleanParameterConverter;
 	}
@@ -140,7 +149,12 @@ public class SimpleUpdater implements Updater {
 	/**
 	 * Sets the {@link BooleanParameterConverter} strategy used for converting java
 	 * booleans to the database boolean representation.
+	 * 
+	 * @deprecated in favor of the {@code ConversionService}. Booleans can be
+	 *             converted to whatever the database supports using the
+	 *             {@code ConversionService}.
 	 */
+	@Deprecated(forRemoval = true, since = "1.71.0")
 	public void setBooleanParameterConverter(BooleanParameterConverter<?> booleanParameterConverter) {
 		Assert.assertNotNull(booleanParameterConverter, "booleanParameterConverter");
 		this.booleanParameterConverter = booleanParameterConverter;
