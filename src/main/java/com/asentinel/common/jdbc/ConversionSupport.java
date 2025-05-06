@@ -57,7 +57,6 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 		return conversionService;
 	}
 
-
 	/**
 	 * Sets a {@code ConversionService} implementation to be used as fallback when
 	 * the resultset value can not be converted to the target field type. Allows
@@ -67,15 +66,13 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 		this.conversionService = conversionService;
 	}
 
-
-	protected final Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+	protected final Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		try {
-			return getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+			return getValue(parentObject, targetDescriptor, rs, columnMetadata);
 		} catch (ClassCastException | SQLException e) {
 			throw new SQLException("Can not convert SQL type to argument type for element " + targetDescriptor + " .", e);
 		}
 	}
-
 
 	/**
 	 * This method reads the value of the specified column from the resultset. It
@@ -92,7 +89,7 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	 * @throws SQLException
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked" })
-	protected Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+	protected Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		Class<?> targetType = targetDescriptor.getType();
 		String column = columnMetadata.getResultsetName();
 		boolean allowNull = columnMetadata.isAllowNull();
@@ -168,7 +165,6 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 		}
 	}
 
-
 	protected final Object customConvert(TypeDescriptor targetDescriptor, ResultSet rs, String column) throws SQLException {
 		if (conversionService != null) {
 			Object object = rs.getObject(column);
@@ -183,7 +179,6 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 		// no luck with the conversion service, we error out
 		throw new SQLException("Unsupported property type " +  targetDescriptor.getType().getName() + ".");
 	}
-	
 	
 	/**
 	 * @return {@code true} if the {@code targetMemberType} parameter is an

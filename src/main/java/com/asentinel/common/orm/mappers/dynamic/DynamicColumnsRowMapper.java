@@ -53,7 +53,7 @@ public class DynamicColumnsRowMapper<C extends DynamicColumn, T extends DynamicC
 		
 		// process dynamic columns
 		for (C column: dynamicColumns) {
-			Object value = getValue(
+			Object value = getValueInternal(
 					object, column.getTypeDescriptor(), 
 					rs, new ColumnMetadata(getColumnPrefix(), column.getDynamicColumnName(), column.isDynamicColumnAllowNull())
 			);
@@ -62,14 +62,14 @@ public class DynamicColumnsRowMapper<C extends DynamicColumn, T extends DynamicC
 	}
 	
 	@Override
-	protected Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+	protected Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		if (!(targetDescriptor instanceof FieldIdTypeDescriptor)) {
-			return super.getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+			return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 		}
 		
 		FieldIdTypeDescriptor fieldIdDescriptor = (FieldIdTypeDescriptor) targetDescriptor;
 		if (!(fieldIdDescriptor.getFieldId() instanceof DynamicColumn)) {
-			return super.getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+			return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 		}
 		
 		DynamicColumn column = (DynamicColumn) fieldIdDescriptor.getFieldId();
@@ -79,7 +79,7 @@ public class DynamicColumnsRowMapper<C extends DynamicColumn, T extends DynamicC
 			return customConvert(targetDescriptor, rs, columnMetadata.getResultsetName());
 		}
 		// let the super class code attempt to convert, but it will likely fail
-		return super.getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+		return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 	}
 
 }

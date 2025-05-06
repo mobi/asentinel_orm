@@ -205,11 +205,11 @@ public class AnnotationRowMapper<T> extends AbstractReflectionRowMapper<T> {
 			AnnotatedElement element = entry.getValue().getAnnotatedElement();
 			if (element instanceof Field) {
 				Field field = (Field) element; 
-				Object value = getValue(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
+				Object value = getValueInternal(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
 				setValue(object, field, value);
 			} else if (element instanceof Method) {
 				Method method = (Method) element; 
-				Object value = getValue(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
+				Object value = getValueInternal(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
 				setValue(object, method, value);
 			} else {
 				throw new IllegalStateException("Expected Field or Method. Found " + element.getClass().getName() + ".");
@@ -218,10 +218,10 @@ public class AnnotationRowMapper<T> extends AbstractReflectionRowMapper<T> {
 	}
 	
 	@Override
-	protected Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+	protected Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		Column column = targetDescriptor.getAnnotation(Column.class);
 		if (column == null) {
-			return super.getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+			return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 		}
 		
 		ConversionService conversionService = getConversionService();
@@ -232,7 +232,7 @@ public class AnnotationRowMapper<T> extends AbstractReflectionRowMapper<T> {
 		}
 		
 		// let the super class code attempt to convert, but it will likely fail
-		return super.getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+		return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 	}
 	
 	/**

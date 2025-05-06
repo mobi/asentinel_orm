@@ -38,7 +38,7 @@ public class ConversionSupportFallbackToConversionServiceTestCase {
 		when(cs.convert(eq(sourceCustomObject), eq(TypeDescriptor.valueOf(sourceCustomObject.getClass())), eq(TypeDescriptor.valueOf(TestTargetClass.class))))
 			.thenReturn(targetCustomObject);
 		
-		TestTargetClass value = (TestTargetClass) support.getValue(new Object(), TypeDescriptor.valueOf(TestTargetClass.class), rs, new ColumnMetadata("testColumn"));
+		TestTargetClass value = (TestTargetClass) support.getValueInternal(new Object(), TypeDescriptor.valueOf(TestTargetClass.class), rs, new ColumnMetadata("testColumn"));
 		assertEquals(targetCustomObject, value);
 	}
 
@@ -48,7 +48,7 @@ public class ConversionSupportFallbackToConversionServiceTestCase {
 		
 		when(rs.getObject("testColumn")).thenReturn(null);
 		
-		TestTargetClass value = (TestTargetClass) support.getValue(new Object(), TypeDescriptor.valueOf(TestTargetClass.class), rs, new ColumnMetadata("testColumn"));
+		TestTargetClass value = (TestTargetClass) support.getValueInternal(new Object(), TypeDescriptor.valueOf(TestTargetClass.class), rs, new ColumnMetadata("testColumn"));
 		assertNull(value);
 		
 		verifyNoInteractions(cs);
@@ -60,7 +60,7 @@ public class ConversionSupportFallbackToConversionServiceTestCase {
 		Object sourceCustomObject = new Object();
 		when(rs.getObject("testColumn")).thenReturn(sourceCustomObject);
 		
-		support.getValue(new Object(), TypeDescriptor.valueOf(TestTargetClass.class), rs, new ColumnMetadata("testColumn"));
+		support.getValueInternal(new Object(), TypeDescriptor.valueOf(TestTargetClass.class), rs, new ColumnMetadata("testColumn"));
 	}
 
 	

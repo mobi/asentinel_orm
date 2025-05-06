@@ -131,7 +131,7 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 					throw new SQLException(errorText);
 				}
 			} else {
-				Object value = getValue(object, getTypeDescriptor(method), rs, columnMetadata);
+				Object value = getValueInternal(object, getTypeDescriptor(method), rs, columnMetadata);
 				setValue(object, method, value);
 			}
 		}

@@ -39,14 +39,14 @@ public class ConversionSupportTestCase {
 	@Test
 	public void inputStreamEager() throws SQLException {
 		when(lh.getBlobAsBinaryStream(rs, "bytes")).thenReturn(bytes);
-		InputStream in = (InputStream) cs.getValue(1, TypeDescriptor.valueOf(InputStream.class), rs, new ColumnMetadata("bytes"));
+		InputStream in = (InputStream) cs.getValueInternal(1, TypeDescriptor.valueOf(InputStream.class), rs, new ColumnMetadata("bytes"));
 		assertSame(bytes, in);
 	}
 	
 	@Test
 	public void inputStreamLazy() throws SQLException {
 		cs.setQueryExecutor(qEx);
-		InputStream in = (InputStream) cs.getValue(new InputStreamWrapper(), TypeDescriptor.valueOf(InputStream.class), rs, new ColumnMetadata("bytes"));
+		InputStream in = (InputStream) cs.getValueInternal(new InputStreamWrapper(), TypeDescriptor.valueOf(InputStream.class), rs, new ColumnMetadata("bytes"));
 		assertTrue(in instanceof InputStreamProxy);
 		assertFalse(((InputStreamProxy) in).isLoaded());
 	}
