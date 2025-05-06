@@ -68,6 +68,15 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	}
 
 
+	protected final Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+		try {
+			return getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
+		} catch (ClassCastException | SQLException e) {
+			throw new SQLException("Can not convert SQL type to argument type for element " + targetDescriptor + " .", e);
+		}
+	}
+
+
 	/**
 	 * This method reads the value of the specified column from the resultset. It
 	 * can be overridden by subclasses to customize the extraction.
@@ -82,15 +91,6 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	 * 
 	 * @throws SQLException
 	 */
-	protected final Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
-		try {
-			return getValueInternal(parentObject, targetDescriptor, rs, columnMetadata);
-		} catch (ClassCastException | SQLException e) {
-			throw new SQLException("Can not convert SQL type to argument type for element " + targetDescriptor + " .", e);
-		}
-	}
-
-
 	@SuppressWarnings({"rawtypes", "unchecked" })
 	protected Object getValueInternal(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
 		Class<?> targetType = targetDescriptor.getType();

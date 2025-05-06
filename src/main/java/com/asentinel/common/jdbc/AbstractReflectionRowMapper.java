@@ -18,8 +18,7 @@ import com.asentinel.common.util.Assert;
  * There is one abstract method to be overridden in subclasses {@link #populateTarget(Object, ResultSet)}. 
  * Optionally subclasses can also override the following methods to customize the column data extraction:<br>
  * 		<li> {@link #createTarget(ResultSet)}
- * 		<li> {@link #getValue(Object, Method, ResultSet, ColumnMetadata)}
- * 		<li> {@link #getValue(Object, Field, ResultSet, ColumnMetadata)}
+ * 		<li> {@link #getValueInternal(Object, org.springframework.core.convert.TypeDescriptor, ResultSet, ColumnMetadata)}
  * 		<li> {@link #setValue(Object, Method, Object)}
  * 		<li> {@link #setValue(Object, Field, Object)}
  *   
