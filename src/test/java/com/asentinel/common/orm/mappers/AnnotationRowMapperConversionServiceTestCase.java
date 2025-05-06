@@ -73,6 +73,6 @@ public class AnnotationRowMapperConversionServiceTestCase {
 		int id;
 		
 		@Column(value = COL_CUSTOM_OBJECT, sqlParam = @SqlParam("custom"))
-		String complexString;
+		String complexString = "some value to be overriden";
 	}
 }
