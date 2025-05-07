@@ -89,8 +89,16 @@ public @interface Column {
 	/**
 	 * @return information about the mapped database column type of the annotated
 	 *         member. It should be used only if the mapped database column is of
-	 *         some special type or a user defined type.
+	 *         some special type or a user defined type. A Spring
+	 *         {@code ConversionService} supporting conversion between the SQL type
+	 *         and the Java type of the {@code Column} annotated member (both ways)
+	 *         must be injected in the ORM beans ({@code SimpleUpdater} and
+	 *         {@code DefaultEntityDescriptorTreeRepository}). See the
+	 *         {@code SqlParam} javadoc for an example.
+	 * 
+	 * @see SqlParam
 	 * @see SqlParameter
+	 * @see SqlParameterTypeDescriptor
 	 * @see SqlParameter#getTypeName()
 	 */
 	SqlParam sqlParam() default @SqlParam;
