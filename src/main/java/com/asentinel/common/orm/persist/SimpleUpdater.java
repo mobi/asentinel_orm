@@ -183,10 +183,11 @@ public class SimpleUpdater implements Updater {
 
 	/**
 	 * Sets a {@code ConversionService} to be used for {@code Column} annotated
-	 * members that need special custom conversion to their corresponding database
-	 * type.
+	 * members or {@code DynamicColumn}s that need special custom conversion to
+	 * their corresponding database type.
 	 * 
 	 * @see Column#sqlParam()
+	 * @see DynamicColumn#getSqlParameter()
 	 * @see SqlParam
 	 */
 	public void setConversionService(ConversionService conversionService) {
