@@ -142,7 +142,7 @@ public class TargetMember {
 				+ annotation.toString() + "]";
 	}
 	
-	protected static TypeDescriptor getTypeDescriptor(AnnotatedElement member, Method getter) {
+	private static TypeDescriptor getTypeDescriptor(AnnotatedElement member, Method getter) {
 		if (member instanceof Field) {
 			return TypeDescriptor.nested((Field) member, 0);
 		} else if (member instanceof Method) {
@@ -157,7 +157,4 @@ public class TargetMember {
 		}
 	}
 
-	public static TypeDescriptor getTypeDescriptor(AnnotatedElement member) {
-		return getTypeDescriptor(member, null);
-	}
 }
