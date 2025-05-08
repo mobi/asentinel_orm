@@ -78,9 +78,13 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 	public ReflectionRowMapper(ObjectFactory<T> objectFactory, boolean bestEffort) {
 		super(objectFactory);
 		this.bestEffort = bestEffort;
-		// TODO: an instance is needed here to get the object type. The instance is discarded.
-		// We may need to find an alternative, we are creating an instance just to discard it.
-		initialize((Class<T>) objectFactory.newObject().getClass());
+		Class<T> type;
+		if (objectFactory instanceof TypedObjectFactory) {
+			type = ((TypedObjectFactory<T>) objectFactory).getType();
+		} else {
+			type = (Class<T>) objectFactory.newObject().getClass();
+		}
+		initialize(type);
 	}
 	
 	
