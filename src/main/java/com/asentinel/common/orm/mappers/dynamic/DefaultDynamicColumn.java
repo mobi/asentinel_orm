@@ -3,6 +3,7 @@ package com.asentinel.common.orm.mappers.dynamic;
 import static java.util.Collections.unmodifiableSet;
 
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
@@ -13,9 +14,12 @@ import com.asentinel.common.text.FieldIdTypeDescriptor;
 import com.asentinel.common.util.Assert;
 
 /**
- * Reference implementation for the {@link DynamicColumn} interface.
+ * Reference implementation for the {@link DynamicColumn} interface. Users of
+ * the library are encouraged to implement the {@link DynamicColumn} interface
+ * for the classes that represent the metadata for their dynamic (runtime
+ * defined) columns.
  * 
- * @author Razvan.Popian
+ * @author Razvan Popian
  */
 public class DefaultDynamicColumn implements DynamicColumn {
 	private final String name;
@@ -79,13 +83,10 @@ public class DefaultDynamicColumn implements DynamicColumn {
 	public SqlParameter getSqlParameter() {
 		return sqlParameter;
 	}
-	
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
+		return Objects.hash(name, type);
 	}
 
 	@Override
@@ -97,13 +98,8 @@ public class DefaultDynamicColumn implements DynamicColumn {
 		if (getClass() != obj.getClass())
 			return false;
 		DefaultDynamicColumn other = (DefaultDynamicColumn) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}	
+		return Objects.equals(name, other.name) && Objects.equals(type, other.type);
+	}
 
 	@Override
 	public String toString() {

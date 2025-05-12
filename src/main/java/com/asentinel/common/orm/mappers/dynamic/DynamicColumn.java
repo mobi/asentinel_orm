@@ -15,7 +15,11 @@ import com.asentinel.common.text.FieldIdTypeDescriptor;
 /**
  * Equivalent for the {@link Column} annotation in the dynamic columns world.
  * This interface should be implemented by classes that describe dynamic field
- * properties like name, type etc.
+ * properties like name, type etc. Ideally implementations should implement
+ * {@code Object#equals(Object)} and {@code Object#hashCode()} using some
+ * natural key. These methods could get used in various scenarios like custom
+ * type conversion using the Spring {@code ConversionService} - type descriptors
+ * holding implementations of this interface may be cached.
  * 
  * @see DynamicColumnsEntity
  * @see PkColumn
