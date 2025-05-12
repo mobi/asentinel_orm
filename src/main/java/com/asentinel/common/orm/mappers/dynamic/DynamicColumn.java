@@ -8,6 +8,8 @@ import org.springframework.jdbc.core.SqlParameter;
 
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
+import com.asentinel.common.orm.mappers.SqlParam;
+import com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor;
 import com.asentinel.common.text.FieldIdTypeDescriptor;
 
 /**
@@ -69,6 +71,9 @@ public interface DynamicColumn {
 	 *         some special type or a user defined type. Returns {@code null} by
 	 *         default to indicate that the default conversion should be used (i.e.
 	 *         no {@code ConversionService} conversion should be triggered).
+	 *         
+	 * @see SqlParam
+	 * @see SqlParameterTypeDescriptor        
 	 */
 	default SqlParameter getSqlParameter() {
 		return null;

@@ -94,7 +94,7 @@ public @interface Column {
 	 *         and the Java type of the {@code Column} annotated member (both ways)
 	 *         must be injected in the ORM beans ({@code SimpleUpdater} and
 	 *         {@code DefaultEntityDescriptorTreeRepository}). See the
-	 *         {@code SqlParam} javadoc for an example.
+	 *         {@code SqlParam} javadoc for additional information and an example.
 	 * 
 	 * @see SqlParam
 	 * @see SqlParameter

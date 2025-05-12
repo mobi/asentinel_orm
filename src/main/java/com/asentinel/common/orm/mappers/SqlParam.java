@@ -13,10 +13,17 @@ import org.springframework.jdbc.core.SqlParameter;
  * Annotation holding information about the type of the mapped database column
  * if the column is not a standard SQL type. It should be used together with a
  * {@link ConversionService} when custom conversion between the java type and
- * the SQL type is needed (both ways). The value of the annotation will be used
- * to construct a {@link SqlParameterTypeDescriptor} instance that will be used
- * by converters registered with the {@code ConversionService}. Below is an
- * example on how to save and load a Postgres JSON column. <br>
+ * the SQL type is needed (both ways). There are 2 conversion cases:
+ * <li>from database type to java type: in this case the source
+ * {@link TypeDescriptor} will be a simple one created for the database
+ * (resultset) type and the target {@code TypeDescriptor} will be a
+ * {@code TypeDescriptor} that wraps the {@code Column} annotated member.
+ * <li>from java type to database type: in this case the source
+ * {@code TypeDescriptor} will be a {@code TypeDescriptor} that wraps the
+ * {@code Column} annotated member and the target {@code TypeDescriptor} will be
+ * {@link SqlParameterTypeDescriptor} created based on this annotation. <br>
+ * <br>
+ * Below is an example on how to save and load a Postgres JSON column. <br>
  * <br>
  * Given the following entities (getters/setters omitted for brevity):
  * 
@@ -135,10 +142,10 @@ public @interface SqlParam {
 	
 	/**
 	 * @return information to be used by the {@code ConversionService} to perform
-	 *         the conversion from the java type to the database type. The default
-	 *         is empty indicating that the default conversion should be performed.
-	 *         The value will be used to create an {@link SqlParameter} instance
-	 *         with the type name equal to the value.
+	 *         the conversion from the java type to the database type and viceversa.
+	 *         The default is empty indicating that the default conversion should be
+	 *         performed. The value will be used to create an {@link SqlParameter}
+	 *         instance with the type name equal to the value.
 	 * 
 	 * @see SqlParameter#getTypeName()
 	 */
