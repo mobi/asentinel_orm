@@ -6,7 +6,7 @@ One of the features of the Tangoe Telecom project is to allow users to define th
 
 # Key features
 
-- simple configuration on top of JdbcTemplate
+- simple configuration on top of `JdbcTemplate`
 - easy to integrate in any `JdbcTemplate` project
 - easy fallback to plain SQL statements and `JdbcTemplate`
 - all SQL queries are executed using `JdbcTemplate` so they participate in Spring managed transactions
