@@ -1,5 +1,6 @@
 package com.asentinel.common.util;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -132,6 +133,8 @@ public class Utils {
 			return toDate((LocalDateTime) someDateOrTime);
 		} else if (someDateOrTime instanceof ZonedDateTime) {
 			return Date.from(((ZonedDateTime) someDateOrTime).toInstant());
+		} else if (someDateOrTime instanceof Instant) {
+			return Date.from((Instant) someDateOrTime);
 		} else if (someDateOrTime == null) {
 			return null;
 		} else {

@@ -1,8 +1,10 @@
 package com.asentinel.common.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
@@ -10,31 +12,36 @@ import java.time.temporal.Temporal;
 import org.junit.Test;
 
 public class UtilsTestCase {
-	LocalDateTime d = LocalDateTime.now();
+	private final LocalDateTime d = LocalDateTime.now();
 
 	@Test
-	public void testTemporalToDate_LocalDate() {
+	public void temporalToDate_LocalDate() {
 		assertEquals(Utils.toDate(d.toLocalDate()), Utils.toDate((Temporal) d.toLocalDate()));
 	}
 	
 	@Test
-	public void testTemporalToDate_LocalTime() {
+	public void temporalToDate_LocalTime() {
 		assertEquals(Utils.toDate(d.toLocalTime()), Utils.toDate((Temporal) d.toLocalTime()));
 	}
 
 	@Test
-	public void testTemporalToDate_LocalDateTime() {
+	public void temporalToDate_LocalDateTime() {
 		assertEquals(Utils.toDate(d), Utils.toDate((Temporal) d));
 	}
 
 	@Test
-	public void testTemporalToDate_Null() {
+	public void temporalToDate_Null() {
 		assertNull(Utils.toDate((Temporal) null));
 	}
 
 	@Test
-	public void testTemporalToDate_Unsupported() {
-		org.junit.Assert.assertNotNull(Utils.toDate(ZonedDateTime.now()));
+	public void temporalToDate_ZonedDateTime() {
+		assertNotNull(Utils.toDate(ZonedDateTime.now()));
+	}
+	
+	@Test
+	public void temporalToDate_Instant() {
+		assertNotNull(Utils.toDate(Instant.now()));
 	}
 
 }
