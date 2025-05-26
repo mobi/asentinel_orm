@@ -405,3 +405,6 @@ public class EmployeeHolder {
 	}
 }   
 ```
+
+# Further reading
+- [Dzone: Runtime-Defined Columns With asentinel-orm](https://dzone.com/articles/runtime-defined-columns-with-asentinel-orm)
