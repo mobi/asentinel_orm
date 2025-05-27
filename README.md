@@ -405,6 +405,46 @@ public class EmployeeHolder {
 	}
 }   
 ```
+Another useful scenario is to convert a certain java type to a `spring-jdbc` `SqlParameterValue` so that we can specify the exact SQL type, precision etc. Here is a pair of converters that can convert between `java.time.Instant` and `java.sql.Timestamp`:
+
+```
+	public class InstantToTimestampConverter implements ConditionalGenericConverter {
+
+		@Override
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			Instant instant = (Instant) source;
+			Timestamp t = Timestamp.from(instant);
+			return new SqlParameterValue(Types.TIMESTAMP, t);
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			if (sourceType.getType() != Instant.class) {
+				return false;
+			}
+			SqlParameterTypeDescriptor typeDescriptor = (SqlParameterTypeDescriptor) targetType;
+			if ("timestamp".equals(typeDescriptor.getTypeName())) {
+				return true;
+			}
+			return false;
+		}
+		
+		@Override
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return null;
+		}
+
+	}
+	
+	public class TimestampToInstantConverter implements Converter<Timestamp, Instant> {
+
+		@Override
+		public Instant convert(Timestamp source) {
+			return source.toInstant();
+		}
+	}
+```
+Any field annotated with `@Column(value = "SomeColumnName", sqlParam = @SqlParam("timestamp"))` will trigger the above converters assuming they are registered with the ORM `ConversionService`.
 
 # Further reading
 - [Dzone: Runtime-Defined Columns With asentinel-orm](https://dzone.com/articles/runtime-defined-columns-with-asentinel-orm)
