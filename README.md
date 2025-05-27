@@ -20,7 +20,7 @@ One of the features of the Tangoe Telecom project is to allow users to define th
 
 # Example
 
-Please see [asentinel-orm-demo](https://github.com/jMediaConverter/asentinel-orm-demo) for a working example. All of the code snippets below are extracted from that project.
+Please see [asentinel-orm-demo](https://github.com/jMediaConverter/asentinel-orm-demo) for a working example. Many of the code snippets below are extracted from that project.
 
 # Supported databases
 
