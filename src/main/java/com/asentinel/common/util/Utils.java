@@ -76,6 +76,20 @@ public class Utils {
 		return toZonedDateTime(date).toLocalDateTime();
 	}
 
+
+	/**
+	 * @param date the {@link Date} to convert.
+	 * @return {@link Instant} representation of the {@code date} parameter. If the
+	 *         {@link Date} argument is <code>null</code> this method returns
+	 *         <code>null</code>.
+	 */
+	public static Instant toInstant(Date date) {
+		if (date == null) {
+			return null;
+		}
+		return date.toInstant();
+	}
+	
 	/**
 	 * @param localDate 
 	 * 			the {@link LocalDate} to convert.

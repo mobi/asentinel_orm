@@ -11,6 +11,7 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -697,6 +698,14 @@ public final class ResultSetUtils {
 		return getLocalDateTime(rs.getTimestamp(col));
 	}
 	
+	public static Instant getInstant(ResultSet rs, int col) throws SQLException {
+		return Utils.toInstant(rs.getTimestamp(col));
+	}
+
+	public static Instant getInstant(ResultSet rs, String col) throws SQLException {
+		return Utils.toInstant(rs.getTimestamp(col));
+	}
+
 	private static LocalDateTime getLocalDateTime(Timestamp t) throws SQLException {
 		return Utils.toLocalDateTime(t);
 	}

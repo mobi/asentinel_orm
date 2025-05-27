@@ -1,6 +1,6 @@
 package com.asentinel.common.jdbc;
 
-import static com.asentinel.common.jdbc.ResultSetUtils.getBigDecimalObject;
+import static com.asentinel.common.jdbc.ResultSetUtils.*;
 import static com.asentinel.common.jdbc.ResultSetUtils.getBigIntegerArray;
 import static com.asentinel.common.jdbc.ResultSetUtils.getBigIntegerObject;
 import static com.asentinel.common.jdbc.ResultSetUtils.getBlobAsBytes;
@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -109,6 +110,8 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 			return getLocalTime(rs, column);
 		} else if (targetType == LocalDateTime.class) {
 			return getLocalDateTime(rs, column);
+		} else if (targetType == Instant.class) {
+			return getInstant(rs, column);
 		} else if (targetType == long.class) {
 			return getLongObject(rs, column);
 		} else if (targetType == Integer.class) {

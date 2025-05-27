@@ -78,7 +78,7 @@ public class DynamicColumnsRowMapper<C extends DynamicColumn, T extends DynamicC
 			// we are dealing with a custom type, we call the conversion service
 			return customConvert(targetDescriptor, rs, columnMetadata.getResultsetName());
 		}
-		// let the super class code attempt to convert, but it will likely fail
+		// let the super class code perform default conversion
 		return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 	}
 

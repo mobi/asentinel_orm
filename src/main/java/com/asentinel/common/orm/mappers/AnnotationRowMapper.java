@@ -231,7 +231,7 @@ public class AnnotationRowMapper<T> extends AbstractReflectionRowMapper<T> {
 			return customConvert(targetDescriptor, rs, columnMetadata.getResultsetName());
 		}
 		
-		// let the super class code attempt to convert, but it will likely fail
+		// let the super class code perform default conversion
 		return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 	}
 	

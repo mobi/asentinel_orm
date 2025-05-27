@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -740,6 +741,69 @@ public class ResultSetUtils4TestCase {
 		LocalDateTime d = ResultSetUtils.getLocalDateTime(rs, "");
 		assertEquals(Utils.toLocalDateTime(testDate), d);
 
+		verify(rs);
+	}
+	
+	
+	// Instant tests
+	
+	@Test
+	public void testInstantColByIndex() throws SQLException {
+		Date testDate = new Date(0);
+		Timestamp testTimeStamp = new Timestamp(testDate.getTime());
+		ResultSet rs = createMock(ResultSet.class);
+		expect(rs.getTimestamp(anyInt())).andReturn(testTimeStamp).anyTimes();
+		expect(rs.wasNull()).andReturn(false).anyTimes();
+		
+		replay(rs);
+
+		Instant d = ResultSetUtils.getInstant(rs, 0);
+		assertEquals(testDate.toInstant(), d);
+
+		verify(rs);
+	}
+	
+	@Test
+	public void testInstantColByName() throws SQLException {
+		Date testDate = new Date(0);
+		Timestamp testTimeStamp = new Timestamp(testDate.getTime());
+		ResultSet rs = createMock(ResultSet.class);
+		expect(rs.getTimestamp(anyObject(String.class))).andReturn(testTimeStamp).anyTimes();
+		expect(rs.wasNull()).andReturn(false).anyTimes();
+		
+		replay(rs);
+
+		Instant d = ResultSetUtils.getInstant(rs, "");
+		assertEquals(testDate.toInstant(), d);
+
+		verify(rs);
+	}
+	
+	@Test
+	public void testInstantColByIndexWithNull() throws SQLException {
+		ResultSet rs = createMock(ResultSet.class);
+		expect(rs.getTimestamp(anyInt())).andReturn(null).anyTimes();
+		expect(rs.wasNull()).andReturn(true).anyTimes();
+		
+		replay(rs);
+		
+		Instant d = ResultSetUtils.getInstant(rs, 0);
+		assertNull("The result should be null.", d);
+		
+		verify(rs);
+	}
+	
+	@Test
+	public void testInstantColByNameWithNull() throws SQLException {
+		ResultSet rs = createMock(ResultSet.class);
+		expect(rs.getTimestamp(anyObject())).andReturn(null).anyTimes();
+		expect(rs.wasNull()).andReturn(true).anyTimes();
+		
+		replay(rs);
+		
+		Instant d = ResultSetUtils.getInstant(rs, "");
+		assertNull("The result should be null.", d);
+		
 		verify(rs);
 	}
 
