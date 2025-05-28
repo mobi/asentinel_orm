@@ -330,10 +330,7 @@ Note that we are also creating a `ConversionService` bean that is able to conver
 				}
 				sqlParamValue = column.sqlParam().value();
 			}
-			if (!("jsonb".equals(sqlParamValue))) {
-				return false;
-			}
-			return true;
+			return "jsonb".equals(sqlParamValue);
 		}
 		
 	}
@@ -369,11 +366,7 @@ Note that we are also creating a `ConversionService` bean that is able to conver
 			}
 			
 			SqlParameterTypeDescriptor typeDescriptor = (SqlParameterTypeDescriptor) targetType;
-			if ("jsonb".equals(typeDescriptor.getTypeName())) {
-				return true;
-			}
-			
-			return false;
+			return "jsonb".equals(typeDescriptor.getTypeName());
 		}
 		
 	}}
@@ -422,11 +415,11 @@ Another useful scenario is to convert a certain java type to a `spring-jdbc` `Sq
 			if (sourceType.getType() != Instant.class) {
 				return false;
 			}
+			if (!(targetType instanceof SqlParameterTypeDescriptor)) {
+				return false;
+			}			
 			SqlParameterTypeDescriptor typeDescriptor = (SqlParameterTypeDescriptor) targetType;
-			if ("timestamp".equals(typeDescriptor.getTypeName())) {
-				return true;
-			}
-			return false;
+			return "timestamp".equals(typeDescriptor.getTypeName());
 		}
 		
 		@Override
