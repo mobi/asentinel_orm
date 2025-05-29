@@ -5,6 +5,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.springframework.core.convert.Property;
+import org.springframework.core.convert.TypeDescriptor;
+
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
 import com.asentinel.common.util.Assert;
@@ -21,6 +24,8 @@ public class TargetMember {
 	
 	private final Method getMethod;
 	private final Method setMethod;
+	
+	private final TypeDescriptor typeDescriptor;
 	
 	public TargetMember(AnnotatedElement member, Annotation annotation) {
 		this(member, annotation, null, null);
@@ -46,6 +51,22 @@ public class TargetMember {
 		this.annotation = annotation;
 		this.getMethod = getMethod;
 		this.setMethod = setMethod;
+		if (annotation instanceof Column 
+				|| annotation instanceof PkColumn
+				|| member instanceof Field) {
+			/* 
+			 * We create TypeDescriptors for :
+			 * 	- any field (including @Child annotated fields)
+			 *  - any @PkColumn annotated member
+			 *  - any annotated @Column member
+			 *  
+			 *  but so far we only need type descriptors for @Column/@PkColumn annotated members
+			 *  see ConversionSupport and/or SimpleUpdater
+			 */
+			this.typeDescriptor = getTypeDescriptor(member, getMethod);
+		} else {
+			this.typeDescriptor = null;
+		}
 	}
 
 	public AnnotatedElement getAnnotatedElement() {
@@ -102,11 +123,38 @@ public class TargetMember {
 			throw new IllegalStateException("Expected Field or Method. Found " + member.getClass().getName());					
 		}
 	}
+	
+	// FIXME: can return null for @Child and so it arguably breaks the Liskov substitution principle so we need to refactor, possibly create a TargetColumnMember
+	// although this seems to break backwards compatibility for the APIs of the TargetXxxx classes
+	
+	/**
+	 * @return the {@code TypeDescriptor} for this member assuming one could be
+	 *         created on construction. Otherwise it returns {@code null}. Always
+	 *         returns {@code null} for {@code Child} annotated <b>methods</b>.
+	 */
+	public TypeDescriptor getTypeDescriptor() {
+		return typeDescriptor;
+	}
 
 	@Override
 	public String toString() {
-		return "TargetMember [member=" + member + ", annotation="
+		return this.getClass().getSimpleName() + " [member=" + member + ", annotation="
 				+ annotation.toString() + "]";
+	}
+	
+	private static TypeDescriptor getTypeDescriptor(AnnotatedElement member, Method getter) {
+		if (member instanceof Field) {
+			return TypeDescriptor.nested((Field) member, 0);
+		} else if (member instanceof Method) {
+			Method method = (Method) member;
+			if (method.getParameterTypes().length != 1) {
+				throw new IllegalArgumentException("The method " + method + " should have exactly one parameter.");
+			}			
+			Class<?> cls = method.getParameterTypes()[0];
+			return TypeDescriptor.nested(new Property(cls, getter, (Method) member), 0);
+		} else {
+			throw new IllegalArgumentException("The member " + member + " is neither a field nor a method.");
+		}
 	}
 
 }

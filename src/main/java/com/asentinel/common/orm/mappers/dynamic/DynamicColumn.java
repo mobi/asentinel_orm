@@ -3,13 +3,23 @@ package com.asentinel.common.orm.mappers.dynamic;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.jdbc.core.SqlParameter;
+
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
+import com.asentinel.common.orm.mappers.SqlParam;
+import com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor;
+import com.asentinel.common.text.FieldIdTypeDescriptor;
 
 /**
  * Equivalent for the {@link Column} annotation in the dynamic columns world.
  * This interface should be implemented by classes that describe dynamic field
- * properties like name, type etc.
+ * properties like name, type etc. Ideally implementations should implement
+ * {@code Object#equals(Object)} and {@code Object#hashCode()} using some
+ * natural key. These methods could get used in various scenarios like custom
+ * type conversion using the Spring {@code ConversionService} - type descriptors
+ * holding implementations of this interface may be cached.
  * 
  * @see DynamicColumnsEntity
  * @see PkColumn
@@ -48,6 +58,29 @@ public interface DynamicColumn {
 	 */
 	default Set<DynamicColumnFlags> getDynamicColumnFlags() {
 		return EnumSet.noneOf(DynamicColumnFlags.class);
+	}
+	
+	/**
+	 * @return a {@link TypeDescriptor} for this column that can be used for
+	 *         converting the resultset value (database value) to a java domain
+	 *         type.
+	 */
+	default TypeDescriptor getTypeDescriptor() {
+		return new FieldIdTypeDescriptor(this, getDynamicColumnType());
+	}
+	
+	/**
+	 * @return information about the mapped database column type of the dynamic
+	 *         column. It should be used only if the mapped database column is of
+	 *         some special type or a user defined type. Returns {@code null} by
+	 *         default to indicate that the default conversion should be used (i.e.
+	 *         no {@code ConversionService} conversion should be triggered).
+	 *         
+	 * @see SqlParam
+	 * @see SqlParameterTypeDescriptor        
+	 */
+	default SqlParameter getSqlParameter() {
+		return null;
 	}
 	
 	public enum DynamicColumnFlags {

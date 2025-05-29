@@ -16,6 +16,7 @@ import java.util.function.UnaryOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.StringUtils;
@@ -357,6 +358,7 @@ public class SimpleEntityDescriptor extends EntityDescriptor implements QueryRea
 		
 		private SqlQuery queryEx;
 		private LobHandler lobHandler;
+		private ConversionService conversionService;
 		private RowMapper<?> entityIdRowMapper;
 		private AnnotationRowMapper<?> mapper;
 
@@ -581,6 +583,17 @@ public class SimpleEntityDescriptor extends EntityDescriptor implements QueryRea
 			return this;
 		}
 		
+		/**
+		 * Sets the {@code ConversionService} to be used for special database types
+		 * when reading result sets.
+		 * 
+		 * @see ConversionSupport
+		 */
+		public Builder conversionService(ConversionService conversionService) {
+			this.conversionService = conversionService;
+			return this;
+		}
+		
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public Builder preBuild() {
 			if (parentRelationType == null) {
@@ -631,6 +644,7 @@ public class SimpleEntityDescriptor extends EntityDescriptor implements QueryRea
 				}
 				this.mapper.setQueryExecutor(queryEx);
 				this.mapper.setLobHandler(lobHandler);
+				this.mapper.setConversionService(conversionService);
 			}
 			
 			return this;
@@ -743,6 +757,10 @@ public class SimpleEntityDescriptor extends EntityDescriptor implements QueryRea
 
 		public SqlQuery getQueryEx() {
 			return queryEx;
+		}
+		
+		public ConversionService getConversionService() {
+			return conversionService;
 		}
 		
 		@Override

@@ -53,17 +53,26 @@ public class TargetMembersHolderTestCase {
 		assertTrue(pk.getAnnotatedElement() instanceof Field);
 		assertEquals("id", ((PkColumn) pk.getAnnotation()).value());
 		assertNull(pk.getGetMethod());
+		assertNotNull(pk.getTypeDescriptor());
 		
 		List<TargetMember> cols = tms.getColumnMembers();
 		assertEquals(2, cols.size());
+		
 		assertTrue(cols.get(0).getAnnotatedElement() instanceof Field);
+		assertNotNull(cols.get(0).getTypeDescriptor());
+		
 		assertTrue(cols.get(1).getAnnotatedElement() instanceof Method);
 		assertNotNull(cols.get(1).getGetMethod());
+		assertNotNull(cols.get(1).getTypeDescriptor());
 		
 		List<TargetChildMember> children = tms.getChildMembers();
 		assertEquals(2, children.size());
+		
 		assertTrue(children.get(0).getAnnotatedElement() instanceof Field);
+		assertNotNull(children.get(0).getTypeDescriptor());
+		
 		assertTrue(children.get(1).getAnnotatedElement() instanceof Method);
+		assertNull(children.get(1).getTypeDescriptor());
 	}
 
 	@Test
@@ -149,6 +158,7 @@ public class TargetMembersHolderTestCase {
 		assertEquals(1, list.size());
 		assertNotNull(list.get(0).getAnnotatedElement());
 		assertNull(list.get(0).getGetMethod());
+		assertNotNull(list.get(0).getTypeDescriptor());
 	}
 
 	@Test
@@ -165,6 +175,7 @@ public class TargetMembersHolderTestCase {
 		assertNotNull(list.get(0).getAnnotatedElement());
 		assertNotNull(list.get(0).getSetMethod());
 		assertNull(list.get(0).getGetMethod());
+		assertNull(list.get(0).getTypeDescriptor());
 		assertEquals(String.class, list.get(0).getChildType());
 	}
 
@@ -181,7 +192,7 @@ public class TargetMembersHolderTestCase {
 		assertEquals(1, list.size());
 		assertNotNull(list.get(0).getAnnotatedElement());
 		assertNotNull(list.get(0).getSetMethod());
-		assertNotNull(list.get(0).getGetMethod());
+		assertNull(list.get(0).getTypeDescriptor());
 		assertEquals(String.class, list.get(0).getChildType());
 	}
 	

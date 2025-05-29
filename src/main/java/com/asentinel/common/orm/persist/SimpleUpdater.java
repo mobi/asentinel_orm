@@ -1,5 +1,6 @@
 package com.asentinel.common.orm.persist;
 
+import static com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor.isCustomConversion;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.partitioningBy;
@@ -24,6 +25,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -54,6 +57,9 @@ import com.asentinel.common.orm.TargetChildMember;
 import com.asentinel.common.orm.TargetMember;
 import com.asentinel.common.orm.TargetMembers;
 import com.asentinel.common.orm.TargetMembersHolder;
+import com.asentinel.common.orm.mappers.Column;
+import com.asentinel.common.orm.mappers.SqlParam;
+import com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor;
 import com.asentinel.common.orm.mappers.dynamic.DynamicColumn;
 import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
 import com.asentinel.common.orm.proxy.InputStreamProxy;
@@ -98,8 +104,12 @@ public class SimpleUpdater implements Updater {
 	private final SqlQuery queryEx;
 
 	private NewEntityDetector newEntityDetector = new SimpleNewEntityDetector();
+	
+	@Deprecated(forRemoval = true, since = "1.71.0")
 	private BooleanParameterConverter<?> booleanParameterConverter = new DefaultBooleanParameterConverter();
+	
 	private NewRowOnUpsertDetector newRowOnUpsertDetector;
+	private ConversionService conversionService;
 
 	public SimpleUpdater(JdbcFlavor jdbcFlavor, SqlQuery queryEx) {
 		Assert.assertNotNull(jdbcFlavor, "jdbcFlavor");
@@ -126,6 +136,12 @@ public class SimpleUpdater implements Updater {
 		this.newEntityDetector = newEntityDetector;
 	}
 
+	/**
+	 * @deprecated in favor of the {@code ConversionService}. Booleans can be
+	 *             converted to whatever the database supports using the
+	 *             {@code ConversionService}.
+	 */
+	@Deprecated(forRemoval = true, since = "1.71.0")
 	public BooleanParameterConverter<?> getBooleanParameterConverter() {
 		return booleanParameterConverter;
 	}
@@ -133,7 +149,12 @@ public class SimpleUpdater implements Updater {
 	/**
 	 * Sets the {@link BooleanParameterConverter} strategy used for converting java
 	 * booleans to the database boolean representation.
+	 * 
+	 * @deprecated in favor of the {@code ConversionService}. Booleans can be
+	 *             converted to whatever the database supports using the
+	 *             {@code ConversionService}.
 	 */
+	@Deprecated(forRemoval = true, since = "1.71.0")
 	public void setBooleanParameterConverter(BooleanParameterConverter<?> booleanParameterConverter) {
 		Assert.assertNotNull(booleanParameterConverter, "booleanParameterConverter");
 		this.booleanParameterConverter = booleanParameterConverter;
@@ -154,7 +175,24 @@ public class SimpleUpdater implements Updater {
 	public void setNewRowOnUpsertDetector(NewRowOnUpsertDetector newRowOnUpsertDetector) {
 		this.newRowOnUpsertDetector = newRowOnUpsertDetector;
 	}
+
 	
+	public ConversionService getConversionService() {
+		return conversionService;
+	}
+
+	/**
+	 * Sets a {@code ConversionService} to be used for {@code Column} annotated
+	 * members or {@code DynamicColumn}s that need special custom conversion to
+	 * their corresponding database type.
+	 * 
+	 * @see Column#sqlParam()
+	 * @see DynamicColumn#getSqlParameter()
+	 * @see SqlParam
+	 */
+	public void setConversionService(ConversionService conversionService) {
+		this.conversionService = conversionService;
+	}
 	
 	@Override
 	public int update(Object entity, UpdateSettings<? extends DynamicColumn> settings) {
@@ -740,6 +778,17 @@ public class SimpleUpdater implements Updater {
 				argument = EntityUtils.getEntityId(argument);
 			}
 			// else the value to go to the db is null
+		} else {
+			// see if we need special conversion
+			if (conversionService != null
+					&& argument != null
+					&& isCustomConversion(targetMember.getColumnAnnotation())) {
+				TypeDescriptor sourceDescriptor = targetMember.getTypeDescriptor();
+				TypeDescriptor targetDescriptor = new SqlParameterTypeDescriptor(targetMember.getColumnAnnotation().sqlParam());
+				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
+					argument = conversionService.convert(argument, sourceDescriptor, targetDescriptor);
+				}
+			}
 		}
 		if (argument instanceof Boolean) {
 			argument = booleanParameterConverter.asObject((Boolean) argument);
@@ -755,10 +804,21 @@ public class SimpleUpdater implements Updater {
 		}
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Object argument = ((DynamicColumnsEntity) entity).getValue(dynamicColumn);
+		if (argument != null && EntityUtils.isEntityClass(argument.getClass())) {
+			argument = EntityUtils.getEntityId(argument);
+		} else {
+			if (conversionService != null
+					&& argument != null
+					&& isCustomConversion(dynamicColumn)) {
+				TypeDescriptor sourceDescriptor = dynamicColumn.getTypeDescriptor();
+				TypeDescriptor targetDescriptor = new SqlParameterTypeDescriptor(dynamicColumn.getSqlParameter());
+				if (conversionService.canConvert(sourceDescriptor, targetDescriptor)) {
+					argument = conversionService.convert(argument, sourceDescriptor, targetDescriptor);
+				}
+			}
+		}
 		if (argument instanceof Boolean) {
 			argument = booleanParameterConverter.asObject((Boolean) argument);
-		} else if (argument != null && EntityUtils.isEntityClass(argument.getClass())) {
-			argument = EntityUtils.getEntityId(argument);
 		}
 		return argument;
 	}

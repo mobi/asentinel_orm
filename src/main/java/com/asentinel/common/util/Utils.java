@@ -1,5 +1,6 @@
 package com.asentinel.common.util;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -75,6 +76,20 @@ public class Utils {
 		return toZonedDateTime(date).toLocalDateTime();
 	}
 
+
+	/**
+	 * @param date the {@link Date} to convert.
+	 * @return {@link Instant} representation of the {@code date} parameter. If the
+	 *         {@link Date} argument is <code>null</code> this method returns
+	 *         <code>null</code>.
+	 */
+	public static Instant toInstant(Date date) {
+		if (date == null) {
+			return null;
+		}
+		return date.toInstant();
+	}
+	
 	/**
 	 * @param localDate 
 	 * 			the {@link LocalDate} to convert.
@@ -132,6 +147,8 @@ public class Utils {
 			return toDate((LocalDateTime) someDateOrTime);
 		} else if (someDateOrTime instanceof ZonedDateTime) {
 			return Date.from(((ZonedDateTime) someDateOrTime).toInstant());
+		} else if (someDateOrTime instanceof Instant) {
+			return Date.from((Instant) someDateOrTime);
 		} else if (someDateOrTime == null) {
 			return null;
 		} else {

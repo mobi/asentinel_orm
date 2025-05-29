@@ -1,5 +1,7 @@
 package com.asentinel.common.orm.mappers;
 
+import static com.asentinel.common.orm.mappers.SqlParameterTypeDescriptor.isCustomConversion;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -13,6 +15,8 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.TypeDescriptor;
 
 import com.asentinel.common.jdbc.AbstractReflectionRowMapper;
 import com.asentinel.common.jdbc.ColumnMetadata;
@@ -201,16 +205,34 @@ public class AnnotationRowMapper<T> extends AbstractReflectionRowMapper<T> {
 			AnnotatedElement element = entry.getValue().getAnnotatedElement();
 			if (element instanceof Field) {
 				Field field = (Field) element; 
-				Object value = getValue(object, field, rs, entry.getKey());
+				Object value = getValueInternal(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
 				setValue(object, field, value);
 			} else if (element instanceof Method) {
 				Method method = (Method) element; 
-				Object value = getValue(object, method, rs, entry.getKey());
+				Object value = getValueInternal(object, entry.getValue().getTypeDescriptor(), rs, entry.getKey());
 				setValue(object, method, value);
 			} else {
 				throw new IllegalStateException("Expected Field or Method. Found " + element.getClass().getName() + ".");
 			}
 		}
+	}
+	
+	@Override
+	protected Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
+		Column column = targetDescriptor.getAnnotation(Column.class);
+		if (column == null) {
+			return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
+		}
+		
+		ConversionService conversionService = getConversionService();
+		if (conversionService != null
+				&& isCustomConversion(column)) {
+			// we are dealing with a custom type, we call the conversion service
+			return customConvert(targetDescriptor, rs, columnMetadata.getResultsetName());
+		}
+		
+		// let the super class code perform default conversion
+		return super.getValue(parentObject, targetDescriptor, rs, columnMetadata);
 	}
 	
 	/**

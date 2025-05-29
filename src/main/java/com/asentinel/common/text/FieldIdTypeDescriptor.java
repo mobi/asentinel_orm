@@ -59,7 +59,7 @@ public class FieldIdTypeDescriptor extends TypeDescriptor {
 	public String toString() {
 		return "FieldIdTypeDescriptor ["
 				+ "fieldId=" + fieldId
-				+ ", type = " + getType() == null ? null : getType().getName()
+				+ ", type = " + (getType() == null ? null : getType().getName())
 				+ "]";
 	}
 }

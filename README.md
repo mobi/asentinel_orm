@@ -6,7 +6,7 @@ One of the features of the Tangoe Telecom project is to allow users to define th
 
 # Key features
 
-- simple configuration on top of JdbcTemplate
+- simple configuration on top of `JdbcTemplate`
 - easy to integrate in any `JdbcTemplate` project
 - easy fallback to plain SQL statements and `JdbcTemplate`
 - all SQL queries are executed using `JdbcTemplate` so they participate in Spring managed transactions
@@ -16,10 +16,11 @@ One of the features of the Tangoe Telecom project is to allow users to define th
 - supports paginated select SQL statements out of the box
 - supports lazy loading entities (entity proxies)
 - supports dynamic schemas - fields can be added to tables at runtime and the tool is able to map them without any code changes. SQL statements (select, insert, update) are generated so that they include the dynamic columns.
+- supports custom conversion from java types to database types and viceversa by leveraging the Spring ConversionService (since 1.71.0). 
 
 # Example
 
-Please see [asentinel-orm-demo](https://github.com/jMediaConverter/asentinel-orm-demo) for a working example. All of the code snippets below are extracted from that project.
+Please see [asentinel-orm-demo](https://github.com/jMediaConverter/asentinel-orm-demo) for a working example. Many of the code snippets below are extracted from that project.
 
 # Supported databases
 
@@ -36,7 +37,7 @@ It should be reasonably easy to add specific `JdbcFlavor` implementations for ot
 <dependency>
     <groupId>com.asentinel.common</groupId>
     <artifactId>asentinel-common</artifactId>
-    <version>1.70.0</version>
+    <version>1.71.0</version>
 </dependency>
 ```
 
@@ -253,3 +254,190 @@ private void loadSomeDataEagerly() {
 	}
 }
 ```
+
+# Custom data types conversion
+
+To support custom data types conversion a `ConversionService` has to be injected both in the `DefaultEntityDescriptorTreeRepository` and the `SimpleUpdater`. The appropiate converters have to be registered with the `ConversionService`. The methods that create the `DefaultEntityDescriptorTreeRepository` and `OrmOperations` shown in the configuration above will change like this:
+
+```
+	.....
+	
+    @Bean
+    public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(SqlBuilderFactory sqlBuilderFactory,
+    		@Qualifier("ormConversionService") ConversionService conversionService) {
+        DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
+        treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
+        treeRepository.setConversionService(conversionService);
+        return treeRepository;
+    }
+
+    @Bean
+    public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
+                             SqlBuilderFactory sqlBuilderFactory,
+                             @Qualifier("ormConversionService") ConversionService conversionService) {
+    	SimpleUpdater updater = new SimpleUpdater(jdbcFlavor, sqlQuery);
+    	updater.setConversionService(conversionService);
+        return new OrmTemplate(sqlBuilderFactory, updater);
+    }
+    
+    @Bean("ormConversionService")
+    public ConversionService ormConversionService() {
+    	GenericConversionService conversionService = new GenericConversionService();
+    	conversionService.addConverter(new JsonToObjectConverter());
+    	conversionService.addConverter(new ObjectToJsonConverter());
+    	return conversionService;
+    }
+```
+
+Note that we are also creating a `ConversionService` bean that is able to convert to/from JSONB. This example works for Postgres. See below the source code for the 2 JSONB converters:
+
+```
+	public class JsonToObjectConverter implements ConditionalGenericConverter {
+		
+		// Jackson mapper
+		private static final ObjectMapper MAPPER = new ObjectMapper();
+
+		@Override
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return null;
+		}
+
+		@Override
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			PGobject pgObj = (PGobject) source;
+			try {
+				return MAPPER.readValue(pgObj.getValue(), targetType.getType());
+			} catch (JsonProcessingException e) {
+				throw new IllegalArgumentException("Failed to convert from JSON.", e);
+			}
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			if (sourceType.getType() != PGobject.class) {
+				return false;
+			}
+			String sqlParamValue;
+			if (targetType instanceof FieldIdTypeDescriptor) {
+				// dynamic column case
+				DynamicColumn column = (DynamicColumn) ((FieldIdTypeDescriptor) targetType).getFieldId(); 
+				sqlParamValue = column.getSqlParameter().getTypeName(); 
+			} else {
+				// static column case
+				Column column = targetType.getAnnotation(Column.class);
+				if (column == null) {
+					return false;
+				}
+				sqlParamValue = column.sqlParam().value();
+			}
+			return "jsonb".equals(sqlParamValue);
+		}
+		
+	}
+	
+	public class ObjectToJsonConverter implements ConditionalGenericConverter {
+	
+		// Jackson mapper	
+		private static final ObjectMapper MAPPER = new ObjectMapper();
+		
+		@Override
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return null;
+		}
+
+		@Override
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			String s;
+			try {
+				s = MAPPER.writeValueAsString(source);
+				PGobject pgo = new PGobject();
+				pgo.setType("jsonb");
+				pgo.setValue(s);
+				return pgo;
+			} catch (JsonProcessingException | SQLException e) {
+				throw new IllegalArgumentException("Failed to convert to JSON.", e);
+			}
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			if (!(targetType instanceof SqlParameterTypeDescriptor)) {
+				return false;
+			}
+			
+			SqlParameterTypeDescriptor typeDescriptor = (SqlParameterTypeDescriptor) targetType;
+			return "jsonb".equals(typeDescriptor.getTypeName());
+		}
+		
+	}}
+
+```
+
+Below is a simple domain class that includes the id and an employee member that is stored as JSONB in a Postgres database. Notice the `@Column` annotation on the employee member declares the column name and a `@SqlParam` annotation that has the database type name as the value. This annotation will trigger the `ConversionService` for the annotated field causing the 2 converters declared above to be used for reading and writing the field. 
+
+```
+@Table("EmployeeHolder")
+public class EmployeeHolder {
+
+    @PkColumn("Id")
+    private int id;
+    
+    @Column(value = "EmployeeJson", sqlParam = @SqlParam("jsonb"))
+    private Employee employee;
+    
+    // getters/setters omitted for brevity
+    ....
+    
+    /** Class represented as JSONB in the database */
+    public static class Employee {
+		private String firstName;
+		private String lastName;
+			
+	    // getters/setters omitted for brevity
+	    ....
+	}
+}   
+```
+Another useful scenario is to convert a certain java type to a `spring-jdbc` `SqlParameterValue` so that we can specify the exact SQL type, precision etc. Here is a pair of converters that can convert between `java.time.Instant` and `java.sql.Timestamp`:
+
+```
+	public class InstantToTimestampConverter implements ConditionalGenericConverter {
+
+		@Override
+		public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
+			Instant instant = (Instant) source;
+			Timestamp t = Timestamp.from(instant);
+			return new SqlParameterValue(Types.TIMESTAMP, t);
+		}
+
+		@Override
+		public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+			if (sourceType.getType() != Instant.class) {
+				return false;
+			}
+			if (!(targetType instanceof SqlParameterTypeDescriptor)) {
+				return false;
+			}			
+			SqlParameterTypeDescriptor typeDescriptor = (SqlParameterTypeDescriptor) targetType;
+			return "timestamp".equals(typeDescriptor.getTypeName());
+		}
+		
+		@Override
+		public Set<ConvertiblePair> getConvertibleTypes() {
+			return null;
+		}
+
+	}
+	
+	public class TimestampToInstantConverter implements Converter<Timestamp, Instant> {
+
+		@Override
+		public Instant convert(Timestamp source) {
+			return source.toInstant();
+		}
+	}
+```
+Any field annotated with `@Column(value = "SomeColumnName", sqlParam = @SqlParam("timestamp"))` will trigger the above converters assuming they are registered with the ORM `ConversionService`.
+
+# Further reading
+- [Dzone: Runtime-Defined Columns With asentinel-orm](https://dzone.com/articles/runtime-defined-columns-with-asentinel-orm)

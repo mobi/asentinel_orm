@@ -6,6 +6,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.jdbc.core.SqlParameter;
+
 import com.asentinel.common.jdbc.ConversionSupport;
 import com.asentinel.common.jdbc.ResultSetUtils;
 import com.asentinel.common.orm.TargetMembers;
@@ -29,6 +31,7 @@ import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
  * This is a feature, it allows for example to override the <code>Column</code> annotation attributes in a subclass.
  * 
  * @see Table
+ * @see SqlParam
  * @see AnnotationRowMapper
  * @see TargetMembers
  * @see TargetMembersHolder
@@ -41,18 +44,25 @@ import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Column {
-
+	
 	/**
 	 * @return the name of the column.
 	 */
 	String value();
 	
 	/**
-	 * @return whether to set the target member to <code>null</code> if the corresponding resultset column
-	 * 		is <code>null</code> or to set it to a default value. For example for numeric fields the default
-	 * 		value is <code>0</code>. See {@link ConversionSupport} for details. Please note that for primitive
-	 * 		types setting this flag to <code>true</code> will have no effect (ie. if the value in the resultset is <code>null</code>
-	 * 		the value set in the primitive target member will still be the default value for that type).
+	 * @return whether to set the target member to <code>null</code> if the
+	 *         corresponding resultset column is <code>null</code> or to set it to a
+	 *         default value. For example for numeric fields the default value is
+	 *         <code>0</code>. See {@link ConversionSupport} for details. Please
+	 *         note that setting this to {@code true} will have no effect for the
+	 *         following:
+	 *         <li>primitive types - if the value in the resultset is
+	 *         <code>null</code> the value set in the primitive target member will
+	 *         still be the default value for that type;
+	 *         <li>custom types (types having the {@link #sqlParam()} set) - if the
+	 *         value in the resultset is {@code null} then {@code null} will be set
+	 *         in the annotated member.
 	 * 
 	 * @see ConversionSupport
 	 * @see ResultSetUtils
@@ -70,4 +80,26 @@ public @interface Column {
 	 *         default is {@code true}.
 	 */
 	boolean updatable() default true;
+	
+	/*
+	 * We are future proofing the database column type. We can potentially add additional attributes
+	 * to the SqlParam annotation without changing this annotation.
+	 */
+	
+	/**
+	 * @return information about the mapped database column type of the annotated
+	 *         member. It should be used only if the mapped database column is of
+	 *         some special type or a user defined type. A Spring
+	 *         {@code ConversionService} supporting conversion between the SQL type
+	 *         and the Java type of the {@code Column} annotated member (both ways)
+	 *         must be injected in the ORM beans ({@code SimpleUpdater} and
+	 *         {@code DefaultEntityDescriptorTreeRepository}). See the
+	 *         {@code SqlParam} javadoc for additional information and an example.
+	 * 
+	 * @see SqlParam
+	 * @see SqlParameter
+	 * @see SqlParameterTypeDescriptor
+	 * @see SqlParameter#getTypeName()
+	 */
+	SqlParam sqlParam() default @SqlParam;
 }

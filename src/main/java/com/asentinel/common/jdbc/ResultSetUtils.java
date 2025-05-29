@@ -11,6 +11,7 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -697,6 +698,14 @@ public final class ResultSetUtils {
 		return getLocalDateTime(rs.getTimestamp(col));
 	}
 	
+	public static Instant getInstant(ResultSet rs, int col) throws SQLException {
+		return Utils.toInstant(rs.getTimestamp(col));
+	}
+
+	public static Instant getInstant(ResultSet rs, String col) throws SQLException {
+		return Utils.toInstant(rs.getTimestamp(col));
+	}
+
 	private static LocalDateTime getLocalDateTime(Timestamp t) throws SQLException {
 		return Utils.toLocalDateTime(t);
 	}
@@ -812,7 +821,7 @@ public final class ResultSetUtils {
 		return getIntArray(rs.getArray(col), allowNull);
 	}
 
-	private static int[] getIntArray(Array array, boolean allowNull) throws SQLException {
+	public static int[] getIntArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
@@ -841,7 +850,7 @@ public final class ResultSetUtils {
 		return getLongArray(rs.getArray(col), allowNull);
 	}
 
-	private static long[] getLongArray(Array array, boolean allowNull) throws SQLException {
+	public static long[] getLongArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
@@ -871,7 +880,7 @@ public final class ResultSetUtils {
 		return getDoubleArray(rs.getArray(col), allowNull);
 	}
 
-	private static double[] getDoubleArray(Array array, boolean allowNull) throws SQLException {
+	public static double[] getDoubleArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;
@@ -900,7 +909,7 @@ public final class ResultSetUtils {
 		return getBigIntegerArray(rs.getArray(col), allowNull);
 	}
 
-	private static BigInteger[] getBigIntegerArray(Array array, boolean allowNull) throws SQLException {
+	public static BigInteger[] getBigIntegerArray(Array array, boolean allowNull) throws SQLException {
 		Number[] numbers = getNumberArray(array, allowNull);
 		if (numbers == null) {
 			return null;

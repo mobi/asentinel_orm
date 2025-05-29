@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.core.convert.TypeDescriptor;
 
 /**
  * <code>RowMapper</code> implementation that attempts to extract each field from
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 	private final static Logger log = LoggerFactory.getLogger(ReflectionRowMapper.class);
 
-	private final Map<String, Method> mapColumnToMethod = new HashMap<>();
+	private final Map<String, MethodInfo> mapColumnToMethodInfo = new HashMap<>();
 	private final boolean bestEffort;
 	
 
@@ -78,9 +78,13 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 	public ReflectionRowMapper(ObjectFactory<T> objectFactory, boolean bestEffort) {
 		super(objectFactory);
 		this.bestEffort = bestEffort;
-		// TODO: an instance is needed here to get the object type. The instance is discarded.
-		// We may need to find an alternative, we are creating an instance just to discard it.
-		initialize((Class<T>) objectFactory.newObject().getClass());
+		Class<T> type;
+		if (objectFactory instanceof TypedObjectFactory) {
+			type = ((TypedObjectFactory<T>) objectFactory).getType();
+		} else {
+			type = (Class<T>) objectFactory.newObject().getClass();
+		}
+		initialize(type);
 	}
 	
 	
@@ -90,7 +94,7 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 			if (method.getParameterTypes().length == 1
 					&& method.getName().toLowerCase().startsWith("set")) {
 				String columnName = method.getName().substring(3).toLowerCase();
-				mapColumnToMethod.putIfAbsent(columnName, method);
+				mapColumnToMethodInfo.putIfAbsent(columnName, new MethodInfo(method));
 			}
 		}
 	}
@@ -116,22 +120,22 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 				continue;
 			}
 			String columnKey = columnMetadata.getMappedName().toLowerCase();
-			Method method = mapColumnToMethod.get(columnKey);
-			if (method == null) {
+			MethodInfo methodInfo = mapColumnToMethodInfo.get(columnKey);
+			if (methodInfo == null) {
 				String errorText = "Can not find 'set' method for resultset column '" 
 						+ columnMetadata.getMappedName() + "' in class " 
 						+ object.getClass().getName()
 						+ ".";
 				if (bestEffort) {
 					if (log.isTraceEnabled()) {
-						log.trace("populateTarget - Best effort mode: " + errorText);
+						log.trace("populateTarget - Best effort mode: {}", errorText);
 					}
 				} else {
 					throw new SQLException(errorText);
 				}
 			} else {
-				Object value = getValue(object, method, rs, columnMetadata);
-				setValue(object, method, value);
+				Object value = getValueInternal(object, methodInfo.getTypeDescriptor(), rs, columnMetadata);
+				setValue(object, methodInfo.getMethod(), value);
 			}
 		}
 	}
@@ -148,6 +152,31 @@ public class ReflectionRowMapper<T> extends AbstractReflectionRowMapper<T> {
 	@Override
 	public String toString() {
 		return "ReflectionRowMapper [objectFactory=" + objectFactory + "]";
+	}
+	
+	private static class MethodInfo {
+		private final Method method;
+		private final TypeDescriptor typeDescriptor;
+		
+		MethodInfo(Method method) {
+			this.method = method;
+			Class<?> parameterType = method.getParameterTypes()[0];
+			this.typeDescriptor = TypeDescriptor.valueOf(parameterType);
+		}
+
+		Method getMethod() {
+			return method;
+		}
+
+		TypeDescriptor getTypeDescriptor() {
+			return typeDescriptor;
+		}
+
+		@Override
+		public String toString() {
+			return "TargetMethodInfo [method=" + method + ", typeDescriptor=" + typeDescriptor + "]";
+		}
+		
 	}
 
 }

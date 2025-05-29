@@ -86,6 +86,7 @@ public class DynamicColumnsEntityDescriptor<C extends DynamicColumn, T extends D
 			);
 		rm.setLobHandler(builder.getLobHandler());
 		rm.setQueryExecutor(builder.getQueryEx());
+		rm.setConversionService(builder.getConversionService());
 		return rm;
 	}
 	

@@ -9,7 +9,7 @@ import static com.asentinel.common.orm.mappers.Const.*;
 /**
  * Field annotated bean.
  */
-public class Bean1 {
+class Bean1 {
 	
 	@PkColumn(COL_PK)
 	private int pk;
@@ -54,119 +54,119 @@ public class Bean1 {
 	private Number number;
 	
 	
-	public Bean1() {
+	Bean1() {
 		this.pk = Integer.MAX_VALUE;
 	}
 	
-	public int getPk() {
+	int getPk() {
 		return pk;
 	}
 
-	public void setPk(int pk) {
+	void setPk(int pk) {
 		this.pk = pk;
 	}
 
-	public int getIntVal() {
+	int getIntVal() {
 		return intVal;
 	}
 
-	public void setIntVal(int intVal) {
+	void setIntVal(int intVal) {
 		this.intVal = intVal;
 	}
 
-	public Integer getIntObj() {
+	Integer getIntObj() {
 		return intObj;
 	}
 
-	public void setIntObj(Integer intObj) {
+	void setIntObj(Integer intObj) {
 		this.intObj = intObj;
 	}
 
-	public long getLongVal() {
+	long getLongVal() {
 		return longVal;
 	}
 
-	public void setLongVal(long longVal) {
+	void setLongVal(long longVal) {
 		this.longVal = longVal;
 	}
 
-	public Long getLongObj() {
+	Long getLongObj() {
 		return longObj;
 	}
 
-	public void setLongObj(Long longObj) {
+	void setLongObj(Long longObj) {
 		this.longObj = longObj;
 	}
 
-	public double getDoubleVal() {
+	double getDoubleVal() {
 		return doubleVal;
 	}
 
-	public void setDoubleVal(double doubleVal) {
+	void setDoubleVal(double doubleVal) {
 		this.doubleVal = doubleVal;
 	}
 
-	public Double getDoubleObj() {
+	Double getDoubleObj() {
 		return doubleObj;
 	}
 
-	public void setDoubleObj(Double doubleObj) {
+	void setDoubleObj(Double doubleObj) {
 		this.doubleObj = doubleObj;
 	}
 
-	public boolean isBoolVal() {
+	boolean isBoolVal() {
 		return boolVal;
 	}
 
-	public void setBoolVal(boolean boolVal) {
+	void setBoolVal(boolean boolVal) {
 		this.boolVal = boolVal;
 	}
 
-	public Boolean getBoolObj() {
+	Boolean getBoolObj() {
 		return boolObj;
 	}
 
-	public void setBoolObj(Boolean boolObj) {
+	void setBoolObj(Boolean boolObj) {
 		this.boolObj = boolObj;
 	}
 
-	public String getString() {
+	String getString() {
 		return string;
 	}
 
-	public void setString(String string) {
+	void setString(String string) {
 		this.string = string;
 	}
 
-	public Date getDate() {
+	Date getDate() {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	void setDate(Date date) {
 		this.date = date;
 	}
 
-	public BigDecimal getBigDecimal() {
+	BigDecimal getBigDecimal() {
 		return bigDecimal;
 	}
 
-	public void setBigDecimal(BigDecimal bigDecimal) {
+	void setBigDecimal(BigDecimal bigDecimal) {
 		this.bigDecimal = bigDecimal;
 	}
 
-	public BigInteger getBigInteger() {
+	BigInteger getBigInteger() {
 		return bigInteger;
 	}
 
-	public void setBigInteger(BigInteger bigInteger) {
+	void setBigInteger(BigInteger bigInteger) {
 		this.bigInteger = bigInteger;
 	}
 
-	public Number getNumber() {
+	Number getNumber() {
 		return number;
 	}
 
-	public void setNumber(Number number) {
+	void setNumber(Number number) {
 		this.number = number;
 	}
 

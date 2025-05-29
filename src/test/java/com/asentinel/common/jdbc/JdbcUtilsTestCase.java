@@ -21,7 +21,7 @@ public class JdbcUtilsTestCase {
 	public void testPrepareStringForLogging1() {
 		assertTrue("The LOG_MAX_SIZE must be greater than LOG_MAX_SHOW_IF_TOO_LONG.", JdbcUtils.LOG_MAX_SIZE > JdbcUtils.LOG_MAX_SHOW_IF_TOO_LONG);
 		String testStr = "";
-		for (int i=0; i < JdbcUtils.LOG_MAX_SIZE - 1 ; i++) {
+		for (int i=0; i < JdbcUtils.LOG_MAX_SIZE - 1; i++) {
 			testStr += "X";
 		}
 		String result = JdbcUtils.prepareStringForLogging(testStr);
@@ -78,7 +78,7 @@ public class JdbcUtilsTestCase {
 				"['abc', 10, true, null, SqlParamVal [type=91, value=%s], SqlParamVal [type=12, value='abc2'], null]", 
 				String.valueOf(d));
 		String result = JdbcUtils.parametersToString(true, params);
-		log.debug("testParametersToString - string: {}", result) ;
+		log.debug("testParametersToString - string: {}", result);
 		assertEquals(expected, result);
 	}
 	
@@ -93,7 +93,7 @@ public class JdbcUtilsTestCase {
 		String expected = 
 				"[String[length=210, 'aaaaaaaaaa ...'], SqlParamVal [type=12, value=String[length=210, 'aaaaaaaaaa ...']]]";
 		String result = JdbcUtils.parametersToString(true, params);
-		log.debug("testParametersToString - string: {}", result) ;
+		log.debug("testParametersToString - string: {}", result);
 		assertEquals(expected, result);
 	}
 	
@@ -101,28 +101,28 @@ public class JdbcUtilsTestCase {
 	@Test
 	public void testParametersToStringWithNull() {
 		String result = JdbcUtils.parametersToString(true, (Object[]) null);
-		log.debug("testParametersToString - string: {}", result) ;
+		log.debug("testParametersToString - string: {}", result);
 		assertEquals("null", result);
 	}
 
 	@Test
 	public void testParametersToStringWithEmpty() {
 		String result = JdbcUtils.parametersToString(true);
-		log.debug("testParametersToString - string: {}", result) ;
+		log.debug("testParametersToString - string: {}", result);
 		assertEquals("[]", result);
 	}
 	
 	@Test
 	public void testParametersToStringWithEmptyNoBrackets() {
 		String result = JdbcUtils.parametersToString(false);
-		log.debug("testParametersToString - string: {}", result) ;
+		log.debug("testParametersToString - string: {}", result);
 		assertEquals("", result);
 	}
 	
 	@Test
 	public void testParametersToStringWithNullSeparator() {
 		String result = JdbcUtils.parametersToString(null, true, 1, 2);
-		log.debug("testParametersToString - string: {}", result) ;
+		log.debug("testParametersToString - string: {}", result);
 		assertEquals("[1, 2]", result);
 	}
 	
@@ -130,7 +130,7 @@ public class JdbcUtilsTestCase {
 	public void testParametersToStringWithTemporal() {
 		LocalDate d = LocalDate.now();
 		String result = JdbcUtils.parametersToString(false, d);
-		log.debug("testParametersToStringWithTemporal - string: {}", result) ;
+		log.debug("testParametersToStringWithTemporal - string: {}", result);
 		assertEquals(String.valueOf(Utils.toDate(d)), result);
 	}
 	
@@ -145,5 +145,40 @@ public class JdbcUtilsTestCase {
 				JdbcUtils.queryProcedureCall("Schema.Function", 1));
 		assertEquals("SELECT * FROM Schema.Function(?, ?, ?, ?, ?)", 
 				JdbcUtils.queryProcedureCall("Schema.Function", 5));
+	}
+	
+	@Test
+	public void testPrepareObjectForLogging1() {
+		String result = JdbcUtils.prepareObjectForLogging(Long.MAX_VALUE, "<", ">");
+		log.debug("testPrepareObjectForLogging1 - string: {}", result);
+		assertEquals(String.valueOf(Long.MAX_VALUE), result);
+	}
+	
+	@Test
+	public void testPrepareObjectForLogging2() {
+		class TestLog {
+			@Override
+			public String toString() {
+				return "a".repeat(JdbcUtils.LOG_MAX_SIZE);
+			}
+		};
+		
+		String result = JdbcUtils.prepareObjectForLogging(new TestLog(), "<", ">");
+		log.debug("testPrepareObjectForLogging2 - string: {}", result);
+		assertEquals("a".repeat(JdbcUtils.LOG_MAX_SIZE), result);
+	}
+	
+	@Test
+	public void testPrepareObjectForLogging3() {
+		class TestLog {
+			@Override
+			public String toString() {
+				return "a".repeat(JdbcUtils.LOG_MAX_SIZE + 1);
+			}
+		};
+		
+		String result = JdbcUtils.prepareObjectForLogging(new TestLog(), "<", ">");
+		log.debug("testPrepareObjectForLogging3 - string: {}", result);
+		assertEquals("TestLog[length=201, <aaaaaaaaaa ...>]", result);
 	}
 }
