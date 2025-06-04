@@ -51,11 +51,13 @@ class Instructions {
 	}
 	
 	/**
-	 * Compiles the instructions to SQL. This method will only work if a valid {@link InstructionType#INITIAL_QUERY}
-	 * instruction was added.
-	 * @return a {@link CompiledSql} object holding the SQL string, any parameters and the {@link EntityDescriptor} tree that
-	 * 			was used for compilation.
-	 * @throws IllegalStateException if a valid {@link InstructionType#INITIAL_QUERY} can not be found.
+	 * Compiles the instructions to SQL. This method will only work if a valid
+	 * initial query instruction was added.
+	 * 
+	 * @return a {@link CompiledSql} object holding the SQL string, any parameters
+	 *         and the {@link EntityDescriptor} tree that was used for compilation.
+	 * @throws IllegalStateException if a valid initial query instruction can not
+	 *                               be found.
 	 */
 	@SuppressWarnings("unchecked")
 	public CompiledSql compile() {
@@ -71,7 +73,11 @@ class Instructions {
 			}
 
 		}
-		throw new IllegalStateException("No query initialization instruction found.");
+		throw new IllegalStateException(
+				"No query initialization instruction found. On the SqlBuilder one of the follwing methods should be called:\n"
+				+ " - select() - to create an ORM SQL query that pulls entities;\n"
+				+ " - pagedSelect() - to create an ORM SQL query that pulls entities in pages;\n"
+				+ " - from() - to create a query that pulls only certain columns (ie. sqlBuilder.selectK().column(\"SOME_COL\").from().exec(rowMapper) )");
 	}
 	
 	
