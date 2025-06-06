@@ -1,7 +1,7 @@
 # Introduction 
 
-The asentinel-orm is a light weight ORM tool written on top of Spring JDBC and `JdbcTemplate`. It was developed initially as an enhancement for the Asentinel TEM project whose data access layer was based on `JdbcTemplate`. Asentinel TEM is called [Tangoe Telecom](https://www.tangoe.com/) today and is a telecom expense management application. If you are using `JdbcTemplate` in your project but you feel you could do better than just using `RowMapper` for mapping database resultsets or you want to stop writing manually inserts and updates, this library might be for you.  
-One of the features of the Tangoe Telecom project is to allow users to define their own custom fields. So one of the design goals of this ORM was to make it easy for the programmer to work with dynamic schemas and custom defined columns/fields.
+**asentinel-orm** is a light weight ORM tool written on top of Spring JDBC and `JdbcTemplate`. Initially, it was developed as an enhancement for the Asentinel TEM project whose data access layer was based on `JdbcTemplate`. Asentinel TEM is called [Tangoe Telecom](https://www.tangoe.com/) today and is a telecom expense management application. If you are using `JdbcTemplate` in your project but you feel you could do better than just using `RowMapper` for mapping database resultsets or you want to stop writing manually inserts and updates, this library might be suitable for you.  
+One of the Tangoe Telecom project features is to allow users to define their own custom fields. Consequently, one of the design goals of this ORM was to make it easy for the programmer to work with dynamic schemas and custom defined columns/fields.
 
 
 # Key features
