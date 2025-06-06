@@ -440,4 +440,4 @@ Another useful scenario is to convert a certain java type to a `spring-jdbc` `Sq
 Any field annotated with `@Column(value = "SomeColumnName", sqlParam = @SqlParam("timestamp"))` will trigger the above converters assuming they are registered with the ORM `ConversionService`.
 
 # Further reading
-- [Dzone: Runtime-Defined Columns With asentinel-orm](https://dzone.com/articles/runtime-defined-columns-with-asentinel-orm)
+- [Runtime-Defined Columns With asentinel-orm](https://dzone.com/articles/runtime-defined-columns-with-asentinel-orm)
