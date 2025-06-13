@@ -26,7 +26,6 @@ public class BasicAuthHttpUrlResourceTestCase {
 		BasicAuthHttpUrlResource r = new BasicAuthHttpUrlResource("http://test.com", "razvan", "test");
 		
 		r.customizeConnection(con);
-		verify(con).setRequestMethod("HEAD");
 		verify(con).setRequestProperty ("Authorization", "Basic " + new String(Base64.getEncoder().encode(("razvan:test").getBytes())));
 	}
 

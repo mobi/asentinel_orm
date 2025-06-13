@@ -1,8 +1,6 @@
 package com.asentinel.common.jdbc.flavors.postgres;
 
-import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.Statement;
 
 import javax.sql.DataSource;
 
@@ -10,15 +8,9 @@ import org.postgresql.util.PSQLWarning;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.SQLWarningException;
-import org.springframework.jdbc.core.CallableStatementCallback;
-import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCallback;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.PreparedStatementSetter;
-import org.springframework.jdbc.core.StatementCallback;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 
@@ -36,8 +28,6 @@ import com.asentinel.common.jdbc.flavors.JdbcFlavor;
  * {@link PgBetterSQLExceptionTranslator}.
  * 
  * @see #LOGGER_NAME
- * 
- * @see {@link https://github.com/spring-projects/spring-framework/issues/23106}
  * 
  * @author Razvan Popian
  */
@@ -95,7 +85,21 @@ public class PgEchoingJdbcTemplate extends JdbcTemplate {
 
 	@Override
 	protected void handleWarnings(SQLWarning warning) throws SQLWarningException {
-		// do nothing, the super throws exception, this is why we had to override this
+		Logger log = getLogger();
+		if (!log.isTraceEnabled()) {
+			return;
+		}
+
+		while (warning != null) {
+			PSQLWarning pWarning = (PSQLWarning) warning;
+			ServerErrorMessage sem = pWarning.getServerErrorMessage();
+			if (sem == null) {
+				log.trace(NO_MESSAGE);
+			} else {
+				log.trace(String.format(LOG_MESSAGE_TEMPLATE, sem.getSeverity(), warning.getMessage()));
+			}
+			warning = warning.getNextWarning();
+		}
 	}
 	
 	/**
@@ -126,72 +130,6 @@ public class PgEchoingJdbcTemplate extends JdbcTemplate {
 			}
 			return exceptionTranslator;
 		}
-	}
-	
-	void myHandleWarnings(Statement s) {
-		Logger log = getLogger();
-		if (!log.isTraceEnabled()) {
-			return;
-		}
-
-		try {
-			SQLWarning warning = s.getWarnings();
-			while (warning != null) {
-				PSQLWarning pWarning = (PSQLWarning) warning;
-				ServerErrorMessage sem = pWarning.getServerErrorMessage();
-				if (sem == null) {
-					log.trace(NO_MESSAGE);
-				} else {
-					log.trace(String.format(LOG_MESSAGE_TEMPLATE, sem.getSeverity(), warning.getMessage()));
-				}
-				warning = warning.getNextWarning();
-			}
-		} catch (SQLException e) {
-			logger.error("Failed to process warnings, but the exception is ignored.", e);
-		}
-	}
-	
-	/*
-	 * The following methods override the #execute methods from the super class and process warnings even in case of statement failure. 
-	 * This is needed until Spring resolves the issue https://github.com/spring-projects/spring-framework/issues/23106 that we opened. Once
-	 * this is fixed the next methods can go away and we can do the warning processing in the #handleWarnings method. 
-	 */
-	
-	@Override
-	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
-		return super.execute((StatementCallback<T>) (stmt) -> {
-			try {
-				return action.doInStatement(stmt);
-			} finally {
-				myHandleWarnings(stmt);
-			}
-		});
-	}
-	
-	
-	@Override
-	public <T> T execute(PreparedStatementCreator psc, PreparedStatementCallback<T> action)
-			throws DataAccessException {
-		return super.execute(psc, (ps) -> {
-			try {
-				return action.doInPreparedStatement(ps);
-			} finally {
-				myHandleWarnings(ps);
-			}
-		});
-	}
-	
-	
-	@Override
-	public <T> T execute(CallableStatementCreator csc, CallableStatementCallback<T> action)
-			throws DataAccessException {	
-		return super.execute(csc, (cs) -> {
-			try {
-				return action.doInCallableStatement(cs);
-			} finally {
-				myHandleWarnings(cs);
-			}
-		});
 	}
 	
 	@Override
