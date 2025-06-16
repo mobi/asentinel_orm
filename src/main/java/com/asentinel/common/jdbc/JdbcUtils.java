@@ -8,7 +8,6 @@ import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.SqlParameterValue;
-import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
 import com.asentinel.common.jdbc.flavors.JdbcFlavorConfig;
@@ -176,19 +175,6 @@ public final class JdbcUtils  {
 	@Deprecated
 	public static LobHandler buildLobHandler() {
 		return JdbcFlavorConfig.getJdbcFlavor().buildLobHandler();
-	}
-
-	/**
-	 * Factory method for {@link LobCreator} instances. Previously
-	 * we used the now deprecated <code>OracleLobCreator</code>. It is recommended
-	 * to use this method for any {@link LobCreator} instance that is needed.
-	 * 
-	 * @deprecated in favor of using an injected instance of {@code LobHandler} as 
-	 * 		a factory of {@code LobCreator}s.
-	 */
-	@Deprecated
-	public static LobCreator buildLobCreator() {
-		return JdbcFlavorConfig.getJdbcFlavor().buildLobCreator();
 	}
 
 	/** 
