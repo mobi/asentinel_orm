@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,34 +21,32 @@ import org.springframework.jdbc.core.PreparedStatementSetter;
 
 public class PgEchoingJdbcTemplateTestCase {
 	
-	static final String DEBUG = "DEBUG";
-	static final String LOG = "LOG";
-	static final String INFO = "INFO";
-	static final String NOTICE = "NOTICE";
-	static final String WARNING = "WARNING"; 
+	private static final String DEBUG = "DEBUG";
+	private static final String LOG = "LOG";
+	private static final String INFO = "INFO";
+	private static final String NOTICE = "NOTICE";
+	private static final String WARNING = "WARNING"; 
 	
-	Logger log = mock(Logger.class);
+	private final Logger log = mock(Logger.class);
 	
-	Statement s = mock(Statement.class);
-
-	PgEchoingJdbcTemplate t = new PgEchoingJdbcTemplate() {
+	private final PgEchoingJdbcTemplate t = new PgEchoingJdbcTemplate() {
 		@Override
 		protected Logger getLogger() {
 			return log;
 		}
 	};
 	
-	ServerErrorMessage m0 = mock(ServerErrorMessage.class);
-	ServerErrorMessage m1 = mock(ServerErrorMessage.class);
-	ServerErrorMessage m2 = mock(ServerErrorMessage.class);
-	ServerErrorMessage m3 = mock(ServerErrorMessage.class);
-	ServerErrorMessage m4 = mock(ServerErrorMessage.class);
+	private final ServerErrorMessage m0 = mock(ServerErrorMessage.class);
+	private final ServerErrorMessage m1 = mock(ServerErrorMessage.class);
+	private final ServerErrorMessage m2 = mock(ServerErrorMessage.class);
+	private final ServerErrorMessage m3 = mock(ServerErrorMessage.class);
+	private final ServerErrorMessage m4 = mock(ServerErrorMessage.class);
 	
-	PSQLWarning w0 = new PSQLWarning(m0); 
-	PSQLWarning w1 = new PSQLWarning(m1);
-	PSQLWarning w2 = new PSQLWarning(m2);
-	PSQLWarning w3 = new PSQLWarning(m3);
-	PSQLWarning w4 = new PSQLWarning(m4);
+	private final PSQLWarning w0 = new PSQLWarning(m0); 
+	private final PSQLWarning w1 = new PSQLWarning(m1);
+	private final PSQLWarning w2 = new PSQLWarning(m2);
+	private final PSQLWarning w3 = new PSQLWarning(m3);
+	private final PSQLWarning w4 = new PSQLWarning(m4);
 	
 	@Before
 	public void setup() throws SQLException {
@@ -75,14 +72,12 @@ public class PgEchoingJdbcTemplateTestCase {
 		w1.setNextWarning(w2);
 		w2.setNextWarning(w3);
 		w3.setNextWarning(w4);
-		
-		when(s.getWarnings()).thenReturn(w0);
 	}
 	
 	@Test
 	public void traceEnabled() {
 		when(log.isTraceEnabled()).thenReturn(true);
-		t.myHandleWarnings(s);
+		t.handleWarnings(w0);
 		verify(log).isTraceEnabled();
 		verify(log).trace(String.format(LOG_MESSAGE_TEMPLATE, DEBUG, DEBUG));
 		verify(log).trace(String.format(LOG_MESSAGE_TEMPLATE, LOG, LOG));
@@ -96,7 +91,7 @@ public class PgEchoingJdbcTemplateTestCase {
 	@Test
 	public void traceDisabled() {
 		when(log.isTraceEnabled()).thenReturn(false);
-		t.myHandleWarnings(s);
+		t.handleWarnings(w0);
 		verify(log).isTraceEnabled();
 		verifyNoMoreInteractions(log);
 	}
