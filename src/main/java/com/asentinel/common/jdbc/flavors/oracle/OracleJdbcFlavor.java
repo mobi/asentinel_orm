@@ -1,13 +1,10 @@
 package com.asentinel.common.jdbc.flavors.oracle;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.CallableStatementCreator;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
-import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.jdbc.support.lob.TemporaryLobCreator;
 
 import com.asentinel.common.jdbc.ResultSetSqlParameter;
 import com.asentinel.common.jdbc.flavors.DefaultPreparedStatementParametersSetter;
@@ -66,16 +63,6 @@ public class OracleJdbcFlavor implements JdbcFlavor {
 		return lh;
 	}
 
-	/**
-	 * Factory method for {@link LobCreator} instances. It is recommended
-	 * to use this method for any {@link LobCreator} instance that is needed. 
-	 */
-	@Deprecated
-	@Override
-	public LobCreator buildLobCreator() {
-		return new TemporaryLobCreator();
-	}
-	
 	@Override
 	public String toString() {
 		return "OracleJdbcFlavor [paginationSqlTemplates="

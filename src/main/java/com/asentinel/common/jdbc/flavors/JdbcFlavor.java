@@ -3,7 +3,6 @@ package com.asentinel.common.jdbc.flavors;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.CallableStatementCreator;
-import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 
 import com.asentinel.common.jdbc.ResultSetSqlParameter;
@@ -34,18 +33,6 @@ public interface JdbcFlavor {
 	 */
 	@Deprecated
 	public LobHandler buildLobHandler();
-
-	
-	/**
-	 * Factory method for {@link LobCreator} instances. Previously
-	 * we used the now deprecated <code>OracleLobCreator</code>. It is recommended
-	 * to use this method for any {@link LobCreator} instance that is needed.
-	 * 
-	 * @deprecated in favor of injecting the right {@link LobHandler} implementation
-	 * 		where it is needed and using it as a factory of {@link LobCreator} instances.
-	 */
-	@Deprecated
-	public LobCreator buildLobCreator();
 	
 	public default LobHandler getLobHandler() {
 		return getPreparedStatementParametersSetter().getLobHandler();
