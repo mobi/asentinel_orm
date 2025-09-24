@@ -11,12 +11,18 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * Facade for a {@link java.util.Properties} object that allows the client
- * to convert properties to java objects or basic types.
+ * Facade for a {@link java.util.Properties} object that allows the client to
+ * convert properties to java objects or basic types. The properties values
+ * support the <code>${some.system.property}</code> syntax and the value between
+ * the braces will be looked up among the system properties. You can define a
+ * system property by passing a {@code -D} command line argument to the JVM.<br>
  * 
  * Because java.util.Properties is thread safe this class is also thread safe.
  * 
@@ -24,6 +30,10 @@ import org.springframework.util.StringUtils;
  * @author Bogdan Ravdan
  */
 public class PropertiesFacade {
+	private static final Logger log = LoggerFactory.getLogger(PropertiesFacade.class);
+	
+	private final static Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{.+\\}");
+	
 	private final Properties properties;
 	
 	/**
@@ -43,15 +53,21 @@ public class PropertiesFacade {
 	}
 	
 	/**
-	 * Checks if the specified property exists. We don't care about the value.
-	 * @param name - a not-null <code>String</code> specifying the name of the property
+	 * Checks if the specified property exists. We don't care about the value. Note
+	 * that for properties referencing system properties with the syntax
+	 * <code>${some.system.property}</code> this method will not check if the actual
+	 * value exists in the system properties. So for this case this method always
+	 * returns {@code true}.
+	 * 
+	 * @param name - a not-null <code>String</code> specifying the name of the
+	 *             property
 	 * @return a boolean indicating if the property was found
 	 */
 	public boolean propertyExists(String name) {
 		Assert.assertNotNull(name, "name");
 		
 		String s = properties.getProperty(name);
-		return s!=null;
+		return s != null;
 	}
 	
 	/**
@@ -66,6 +82,14 @@ public class PropertiesFacade {
 	public String getRequiredString(String name) throws MissingResourceException {
 		Assert.assertNotNull(name, "name");
 		String s = properties.getProperty(name);
+		if (s != null && PLACEHOLDER_PATTERN.matcher(s).matches()) {
+			String envName = s.substring(2, s.length() - 1);
+			s = System.getProperty(envName);
+			if (s == null) {
+				log.warn("getRequiredString - Property '{}' references the system property '{}', but that can not be found. "
+						+ "Pass the property to the JVM using the '-D{}=value' command line argument.", name, envName, envName);
+			}
+		}
     	if (StringUtils.hasText(s)) {
     		return s.trim();
     	} else {
