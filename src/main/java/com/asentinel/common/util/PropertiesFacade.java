@@ -20,9 +20,13 @@ import org.springframework.util.StringUtils;
 /**
  * Facade for a {@link java.util.Properties} object that allows the client to
  * convert properties to java objects or basic types. The properties values
- * support the <code>${some.system.property}</code> syntax and the value between
- * the braces will be looked up among the system properties. You can define a
- * system property by passing a {@code -D} command line argument to the JVM.<br>
+ * support the following placeholders:
+ * <li><code>${some.system.property}</code> the value between the braces will be
+ * looked up among the system properties. You can define a system property by
+ * passing a {@code -D} command line argument to the JVM.
+ * <li><code>${some.system.property:some default value}</code> same as the
+ * above, but allows defining a default value that will be used if the property
+ * can not be found in the system properties. <br><br>
  * 
  * Because java.util.Properties is thread safe this class is also thread safe.
  * 
@@ -71,23 +75,41 @@ public class PropertiesFacade {
 	}
 	
 	/**
-	 * Returns the value of the specified property or throws an exception
-	 * if the property is missing. 
+	 * Returns the value of the specified property or throws an exception if the
+	 * property is missing. Supports the placeholder mentioned at the class level
+	 * documentation.
+	 * 
 	 * @param name the name of the property to retrieve.
 	 * @return the value of the property with the specified name.
-	 * @throws MissingResourceException for one of the following:
-	 * 			- the property is not defined,
-	 * 			- the property is defined, but its value is empty string or white spaces only. 
+	 * @throws MissingResourceException for one of the following: - the property is
+	 *                                  not defined, - the property is defined, but
+	 *                                  its value is empty string or white spaces
+	 *                                  only.
 	 */
 	public String getRequiredString(String name) throws MissingResourceException {
 		Assert.assertNotNull(name, "name");
 		String s = properties.getProperty(name);
 		if (s != null && PLACEHOLDER_PATTERN.matcher(s).matches()) {
-			String envName = s.substring(2, s.length() - 1);
+			String content = s.substring(2, s.length() - 1);
+			int separatorIndex = content.indexOf(':');
+			String envName;
+			String defaultValue;
+			if (separatorIndex < 0) {
+				envName = content;
+				defaultValue = null;
+			} else {
+				envName = content.substring(0, separatorIndex); 
+				defaultValue = content.substring(separatorIndex + 1);
+			}
+			
 			s = System.getProperty(envName);
 			if (s == null) {
-				log.warn("getRequiredString - Property '{}' references the system property '{}', but that can not be found. "
-						+ "Pass the property to the JVM using the '-D{}=value' command line argument.", name, envName, envName);
+				if (StringUtils.hasText(defaultValue)) {
+					s = defaultValue;
+				} else {
+					log.warn("getRequiredString - Property '{}' references the system property '{}', but that can not be found. "
+							+ "Pass the property to the JVM using the '-D{}=value' command line argument.", name, envName, envName);
+				}
 			}
 		}
     	if (StringUtils.hasText(s)) {

@@ -451,7 +451,35 @@ public class PropertiesFacadeTestCase {
 		assertEquals("", facade.getString("string.key.system.missing"));
 	}
 
+	@Test
+	public void stringSystemPropertyDoesntExistButHasDefault() {
+		props.setProperty("string.key.system.missing", String.format("${%s:%s}", STRING_SYSTEM_PROP_NAME_MISSING, "default"));
+		assertTrue(facade.propertyExists("string.key.system.missing"));
+		assertEquals("default", facade.getRequiredString("string.key.system.missing"));
+	}
+	
+	@Test
+	public void stringSystemPropertyDoesntExistButHasDefaultWithColon() {
+		props.setProperty("string.key.system.missing", String.format("${%s:%s}", STRING_SYSTEM_PROP_NAME_MISSING, "def:ault"));
+		assertTrue(facade.propertyExists("string.key.system.missing"));
+		assertEquals("def:ault", facade.getRequiredString("string.key.system.missing"));
+	}
+	
+	@Test(expected = MissingResourceException.class)
+	public void stringSystemPropertyDoesntExistButHasEmptyDefault() {
+		props.setProperty("string.key.system.missing", String.format("${%s:%s}", STRING_SYSTEM_PROP_NAME_MISSING, ""));
+		assertTrue(facade.propertyExists("string.key.system.missing"));
+		facade.getRequiredString("string.key.system.missing");
+	}	
 
+	@Test(expected = MissingResourceException.class)
+	public void stringSystemPropertyDoesntExistButHasSpacesDefault() {
+		props.setProperty("string.key.system.missing", String.format("${%s:%s}", STRING_SYSTEM_PROP_NAME_MISSING, "    "));
+		assertTrue(facade.propertyExists("string.key.system.missing"));
+		facade.getRequiredString("string.key.system.missing");
+	}	
+
+	
 	@Test
 	public void intSystemPropertyExists() {
 		assertTrue(facade.propertyExists("int.key.system"));
@@ -468,5 +496,12 @@ public class PropertiesFacadeTestCase {
 	public void intSystemPropertyDoesntExist_defaultReturned() {
 		assertTrue(facade.propertyExists("int.key.system.missing"));
 		assertEquals(0, facade.getInt("int.key.system.missing"));
+	}
+	
+	@Test
+	public void intSystemPropertyDoesntExistButHasDefault() {
+		props.setProperty("int.key.system.missing", String.format("${%s:%s}", INT_SYSTEM_PROP_NAME_MISSING, "17"));
+		assertTrue(facade.propertyExists("int.key.system.missing"));
+		assertEquals(17, facade.getRequiredInt("int.key.system.missing"));
 	}
 }
