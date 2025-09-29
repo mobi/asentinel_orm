@@ -107,7 +107,7 @@ public class PropertiesFacade {
 				if (StringUtils.hasText(defaultValue)) {
 					s = defaultValue;
 				} else {
-					log.warn("getRequiredString - Property '{}' references the system property '{}', but that can not be found. "
+					log.debug("getRequiredString - Property '{}' references the system property '{}', but that can not be found. "
 							+ "Pass the property to the JVM using the '-D{}=value' command line argument.", name, envName, envName);
 				}
 			}
