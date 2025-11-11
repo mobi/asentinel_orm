@@ -24,16 +24,15 @@ public interface Node<T> {
 	
 	/**
 	 * Set the parent of this node.
-	 * @param node
 	 */
-	public void setParent(Node<T> node);
+	void setParent(Node<T> node);
 	
 	/**
 	 * @return the parent of this Node. It can return null if this is
 	 * 			a root node.
 	 * @see #isRoot()
 	 */
-	public Node<T> getParent();
+	Node<T> getParent();
 	
 	/**
 	 * Method that adds a child to this node. If the node parameter is already child of
@@ -44,7 +43,7 @@ public interface Node<T> {
 	 * @return this node so that multiple {@link #addChild(Node)} methods can be
 	 * 			chained like this: node.addChild(node1).addChild(node2). 
 	 */
-	public Node<T> addChild(Node<T> node);
+	Node<T> addChild(Node<T> node);
 	
 	/**
 	 * Remove the specified child node from this node. Only the first occurrence should be removed. 
@@ -54,53 +53,51 @@ public interface Node<T> {
 	 * @return true if the node was found and removed from the list of children for this node,
 	 * 			false otherwise.
 	 */
-	public boolean removeChild(Node<T> node);
+	boolean removeChild(Node<T> node);
 	
 	/**
 	 * Set the value of this node. 
-	 * @param value
 	 */
-	public void setValue(T value);
+	void setValue(T value);
 	
 	/**
 	 * @return the value of this node.
 	 */
-	public T getValue();
+	T getValue();
 	
 	/**
 	 * @return true if this is a root node (the parent is null),
 	 * 			false if this node has a parent.
 	 */
-	public boolean isRoot();
+	boolean isRoot();
 	
 	/**
 	 * @return true if this node has no children,
 	 * 			false otherwise.
 	 */
-	public boolean isLeaf();
+	boolean isLeaf();
 	
 	/**
 	 * @return the level of this node. The root node is on level 0,
 	 * 			the root children are on level 1, the children of 
 	 * 			the root children are on level 2 and so on.
 	 */
-	public int getLevel();
+	int getLevel();
 
 	/**
 	 * Method that traverses the tree represented by this node (this node is considered the root). 
 	 * The implementation is free to choose whatever traversal order it needs. The implementation should
 	 * use the handler parameter to process each node.
-	 * @param handler
 	 * @see NodeHandler
 	 */
-	public void traverse(NodeHandler<T> handler);
+	void traverse(NodeHandler<T> handler);
 	
 	/**
 	 * @return the children of this node. The order of the children
 	 * 			may not be the order in which they were added (it is an implementation detail).
 	 * @see #getDescendants()
 	 */
-	public List<Node<T>> getChildren();
+	List<Node<T>> getChildren();
 	
 	/**
 	 * @return a list of all the nodes that are descendants of this node (children, nephews, etc).The
@@ -108,7 +105,7 @@ public interface Node<T> {
 	 * 			are returned is an implementation detail.
 	 * @see #getChildren()
 	 */
-	public List<Node<T>> getDescendants();
+	List<Node<T>> getDescendants();
 
 	/**
 	 * @return list of the ancestors of this node up to the root,
@@ -116,20 +113,17 @@ public interface Node<T> {
 	 * 			must be the root and the last must be this node. If
 	 * 			this node is the root the list will contain just this node.
 	 */
-	public List<Node<T>> getAncestors();
+	List<Node<T>> getAncestors();
 	
 	/**
 	 * @return the siblings of this node if any. If this node
 	 * 			is the root node an empty list is returned.
 	 */
-	public List<Node<T>> getSiblings();
+	List<Node<T>> getSiblings();
 	
 	/**
 	 * @return String representation of this node including its subtree.
 	 * 			How this string is created is an implementation detail.
 	 */
-	public String toStringAsTree();
-	
-	
-
+	String toStringAsTree();
 }

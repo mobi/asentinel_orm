@@ -14,8 +14,6 @@ public interface NodeHandler<T> {
 	
 	/**
 	 * Method that processes the node parameter.
-	 * @param node
 	 */
-	public void handleNode(Node<T> node);
-
+	void handleNode(Node<T> node);
 }

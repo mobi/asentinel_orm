@@ -14,9 +14,9 @@ public interface ArrayFactory {
 
 	/**
 	 * Method for creating new {@code java.sql.Array} instances. It has a default implementation
-	 * that uses strictly non vendor specific JDBC code.
+	 * that uses strictly non-vendor specific JDBC code.
 	 */
-	public default java.sql.Array newArray(PreparedStatement ps, String typeName, Object... objects) 
+	default java.sql.Array newArray(PreparedStatement ps, String typeName, Object... objects)
 			throws SQLException {
 		Assert.assertNotNull(ps, "ps");
 		return ps.getConnection().createArrayOf(typeName, objects);

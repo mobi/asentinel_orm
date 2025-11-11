@@ -14,37 +14,37 @@ import com.asentinel.common.jdbc.ResultSetSqlParameter;
  */
 public interface JdbcFlavor {
 	
-	public SqlTemplates getSqlTemplates();
+	SqlTemplates getSqlTemplates();
 	
-	public int getCursorType();
+	int getCursorType();
 	
-	public PreparedStatementParametersSetter getPreparedStatementParametersSetter();
+	PreparedStatementParametersSetter getPreparedStatementParametersSetter();
 	
-	public CallableStatementCreator buildCallableStatementCreator(String spName, int resultCount, Logger logger, Object ... inParams);
+	CallableStatementCreator buildCallableStatementCreator(String spName, int resultCount, Logger logger, Object ... inParams);
 	
-	public CallableStatementCallback<?> buildCallableStatementCallback(ResultSetSqlParameter[] rsParams, Object ... inParams);
+	CallableStatementCallback<?> buildCallableStatementCallback(ResultSetSqlParameter[] rsParams, Object ... inParams);
 	
 	/**
 	 * Factory method for {@link LobHandler} instances. It is recommended
 	 * to use this method for any {@link LobHandler} instance that is needed.
 	 * 
 	 * @deprecated in favor of injecting the right {@link LobHandler} implementation
-	 * 		where it is needed
+	 * 		where it is necessary
 	 */
 	@Deprecated
-	public LobHandler buildLobHandler();
+	LobHandler buildLobHandler();
 	
-	public default LobHandler getLobHandler() {
+	default LobHandler getLobHandler() {
 		return getPreparedStatementParametersSetter().getLobHandler();
 	}	
 	
 	// TODO: Maybe this method should be a parameter of the SqlQuery and InOutCall implementations ?
-	public default boolean isWrapDoubleParameterWithBigDecimal() {
+	default boolean isWrapDoubleParameterWithBigDecimal() {
 		return false;
 	}
 
 	// TODO: Maybe this method should be a parameter of the SqlQuery and InOutCall implementations ?
-	public default boolean isWrapFloatParameterWithBigDecimal() {
+	default boolean isWrapFloatParameterWithBigDecimal() {
 		return false;
 	}
 	
@@ -52,7 +52,7 @@ public interface JdbcFlavor {
 	 * @param keyColumnNames the names of the columns whose value after an insert/update operation should be returned.
 	 * @return the names array to be used.
 	 */
-	public default String[] preprocessKeyColumnNames(String ... keyColumnNames) {
+	default String[] preprocessKeyColumnNames(String ... keyColumnNames) {
 		return keyColumnNames;
 	}
 }

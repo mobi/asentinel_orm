@@ -21,16 +21,16 @@ public interface BooleanParameterConverter<T> {
 	 * Object that should be passed to an InOutCall method
 	 * that needs to call a stored procedure with a NULL boolean.
 	 */
-	public final static Object NULL_BOOLEAN = new Object() {
+	Object NULL_BOOLEAN = new Object() {
 		@Override
 		public String toString() {
 			return "NULL_BOOLEAN";
 		}
 	};
 	
-	public T asObject(boolean b);
+	T asObject(boolean b);
 	
-	public default T asObject(Boolean b) {
+	default T asObject(Boolean b) {
 		if (b == null) {
 			return null;
 		}

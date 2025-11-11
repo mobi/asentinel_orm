@@ -35,27 +35,25 @@ public interface SqlFactory {
 	 * 
 	 * @return the configured {@link SqlTemplates} instance.
 	 */
-	public SqlTemplates getSqlTemplates();
+	SqlTemplates getSqlTemplates();
 	
 	
 	/**
 	 * @see #buildParameterizedQuery(Node, String...)
 	 */
-	public default String buildQuery(Class<?> clazz, String tableAlias) {
+	default String buildQuery(Class<?> clazz, String tableAlias) {
 		return buildParameterizedQuery(clazz , tableAlias).getSql();
 	}
 	
 	/**
 	 * Creates a sql query for a single annotated {@link Entity} class.
-	 * @param clazz
-	 * @param tableAlias
 	 * @return the {@link ParameterizedQuery} encapsulating the SQL string and the parameters (if any).
 	 */
-	public default ParameterizedQuery buildParameterizedQuery(Class<?> clazz, String tableAlias) {
+	default ParameterizedQuery buildParameterizedQuery(Class<?> clazz, String tableAlias) {
 		Assert.assertNotNull(clazz, "clazz");
 		Assert.assertNotEmpty(tableAlias, "tableAlias");
 		return buildParameterizedQuery(
-				new SimpleNode<SimpleEntityDescriptor>(
+				new SimpleNode<>(
 						new SimpleEntityDescriptor.Builder(clazz).tableAlias(tableAlias).build()
 						)
 				);
@@ -64,21 +62,21 @@ public interface SqlFactory {
 	/**
 	 * @see #buildQuery(Node)
 	 */
-	public default String buildQuery(Node<?> root) {
+	default String buildQuery(Node<?> root) {
 		return buildParameterizedQuery(root).getSql();
 	}
 
 	/**
 	 * @see #buildParameterizedQuery(Node)
 	 */
-	public default ParameterizedQuery buildParameterizedQuery(Node<?> root) {
+	default ParameterizedQuery buildParameterizedQuery(Node<?> root) {
 		return buildParameterizedQuery(root, (String[]) null);
 	}
 	
 	/**
 	 * @see #buildParameterizedQuery(Node, String...)
 	 */
-	public default String buildQuery(Node<?> root, String ... additionalColumns) {
+	default String buildQuery(Node<?> root, String ... additionalColumns) {
 		return buildParameterizedQuery(root, additionalColumns).getSql();
 	}
 
@@ -91,13 +89,12 @@ public interface SqlFactory {
 	 * 			by this method, other than those found in the entities. 
 	 * @return the {@link ParameterizedQuery} encapsulating the SQL string and the parameters (if any).
 	 */
-	public ParameterizedQuery buildParameterizedQuery(Node<?> root, String ... additionalColumns);
-	
-	
+	ParameterizedQuery buildParameterizedQuery(Node<?> root, String ... additionalColumns);
+
 	/**
 	 * @see #buildParameterizedQuery(QueryCriteria)
 	 */
-	public default String buildQuery(QueryCriteria criteria) {
+	default String buildQuery(QueryCriteria criteria) {
 		return buildParameterizedQuery(criteria).getSql();
 	}
 	
@@ -211,14 +208,14 @@ public interface SqlFactory {
 	 * 
 	 * @see QueryCriteria
 	 */
-	public ParameterizedQuery buildParameterizedQuery(QueryCriteria criteria);
+	ParameterizedQuery buildParameterizedQuery(QueryCriteria criteria);
 	
 	// FROM query methods
 	
 	/**
 	 * @see #buildParameterizedFromQuery(Node)
 	 */
-	public default String buildFromQuery(Node<?> root, String ... additionalColumns) {
+	default String buildFromQuery(Node<?> root, String ... additionalColumns) {
 		return buildParameterizedFromQuery(root).getSql();
 	}
 	
@@ -230,9 +227,8 @@ public interface SqlFactory {
 	 * @param root the root of the tree.
 	 * @return the {@link ParameterizedQuery} encapsulating the SQL string and the parameters (if any).
 	 */
-	public ParameterizedQuery buildParameterizedFromQuery(Node<?> root);
-	
-	
+	ParameterizedQuery buildParameterizedFromQuery(Node<?> root);
+
 	
 	// pagination query methods
 	// TODO: enhance the documentation of the pagination methods
@@ -240,7 +236,7 @@ public interface SqlFactory {
 	/**
 	 * @see #buildPaginatedParameterizedQuery(QueryCriteria)
 	 */
-	public default String buildPaginatedQuery(QueryCriteria criteria) {
+	default String buildPaginatedQuery(QueryCriteria criteria) {
 		return buildPaginatedParameterizedQuery(criteria).getSql();
 	}
 	
@@ -248,14 +244,14 @@ public interface SqlFactory {
 	/**
 	 * @see #buildPaginatedQuery(QueryCriteria, boolean)
 	 */
-	public default ParameterizedQuery buildPaginatedParameterizedQuery(QueryCriteria criteria) {
+	default ParameterizedQuery buildPaginatedParameterizedQuery(QueryCriteria criteria) {
 		return buildPaginatedParameterizedQuery(criteria, false);
 	}
 	
 	/**
 	 * @see #buildPaginatedParameterizedQuery(QueryCriteria, boolean)
 	 */
-	public default String buildPaginatedQuery(QueryCriteria criteria, boolean useNamedParams) {
+	default String buildPaginatedQuery(QueryCriteria criteria, boolean useNamedParams) {
 		return buildPaginatedParameterizedQuery(criteria, useNamedParams).getSql();
 		
 	}
@@ -284,11 +280,11 @@ public interface SqlFactory {
 	 * @see #buildCountQuery(QueryCriteria)
 	 * @see QueryCriteria
 	 */
-	public ParameterizedQuery buildPaginatedParameterizedQuery(QueryCriteria criteria, boolean useNamedParams);
+	ParameterizedQuery buildPaginatedParameterizedQuery(QueryCriteria criteria, boolean useNamedParams);
 	/**
 	 * @see #buildCountParameterizedQuery(QueryCriteria)
 	 */
-	public default String buildCountQuery(QueryCriteria criteria) {
+	default String buildCountQuery(QueryCriteria criteria) {
 		return buildCountParameterizedQuery(criteria).getSql();
 	}
 	
@@ -303,7 +299,6 @@ public interface SqlFactory {
 	 * @see #buildPaginatedQuery(QueryCriteria)
 	 * @see QueryCriteria
 	 */
-	public ParameterizedQuery buildCountParameterizedQuery(QueryCriteria criteria);
-	
-	
+	ParameterizedQuery buildCountParameterizedQuery(QueryCriteria criteria);
+
 }

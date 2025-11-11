@@ -139,11 +139,11 @@ import com.asentinel.common.util.Assert;
  * @author Razvan Popian
  */
 public class SqlBuilder<E> {
-	private final static Logger log = LoggerFactory.getLogger(SqlBuilder.class);
+	private static final Logger log = LoggerFactory.getLogger(SqlBuilder.class);
 	
-	private final static Object[] NO_PARAMS = new Object[0];
-	
-	final static String NO_RESULTS = "1 = 0";
+	private static final Object[] NO_PARAMS = new Object[0];
+
+    static final String NO_RESULTS = "1 = 0";
 
 	private final EntityDescriptorTreeRepository entityDescriptorTreeRepository;
 	private final SqlFactory sqlFactory;
@@ -170,8 +170,7 @@ public class SqlBuilder<E> {
 		this.queryExecutor = queryExecutor;
 		this.instructions = new Instructions(sqlFactory);
 	}
-	
-	
+
 	/**
 	 * Constructor.
 	 * @param clasz the object type that will result from executing the built query.
@@ -259,8 +258,7 @@ public class SqlBuilder<E> {
 		);
 		return this;
 	}
-	
-	
+
 	public SqlBuilder<E> from(Node<EntityDescriptor> root) {
 		Assert.assertNotNull(root, "root");
 		getInstructions().add(new Instruction(FROM_QUERY, root));		
@@ -279,8 +277,7 @@ public class SqlBuilder<E> {
 	 */
 	public CompiledSql compileAsIs(String rootTableAlias) {
 		Node<EntityDescriptor> root = entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, rootTableAlias);
-		CompiledSql compiledSql = compileAsIs(root);
-		return compiledSql;
+		return compileAsIs(root);
 	}
 
 	/**
@@ -292,10 +289,8 @@ public class SqlBuilder<E> {
 	 * @see CompiledSql
 	 */
 	public CompiledSql compileAsIs(Node<EntityDescriptor> root) {
-		CompiledSql compiledSql = getInstructions().compile(root);
-		return compiledSql;
+		return getInstructions().compile(root);
 	}
-	
 
 	/**
 	 * Compiles the instructions that were added to the builder. This method will only work if a 
@@ -305,8 +300,7 @@ public class SqlBuilder<E> {
 	 * @see CompiledSql
 	 */
 	public CompiledSql compile() {
-		CompiledSql compiledSql = getInstructions().compile();
-		return compiledSql;
+		return getInstructions().compile();
 	}
 	
 	/**
@@ -316,7 +310,7 @@ public class SqlBuilder<E> {
 	@Deprecated
 	public List<E> exec(SqlQuery queryExecutor) {
 		CompiledSql compiledSql = getInstructions().compile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntityList();
 	}
@@ -327,12 +321,11 @@ public class SqlBuilder<E> {
 	 */
 	public List<E> exec() {
 		CompiledSql compiledSql = getInstructions().compile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntityList();
 	}
-	
-	
+
 	/**
 	 * Compiles and then executes the resulting query.
 	 * @return the map of objects resulted from the SQL query.
@@ -340,7 +333,7 @@ public class SqlBuilder<E> {
 	@Deprecated
 	public Map<Object, E> execForMap(SqlQuery queryExecutor) {
 		CompiledSql compiledSql = getInstructions().compile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntityMap();
 	}
@@ -351,15 +344,14 @@ public class SqlBuilder<E> {
 	 */
 	public Map<Object, E> execForMap() {
 		CompiledSql compiledSql = getInstructions().compile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntityMap();
 	}
-	
 
 	/**
 	 * Compiles and then executes the resulting query. If the query does not produce
-	 * exactly 1 object an exception is thrown.
+	 * exactly 1 object, an exception is thrown.
 	 * @return the object resulted from the SQL query. 
 	 * @throws EmptyResultDataAccessException if no objects were produced
 	 * @throws IncorrectResultSizeDataAccessException if more than 1 object
@@ -368,7 +360,7 @@ public class SqlBuilder<E> {
 	@Deprecated	
 	public E execForEntity(SqlQuery queryExecutor) {
 		CompiledSql compiledSql = getInstructions().compile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntity();
 	}
@@ -382,12 +374,11 @@ public class SqlBuilder<E> {
 	 */
 	public E execForEntity() {
 		CompiledSql compiledSql = getInstructions().compile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntity();
 	}
-	
-	
+
 	/**
 	 * Compiles and then executes the resulting query. If the query does not produce
 	 * any result, it will return an empty {@link Optional}. If the query produces more than 
@@ -454,7 +445,6 @@ public class SqlBuilder<E> {
 		CompiledSql compiledSql = getInstructions().compile();
 		return queryExecutor.query(compiledSql.getSqlString(), new RowAsArrayRowMapper(), compiledSql.getParameters());
 	}
-	
 
 	/**
 	 * @see #exec(SqlQuery, RowMapper)
@@ -574,7 +564,7 @@ public class SqlBuilder<E> {
 	// ------------------- alias/path selectors --------------------
 	
 	/**
-	 * Sets the path to an {@link EntityDescriptor} node that will be used by any subsequent 
+	 * Sets the path to an {@link EntityDescriptor} node that will be used by any subsequent
 	 * column related builder methods to determine the table alias for the specified column.
 	 * <br>
 	 * If the path argument is <code>null</code> or <code>0</code> length the alias is set to the 
@@ -632,8 +622,7 @@ public class SqlBuilder<E> {
 		getInstructions().add(new Instruction(SEPARATOR, separator));
 		return this;
 	}
-	
-	
+
 	/**
 	 * Logs the methods calls received so far.
 	 */
@@ -812,7 +801,6 @@ public class SqlBuilder<E> {
 	 * Adds a like condition to the query.
 	 * @param column the column to apply the condition on.
 	 * @param param the value of the like filter.
-	 * @param caseSensitive
 	 * @return this builder.
 	 */
 	public SqlBuilder<E> applyLike(String column, String param, boolean caseSensitive) {
@@ -836,7 +824,6 @@ public class SqlBuilder<E> {
 	 * like condition to the query.
 	 * @param column the column to apply the condition on.
 	 * @param param the value of the like filter, if <code>null</code> an empty string will be used.
-	 * @param caseSensitive
 	 * @return this builder.
 	 */
 	public SqlBuilder<E> applyStartsWith(String column, String param, boolean caseSensitive) {
@@ -855,7 +842,7 @@ public class SqlBuilder<E> {
 	 * @param param
 	 * 			the value of the like filter, if {@code null} an empty string will be used
 	 * @param caseSensitive
-	 * 			{@code true} case sensitive, {@code false} case insensitive 
+	 * 			{@code true} case sensitive, {@code false} case-insensitive
 	 * @param columns
 	 * 			the columns to apply the condition on, if {@code null}, nothing is appended
 	 * @return
@@ -896,7 +883,6 @@ public class SqlBuilder<E> {
 	 * like condition to the query.
 	 * @param column the column to apply the condition on.
 	 * @param param the value of the like filter, if <code>null</code> an empty string will be used.
-	 * @param caseSensitive
 	 * @return this builder.
 	 */
 	public SqlBuilder<E> applyContains(String column, String param, boolean caseSensitive) {
@@ -915,7 +901,7 @@ public class SqlBuilder<E> {
 	 * @param param
 	 * 			the value of the like filter, if {@code null} an empty string will be used
 	 * @param caseSensitive
-	 * 			{@code true} case sensitive, {@code false} case insensitive 
+	 * 			{@code true} case sensitive, {@code false} case-insensitive
 	 * @param columns
 	 * 			the columns to apply the condition on, if {@code null}, nothing is appended
 	 * @return
@@ -971,7 +957,7 @@ public class SqlBuilder<E> {
 	/**
 	 * Simulates the SQL <code>IN</code> condition using <code>ORs</code>.
 	 * You may prefer this method to the {@link #in(Array)} method
-	 * because it may yield better performing SQL with certain databases (Oracle). However, the resulting SQL may be
+	 * because it may yield better-performing SQL with certain databases (Oracle). However, the resulting SQL may be
 	 * very long if the <code>params</code> collection is large.
 	 * @param column the column name. If this is <code>null</code> the id column will be used.
 	 * @param params the parameters.
@@ -980,7 +966,7 @@ public class SqlBuilder<E> {
 	 * @see #idIn(Collection)
 	 */
 	public SqlBuilder<E> in(String column, Collection<?> params) {
-		if (params == null || params.size() == 0) {
+		if (params == null || params.isEmpty()) {
 			// we do not return any result if params is null or 0 length  
 			return sql(NO_RESULTS);
 		}
@@ -1010,7 +996,7 @@ public class SqlBuilder<E> {
 	
 	// INFO for maintainers: inObjects(String, Object[]) is not called simply in(String, Object[])
 	// because the compiler will complain that a call like new SqlBuilder(...).in("test", 1, 2, 3)
-	// is ambiguos
+	// is ambiguous
 	/**
 	 * @see #in(String, Collection)
 	 */
@@ -1215,8 +1201,7 @@ public class SqlBuilder<E> {
 	public SqlBuilder<E> sql(CompiledSql compiledSql) {
 		return this.sql(compiledSql.getSqlString(), compiledSql.getParameters());
 	}
-	
-	
+
 	public SqlBuilder<E> update() {
 		addString(UPDATE);
 		return this;
@@ -1282,7 +1267,7 @@ public class SqlBuilder<E> {
 	/**
 	 * References the id column for the current {@link EntityDescriptor} node. This method
 	 * should be used after a {@link #orderBy()} was issued and for string columns only.
-	 * @param caseSensitive sort/search case sensitive or not. If <code>null</code> this method behaves like {@link #id()}.
+	 * @param caseSensitive sort/search case-sensitive or not. If <code>null</code> this method behaves like {@link #id()}.
 	 * 
 	 * @see #alias(Object...)
 	 * @see #rootAlias()
@@ -1323,7 +1308,7 @@ public class SqlBuilder<E> {
 	 * References the column with the specified name for the current {@link EntityDescriptor} node. This method
 	 * should be used after a {@link #orderBy()} was issued and for string columns only.
 	 * @param column the name of the column.
-	 * @param caseSensitive sort/search case sensitive or not. If <code>null</code> this method behaves like {@link #column(String)}.
+	 * @param caseSensitive sort/search case-sensitive or not. If <code>null</code> this method behaves like {@link #column(String)}.
 	 * 
 	 * @see #alias(Object...)
 	 * @see #rootAlias()
@@ -1364,8 +1349,7 @@ public class SqlBuilder<E> {
 		getInstructions().add(new Instruction(InstructionType.TABLE, null));
 		return this;
 	}
-	
-	
+
 	/**
 	 * Adds a parameter. This will be used in the final {@link PreparedStatement} execution.
 	 * @param param the parameter. Arrays and Collections must be wrapped in an {@link Array} subclass.
@@ -1399,8 +1383,8 @@ public class SqlBuilder<E> {
 	/**
 	 * Creates a paginated select query. Under the hood it will call the {@link SqlFactory} pagination
 	 * methods.
-	 * @param beginIndex the first item to pull (inclusive, 0 based).
-	 * @param endIndex the last item to pull (exclusive, 0 based).
+	 * @param beginIndex the first item to pull (inclusive, 0-based).
+	 * @param endIndex the last item to pull (exclusive, 0-based).
 	 * @param rootTableAlias the alias to be used for the root table.
 	 * @param nodeCallbacks array of node callbacks.
 	 * 
@@ -1493,8 +1477,7 @@ public class SqlBuilder<E> {
 		getInstructions().add(new Instruction(PAGED_HAVING, null));
 		return rootAlias();
 	}
-	
-	
+
 	/**
 	 * Switches the builder into the secondary where conditions mode for paginated
 	 * queries. The table alias is set to the root {@link EntityDescriptor} node by
@@ -1525,8 +1508,7 @@ public class SqlBuilder<E> {
 		if (!(cSql instanceof PagedCompiledSql)) {
 			throw new IllegalStateException("The builder was not used to create a paginated query, but you attempted to compile it with pagination.");
 		}
-		PagedCompiledSql pcSql = (PagedCompiledSql) cSql;
-		return pcSql;
+        return (PagedCompiledSql) cSql;
 	}
 
 	/**
@@ -1539,12 +1521,12 @@ public class SqlBuilder<E> {
 		PagedCompiledSql compiledSql = pagedCompile();
 		long count = queryExecutor.queryForLong(compiledSql.getSqlCountString(), compiledSql.getCountParameters());
 		if (count > 0) {
-			EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+			EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 			queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
-			return new Page<E>(eb.getEntityList(), count);
+			return new Page<>(eb.getEntityList(), count);
 		} else {
 			List<E> empty = Collections.emptyList();
-			return new Page<E>(empty, count);
+			return new Page<>(empty, count);
 		}
 	}
 
@@ -1557,12 +1539,12 @@ public class SqlBuilder<E> {
 		PagedCompiledSql compiledSql = pagedCompile();
 		long count = queryExecutor.queryForLong(compiledSql.getSqlCountString(), compiledSql.getCountParameters());
 		if (count > 0) {
-			EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+			EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 			queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
-			return new Page<E>(eb.getEntityList(), count);
+			return new Page<>(eb.getEntityList(), count);
 		} else {
 			List<E> empty = Collections.emptyList();
-			return new Page<E>(empty, count);
+			return new Page<>(empty, count);
 		}
 	}
 	
@@ -1575,7 +1557,7 @@ public class SqlBuilder<E> {
 	@Deprecated
 	public List<E> execForRange(SqlQuery queryExecutor) {
 		PagedCompiledSql compiledSql = pagedCompile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntityList();
 	}
@@ -1591,7 +1573,7 @@ public class SqlBuilder<E> {
 	@Deprecated
 	public List<E> execForRange() {
 		PagedCompiledSql compiledSql = pagedCompile();
-		EntityBuilder<E> eb = new EntityBuilder<E>(compiledSql.getRootNode());
+		EntityBuilder<E> eb = new EntityBuilder<>(compiledSql.getRootNode());
 		queryExecutor.query(compiledSql.getSqlString(), eb, compiledSql.getParameters());
 		return eb.getEntityList();
 	}
@@ -1632,42 +1614,39 @@ public class SqlBuilder<E> {
 			return -1;
 		}
 	}
-	
-	
-	
-	// -------------------- constants -----------------------	
-	
 
-	final static String SELECT = "select";
-	final static String STAR = " *";
-	final static String FROM = " from";
-	final static String WHERE = " where";
-	final static String ORDER_BY = " order by";
-	final static String ASC = " asc";
-	final static String DESC = " desc";
-	final static String AND = " and";
-	final static String OR = " or";
-	final static String NOT = " not";
-	final static String LP = " (";
-	final static String RP = " )";
-	final static String EQ = " =";
-	final static String NE = " <>";
-	final static String GT = " >";
-	final static String LT = " <";
-	final static String GTE = " >=";
-	final static String LTE = " <=";
-	final static String COMMA = ",";
-	final static String LIKE = " like";
-	final static String IN = " in";
-	final static String IS = " is";
-	final static String NULL = " null";
-	final static String UPPER = " upper";
-	final static String LOWER = " lower";
-	final static String BETWEEN = " between";
-	final static String EXISTS = " exists";
-	final static String COUNT = " count";
-	final static String UPDATE = "update";
-	final static String SET = " set";
-	final static String DELETE = "delete";
-	final static String COALESCE = " coalesce";
+	// -------------------- constants -----------------------	
+
+    static final String SELECT = "select";
+    static final String STAR = " *";
+    static final String FROM = " from";
+    static final String WHERE = " where";
+    static final String ORDER_BY = " order by";
+    static final String ASC = " asc";
+    static final String DESC = " desc";
+    static final String AND = " and";
+    static final String OR = " or";
+    static final String NOT = " not";
+    static final String LP = " (";
+    static final String RP = " )";
+    static final String EQ = " =";
+    static final String NE = " <>";
+    static final String GT = " >";
+    static final String LT = " <";
+    static final String GTE = " >=";
+    static final String LTE = " <=";
+    static final String COMMA = ",";
+    static final String LIKE = " like";
+    static final String IN = " in";
+    static final String IS = " is";
+    static final String NULL = " null";
+    static final String UPPER = " upper";
+    static final String LOWER = " lower";
+    static final String BETWEEN = " between";
+    static final String EXISTS = " exists";
+    static final String COUNT = " count";
+    static final String UPDATE = "update";
+    static final String SET = " set";
+    static final String DELETE = "delete";
+    static final String COALESCE = " coalesce";
 }

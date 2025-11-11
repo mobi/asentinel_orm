@@ -28,19 +28,19 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * {@link #getManyToManyRightJoinConditionsOverride()} methods.<br>
 	 * This placeholder will be replaced with the table alias of the link table.
 	 */
-	public final static String PLACEHOLDER_MTM_TABLE_ALIAS = "#{manyToManyTableAlias}";
+	String PLACEHOLDER_MTM_TABLE_ALIAS = "#{manyToManyTableAlias}";
 
 	/**
 	 * @return the name of the table that links the table
 	 * 			represented by this entity to the table
 	 * 			represented by the parent entity.
 	 */
-	public String getManyToManyTable();
+	String getManyToManyTable();
 
 	/**
 	 * @return the alias of the link table in the many to many relationship.
 	 */
-	public String getManyToManyTableAlias();
+	String getManyToManyTableAlias();
 
 	/**
 	 * @return the name of the column in the link table that connects
@@ -48,7 +48,7 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * 			{@code null} the {@link SqlFactory#buildQuery(Node)} method will use the same 
 	 * 			name as the name of the primary key in the parent entity table.
 	 */
-	public String getManyToManyLeftFkName();
+	String getManyToManyLeftFkName();
 	
 	/**
 	 * @return the name of the column in the link table that connects
@@ -56,7 +56,7 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * 			the {@link SqlFactory#buildQuery(Node)} method will use the same 
 	 * 			name as the name of the primary key in this entity table.
 	 */
-	public String getManyToManyRightFkName();
+	String getManyToManyRightFkName();
 	
 	/**
 	 * @return a SQL snippet defining the join conditions between the parent and the link table. 
@@ -69,7 +69,7 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * @see #PLACEHOLDER_PARENT_TABLE_ALIAS
 	 * @see #PLACEHOLDER_MTM_TABLE_ALIAS
 	 */
-	public default String getManyToManyLeftJoinConditionsOverride() {
+	default String getManyToManyLeftJoinConditionsOverride() {
 		return getJoinConditionsOverride();
 	}
 	
@@ -82,7 +82,7 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * 
 	 * @see #getManyToManyLeftJoinConditionsOverride()
 	 */
-	public default List<Object> getManyToManyLeftJoinConditionsOverrideParams() {
+	default List<Object> getManyToManyLeftJoinConditionsOverrideParams() {
 		return getJoinConditionsOverrideParams();
 	}
 
@@ -97,7 +97,7 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * @see #PLACEHOLDER_CHILD_TABLE_ALIAS
 	 * @see #PLACEHOLDER_MTM_TABLE_ALIAS
 	 */
-	public default String getManyToManyRightJoinConditionsOverride() {
+	default String getManyToManyRightJoinConditionsOverride() {
 		return null;
 	}
 
@@ -110,7 +110,7 @@ public interface ManyToManyQueryReady extends QueryReady {
 	 * 
 	 * @see #getManyToManyRightJoinConditionsOverride()
 	 */
-	public default List<Object> getManyToManyRightJoinConditionsOverrideParams() {
+	default List<Object> getManyToManyRightJoinConditionsOverrideParams() {
 		return Collections.emptyList();
 	}
 

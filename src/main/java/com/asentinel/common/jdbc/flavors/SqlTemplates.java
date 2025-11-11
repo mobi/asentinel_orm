@@ -8,52 +8,50 @@ package com.asentinel.common.jdbc.flavors;
  */
 public interface SqlTemplates {
 	
-	public final static String ROW_INDEX_COL = "RowIndex";
+	String ROW_INDEX_COL = "RowIndex";
 	
-	public final static String[] NO_COLS = new String[0];
+	String[] NO_COLS = new String[0];
 	
-	public final static String UPSERT_INSERT_PLACEHOLDER = "#{insert}";
-	public final static String UPSERT_UPDATE_PLACEHOLDER = "#{update}";
+	String UPSERT_INSERT_PLACEHOLDER = "#{insert}";
+	String UPSERT_UPDATE_PLACEHOLDER = "#{update}";
 	
-	public String getSqlForFirstRowOnly();
+	String getSqlForFirstRowOnly();
 
-	public String getSqlOnlyAssociations();
+	String getSqlOnlyAssociations();
 	
-	public String getSqlAtLeastOneCollection();
+	String getSqlAtLeastOneCollection();
 
-	
-	public String getPaginationSqlOnlyAssociations();
+	String getPaginationSqlOnlyAssociations();
 
-	public String getPaginationSqlAtLeastOneCollection();
+	String getPaginationSqlAtLeastOneCollection();
+
+	String getPaginationNamedParam1();
 	
+	String getPaginationNamedParam2();
 	
-	public String getPaginationNamedParam1();
+	String getPaginationSqlOnlyAssociationsNamed();
 	
-	public String getPaginationNamedParam2();
+	String getPaginationSqlAtLeastOneCollectionNamed();
 	
-	public String getPaginationSqlOnlyAssociationsNamed();
-	
-	public String getPaginationSqlAtLeastOneCollectionNamed();
-	
-	public default String[] getPaginationAdditionalColumns(String mainOrderByString) {
+	default String[] getPaginationAdditionalColumns(String mainOrderByString) {
 		return NO_COLS;
 	}
 
-	public default boolean isSecondaryWhereStarted() {
+	default boolean isSecondaryWhereStarted() {
 		return false;
 	}
 	
-	public default Long[] applyRangeTransformation(long beginIndex, long endIndex) {
+	default Long[] applyRangeTransformation(long beginIndex, long endIndex) {
 		return new Long[] {beginIndex, endIndex};
 	}
 	
-	public String getSqlForNextSequenceVal(String sequenceName);
+	String getSqlForNextSequenceVal(String sequenceName);
 	
-	public String getSqlForInArray();
+	String getSqlForInArray();
 	
-	public String getSqlForCaseSensitiveColumn(String tableAlias, String separator, String column);
+	String getSqlForCaseSensitiveColumn(String tableAlias, String separator, String column);
 	
-	public String getSqlForCaseInsensitiveColumn(String tableAlias, String separator, String column);
+	String getSqlForCaseInsensitiveColumn(String tableAlias, String separator, String column);
 	
-	public String getSqlForUpsert(String sqlInsert, String sqlUpdate, Object ... hints);
+	String getSqlForUpsert(String sqlInsert, String sqlUpdate, Object ... hints);
 }
