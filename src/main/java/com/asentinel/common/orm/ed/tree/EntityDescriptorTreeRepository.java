@@ -7,7 +7,7 @@ import com.asentinel.common.orm.SimpleEntityDescriptor;
 import com.asentinel.common.orm.mappers.Child;
 
 /**
- * Interface that defines the methods to be be used to create {@link EntityDescriptor}
+ * Interface that defines the methods to be used to create {@link EntityDescriptor}
  * trees by recursively looking for the {@link Child} annotation in domain objects.
  * 
  * @author Razvan Popian
@@ -19,26 +19,24 @@ public interface EntityDescriptorTreeRepository {
 	/**
 	 * @see #getEntityDescriptorTree(Class, EntityDescriptorNodeCallback...)
 	 */
-	public default Node<EntityDescriptor> getEntityDescriptorTree(Class<?> clazz) {
+	default Node<EntityDescriptor> getEntityDescriptorTree(Class<?> clazz) {
 		return getEntityDescriptorTree(clazz, (EntityDescriptorNodeCallback[]) null);
 	}
 
 	/**
 	 * @see #getEntityDescriptorTree(Class, String, EntityDescriptorNodeCallback...)
 	 */
-	public default Node<EntityDescriptor> getEntityDescriptorTree(Class<?> clazz, String rootTableAlias) {
+	default Node<EntityDescriptor> getEntityDescriptorTree(Class<?> clazz, String rootTableAlias) {
 		return getEntityDescriptorTree(clazz, rootTableAlias, (EntityDescriptorNodeCallback[]) null);
 	}
 	
 	/**
 	 * @see #getEntityDescriptorTree(Node, EntityDescriptorNodeCallback...)
 	 */
-	public default Node<EntityDescriptor> getEntityDescriptorTree(Node<EntityDescriptor> root) {
+	default Node<EntityDescriptor> getEntityDescriptorTree(Node<EntityDescriptor> root) {
 		return getEntityDescriptorTree(root, (EntityDescriptorNodeCallback[]) null);
 	}
-	
-	
-	
+
 	// callback methods
 	
 	/**
@@ -57,11 +55,10 @@ public interface EntityDescriptorTreeRepository {
 	 * @see SimpleEntityDescriptor
 	 * @see SimpleEntityDescriptor.Builder
 	 */
-	public default Node<EntityDescriptor> getEntityDescriptorTree(
+	default Node<EntityDescriptor> getEntityDescriptorTree(
 			Class<?> clazz, 
-			EntityDescriptorNodeCallback ... nodeCallbacks
-			) {
-		return getEntityDescriptorTree(clazz, (String) null, nodeCallbacks);
+			EntityDescriptorNodeCallback ... nodeCallbacks) {
+		return getEntityDescriptorTree(clazz, null, nodeCallbacks);
 	}
 	
 	/**
@@ -81,12 +78,10 @@ public interface EntityDescriptorTreeRepository {
 	 * @see SimpleEntityDescriptor
 	 * @see SimpleEntityDescriptor.Builder
 	 */
-	public Node<EntityDescriptor> getEntityDescriptorTree(
+	Node<EntityDescriptor> getEntityDescriptorTree(
 			Class<?> clazz, 
 			String rootTableAlias, 
-			EntityDescriptorNodeCallback ... nodeCallbacks
-			);
-	
+			EntityDescriptorNodeCallback ... nodeCallbacks);
 
 	/**
 	 * Creates an {@link EntityDescriptor} tree by recursively looking for {@link Child} annotations
@@ -107,9 +102,7 @@ public interface EntityDescriptorTreeRepository {
 	 * @see SimpleEntityDescriptor
 	 * @see SimpleEntityDescriptor.Builder
 	 */
-	public Node<EntityDescriptor> getEntityDescriptorTree(
+	Node<EntityDescriptor> getEntityDescriptorTree(
 			Node<EntityDescriptor> root, 
-			EntityDescriptorNodeCallback ... nodeCallbacks
-			);
-	
+			EntityDescriptorNodeCallback ... nodeCallbacks);
 }
