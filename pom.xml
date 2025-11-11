@@ -4,7 +4,7 @@
 
 	<groupId>com.asentinel.common</groupId>
 	<artifactId>asentinel-common</artifactId>
-	<version>1.71.2</version>
+	<version>1.71.3</version>
 	<packaging>jar</packaging>
 
 	<name>Asentinel ORM</name>
@@ -26,6 +26,12 @@
 			<organization>Tangoe</organization>
 			<organizationUrl>https://www.tangoe.com/</organizationUrl>
 		</developer>
+        <developer>
+            <name>Horatiu Dan</name>
+            <email>horatiucd@gmail.com</email>
+            <organization>Tangoe</organization>
+            <organizationUrl>https://www.tangoe.com/</organizationUrl>
+        </developer>
 	</developers>
  
 	<scm>
