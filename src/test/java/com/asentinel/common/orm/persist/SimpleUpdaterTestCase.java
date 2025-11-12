@@ -1,34 +1,5 @@
 package com.asentinel.common.orm.persist;
 
-import static java.util.Collections.singleton;
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.aryEq;
-import static org.easymock.EasyMock.capture;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.eq;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.getCurrentArguments;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-
-import org.easymock.Capture;
-import org.easymock.IAnswer;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.util.ReflectionUtils;
-
 import com.asentinel.common.jdbc.SqlQuery;
 import com.asentinel.common.jdbc.flavors.JdbcFlavor;
 import com.asentinel.common.jdbc.flavors.postgres.PostgresJdbcFlavor;
@@ -41,6 +12,28 @@ import com.asentinel.common.orm.mappers.dynamic.DynamicColumnsEntity;
 import com.asentinel.common.orm.proxy.InputStreamProxy;
 import com.asentinel.common.orm.proxy.ProxyFactorySupport;
 import com.asentinel.common.orm.proxy.entity.ProxyFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.util.ReflectionUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+
+import static java.util.Collections.singleton;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests the single entity insert/update operations. Validates that the SQL statements
@@ -64,7 +57,7 @@ public class SimpleUpdaterTestCase {
 	private static final String UPDATE_INPUT_STREAMS_PROXIES = "update table set name = ? where id = ?";
 	private static final String INSERT_INPUT_STREAMS = "insert into table(name, bytes, insertableBytes, dynamicBytes) values(?, ?, ?, ?)";
 	
-	private static final Number ID = (Number) 10;
+	private static final Number ID = 10;
 	
 	private final JdbcFlavor jdbcFlavor = new PostgresJdbcFlavor();
 	
@@ -73,13 +66,12 @@ public class SimpleUpdaterTestCase {
 	
 	private final Set<DynamicColumn> dynamicColumns = singleton(new DefaultDynamicColumn("dynamicField", Integer.class));
 	
-	private final Capture<String> cSql = Capture.newInstance();
-	private final Capture<KeyHolder> cKeyHolder = Capture.newInstance();
-	
-	
+	private final ArgumentCaptor<String> cSql = ArgumentCaptor.forClass(String.class);
+	private final ArgumentCaptor<KeyHolder> cKeyHolder = ArgumentCaptor.forClass(KeyHolder.class);
+
 	@Before
 	public void setup() {
-		ex = createMock(SqlQuery.class);
+		ex = mock(SqlQuery.class);
 		u = new SimpleUpdater(jdbcFlavor, ex);
 	}
 	
@@ -87,112 +79,25 @@ public class SimpleUpdaterTestCase {
 	public void testInsertAutoIdForTableMappedBean() {
 		Bean b = new Bean(0, 20, 30, 40, 50, 60);
 		
-		expect(ex.update((String) capture(cSql), aryEq(new String[] {"id"}), capture(cKeyHolder),
+		when(ex.update(cSql.capture(), eq(new String[] {"id"}), cKeyHolder.capture(),
 				eq(b.insertable), eq(b.field1), eq(b.field2), eq(b.dynamicField)))
-			.andAnswer(new IAnswer<Integer>() {
-
-				@Override
-				public Integer answer() {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
-		;
+			.thenAnswer(invocation -> {
+                Object[] args = invocation.getArguments();
+                for (Object arg: args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            });
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
-		verify(ex);
-		assertEquals(1, count);
-		assertEquals(ID, (Number) b.id);
-		assertEquals(INSERT_AUTO_ID.replaceAll("\\s", "").toLowerCase(), 
-				cSql.getValue().replaceAll("\\s", "")
-				.replace(jdbcFlavor.getSqlTemplates().getSqlForNextSequenceVal("seq"), SEQ_NEXT_VAL_PLACEHOLDER)
-				.toLowerCase()
-		);
-	}
-	
-	
-	@Test
-	public void testInsertAutoIdForTableMappedBean_NoSeq() {
-		BeanNoSeq b = new BeanNoSeq(0, 20, 30, 40, 50, 60);
-		
-		expect(ex.update(capture(cSql), aryEq(new String[] {"id"}), capture(cKeyHolder),
-				eq(b.field1), eq(b.field2), eq(b.insertable), eq(b.dynamicField)))
-			.andAnswer(new IAnswer<Integer>() {
-
-				@Override
-				public Integer answer() throws Throwable {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
-		;
-		
-		replay(ex);
-		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
-		verify(ex);
-		assertEquals(1, count);
-		assertEquals(ID, b.id);		
-		assertEquals(INSERT_AUTO_ID_NO_SEQ.replaceAll("\\s", "").toLowerCase(), 
-				cSql.getValue().replaceAll("\\s", "")
-				.replace(jdbcFlavor.getSqlTemplates().getSqlForNextSequenceVal("seq"), SEQ_NEXT_VAL_PLACEHOLDER)
-				.toLowerCase()
-		);
-	}
-	
-	
-	@Test
-	public void testInsertAutoIdForViewMappedBean() {
-		ExtBean b = new ExtBean(0, 20, 30, 40, 50, 60);
-
-		expect(ex.update(capture(cSql), aryEq(new String[] {"id"}), capture(cKeyHolder),
-				eq(b.insertable), eq(b.field1), eq(b.field2), eq(b.dynamicField)))
-			.andAnswer(new IAnswer<Integer>() {
-
-				@Override
-				public Integer answer() {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
-		;
-		
-		replay(ex);
-		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
-		verify(ex);
 		assertEquals(1, count);
 		assertEquals(ID, b.id);
 		assertEquals(INSERT_AUTO_ID.replaceAll("\\s", "").toLowerCase(), 
@@ -201,60 +106,109 @@ public class SimpleUpdaterTestCase {
 				.toLowerCase()
 		);
 	}
-	
+
+	@Test
+	public void testInsertAutoIdForTableMappedBean_NoSeq() {
+		BeanNoSeq b = new BeanNoSeq(0, 20, 30, 40, 50, 60);
+		
+		when(ex.update(cSql.capture(), eq(new String[] {"id"}), cKeyHolder.capture(),
+				eq(b.field1), eq(b.field2), eq(b.insertable), eq(b.dynamicField)))
+			.thenAnswer(invocation -> {
+                Object[] args = invocation.getArguments();
+                for (Object arg: args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            });
+		
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
+		assertEquals(1, count);
+		assertEquals(ID, b.id);		
+		assertEquals(INSERT_AUTO_ID_NO_SEQ.replaceAll("\\s", "").toLowerCase(), 
+				cSql.getValue().replaceAll("\\s", "")
+				.replace(jdbcFlavor.getSqlTemplates().getSqlForNextSequenceVal("seq"), SEQ_NEXT_VAL_PLACEHOLDER)
+				.toLowerCase());
+	}
+
+	@Test
+	public void testInsertAutoIdForViewMappedBean() {
+		ExtBean b = new ExtBean(0, 20, 30, 40, 50, 60);
+
+		when(ex.update(cSql.capture(), eq(new String[] {"id"}), cKeyHolder.capture(),
+				eq(b.insertable), eq(b.field1), eq(b.field2), eq(b.dynamicField)))
+			.thenAnswer(invocation -> {
+                Object[] args = invocation.getArguments();
+                for (Object arg: args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            });
+		
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
+		assertEquals(1, count);
+		assertEquals(ID, b.id);
+		assertEquals(INSERT_AUTO_ID.replaceAll("\\s", "").toLowerCase(), 
+				cSql.getValue().replaceAll("\\s", "")
+				.replace(jdbcFlavor.getSqlTemplates().getSqlForNextSequenceVal("seq"), SEQ_NEXT_VAL_PLACEHOLDER)
+				.toLowerCase());
+	}
 
 	@Test
 	public void testInsertForTableMappedBean() {
 		Bean b = new Bean(ID.intValue(), 20, 30, 40, 50, 60);
 		
-		expect(ex.update(capture(cSql), eq(b.id),
+		when(ex.update(cSql.capture(), eq(b.id),
 				eq(b.insertable),
 				eq(b.field1), eq(b.field2), eq(b.dynamicField)))
-				.andReturn(1);
-		
-		
-		replay(ex);
+				.thenReturn(1);
+
 		int count = u.update(b, new UpdateSettings<>(UpdateType.INSERT, dynamicColumns));
-		verify(ex);
 		assertEquals(1, count);
 		assertEquals(INSERT.replaceAll("\\s", "").toLowerCase(), 
-				cSql.getValue().replaceAll("\\s", "").toLowerCase()
-		);
+				cSql.getValue().replaceAll("\\s", "").toLowerCase());
 	}
 	
 	@Test
 	public void testInsertForViewMappedBean() {
 		ExtBean b = new ExtBean(ID.intValue(), 20, 30, 40, 50, 60);
 		
-		expect(ex.update(capture(cSql), eq(b.id),
+		when(ex.update(cSql.capture(), eq(b.id),
 				eq(b.insertable), eq(b.field1), eq(b.field2), eq(b.dynamicField)))
-				.andReturn(1);
+				.thenReturn(1);
 		
-		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(UpdateType.INSERT, dynamicColumns));
-		verify(ex);
+		int count = u.update(b, new UpdateSettings<>(UpdateType.INSERT, dynamicColumns));
 		assertEquals(1, count);
 		assertEquals(INSERT.replaceAll("\\s", "").toLowerCase(), 
-				cSql.getValue().replaceAll("\\s", "").toLowerCase()
-		);
+				cSql.getValue().replaceAll("\\s", "").toLowerCase());
 	}
-	
-	
 
 	@Test
 	public void testUpdateForTableMappedBean() {
 		Bean b = new Bean(10, 20, 30, 40, 50, 60);
 		
-		expect(ex.update(capture(cSql), eq(b.updatable), eq(b.field1), eq(b.field2), eq(b.dynamicField), eq(b.id)))
-			.andReturn(1);
+		when(ex.update(cSql.capture(), eq(b.updatable), eq(b.field1), eq(b.field2), eq(b.dynamicField), eq(b.id)))
+			.thenReturn(1);
 		
-		replay(ex);
-		int count = u.update(b, new UpdateSettings<DynamicColumn>(dynamicColumns));
-		verify(ex);
+		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
 		assertEquals(1, count);
 		assertEquals(UPDATE.replaceAll("\\s", "").toLowerCase(), 
-				cSql.getValue().replaceAll("\\s", "").toLowerCase()
-		);
+				cSql.getValue().replaceAll("\\s", "").toLowerCase());
 	}
 	
 	@Test
@@ -262,9 +216,7 @@ public class SimpleUpdaterTestCase {
 		Bean b = ProxyFactory.getInstance().getProxyObjectFactory(Bean.class).newObject();
 		Function<Object, Bean> loader = id -> new Bean(10, 20, 30, 40, 50, 60);
 		ReflectionUtils.setField(ProxyFactorySupport.findLoaderField(b.getClass()), b, loader);
-		replay(ex);
 		int count = u.update(b);
-		verify(ex);
 		assertEquals(0, count);
 	}
 	
@@ -275,39 +227,32 @@ public class SimpleUpdaterTestCase {
 		Function<Object, Bean> loader = id -> tb;
 		ReflectionUtils.setField(ProxyFactorySupport.findLoaderField(b.getClass()), b, loader);
 		
-		expect(ex.update(capture(cSql), eq(tb.updatable), eq(tb.field1), eq(tb.field2), eq(tb.dynamicField), eq(tb.id)))
-			.andReturn(1);
+		when(ex.update(cSql.capture(), eq(tb.updatable), eq(tb.field1), eq(tb.field2), eq(tb.dynamicField), eq(tb.id)))
+			.thenReturn(1);
 		
 		// trigger load
 		b.getField2();
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
-		verify(ex);
 		assertEquals(1, count);
 		assertEquals(UPDATE.replaceAll("\\s", "").toLowerCase(), 
-				cSql.getValue().replaceAll("\\s", "").toLowerCase()
-		);
+				cSql.getValue().replaceAll("\\s", "").toLowerCase());
 	}
-	
-	
+
 	@Test
 	public void testUpdateForViewMappedBean() {
 		ExtBean b = new ExtBean(10, 20, 30, 40, 50, 60);
 		
-		expect(ex.update(capture(cSql), eq(b.updatable), eq(b.field1), eq(b.field2), eq(b.dynamicField), eq(b.id)))
-			.andReturn(1);
+		when(ex.update(cSql.capture(), eq(b.updatable), eq(b.field1), eq(b.field2), eq(b.dynamicField), eq(b.id)))
+			.thenReturn(1);
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<>(dynamicColumns));
-		verify(ex);
 		assertEquals(1, count);
 		assertEquals(UPDATE.replaceAll("\\s", "").toLowerCase(), 
 				cSql.getValue().replaceAll("\\s", "").toLowerCase()
 		);
 	}
-	
-	
+
 	@Test
 	public void testUpdateForInputStreamBean() {
 		InputStreamBean b = new InputStreamBean(1, "test", 
@@ -316,31 +261,25 @@ public class SimpleUpdaterTestCase {
 				new ByteArrayInputStream(new byte[] {11, 22}),
 				new ByteArrayInputStream(new byte[] {44, 55})
 				);
-		expect(ex.update(eq(UPDATE_INPUT_STREAMS), eq(b.name), eq(b.bytes), eq(b.updatableBytes), eq(b.dynamicBytes), eq(b.id)))
-			.andReturn(1);
+		when(ex.update(eq(UPDATE_INPUT_STREAMS), eq(b.name), eq(b.bytes), eq(b.updatableBytes), eq(b.dynamicBytes), eq(b.id)))
+			.thenReturn(1);
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<DynamicColumn>(singleton(new DefaultDynamicColumn("dynamicBytes", InputStream.class))));
-		verify(ex);
 		assertEquals(1, count);
 	}
-
 
 	@Test
 	public void testUpdateForInputStreamBeanWithProxies() {
-		InputStreamBean b = new InputStreamBean(1, "test", 
-				createMock(InputStreamProxy.class), createMock(InputStreamProxy.class),
-				createMock(InputStreamProxy.class), createMock(InputStreamProxy.class));
-		expect(ex.update(eq(UPDATE_INPUT_STREAMS_PROXIES), eq(b.name), eq(b.id)))
-			.andReturn(1);
+		InputStreamBean b = new InputStreamBean(1, "test",
+                mock(InputStreamProxy.class), mock(InputStreamProxy.class),
+				mock(InputStreamProxy.class), mock(InputStreamProxy.class));
+		when(ex.update(eq(UPDATE_INPUT_STREAMS_PROXIES), eq(b.name), eq(b.id)))
+			.thenReturn(1);
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<DynamicColumn>(singleton(new DefaultDynamicColumn("dynamicBytes", InputStream.class))));
-		verify(ex);
 		assertEquals(1, count);
 	}
-	
-	
+
 	@Test
 	public void testInsertForInputStreamBean() {
 		InputStreamBean b = new InputStreamBean(0, "test", 
@@ -349,31 +288,24 @@ public class SimpleUpdaterTestCase {
 				new ByteArrayInputStream(new byte[] {11, 22}),
 				new ByteArrayInputStream(new byte[] {33, 44})
 			);
-		expect(ex.update(eq(INSERT_INPUT_STREAMS), aryEq(new String[] {"id"}), anyObject(), eq(b.name), eq(b.bytes), eq(b.insertableBytes), eq(b.dynamicBytes)))
-			.andAnswer(new IAnswer<Integer>() {
-	
-				@Override
-				public Integer answer() throws Throwable {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<String, Object>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
-		;
+		when(ex.update(eq(INSERT_INPUT_STREAMS), eq(new String[] {"id"}), any(), eq(b.name), eq(b.bytes), eq(b.insertableBytes), eq(b.dynamicBytes)))
+			.thenAnswer(invocation -> {
+                Object[] args = invocation.getArguments();
+                for (Object arg : args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            });
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<DynamicColumn>(singleton(new DefaultDynamicColumn("dynamicBytes", InputStream.class))));
-		verify(ex);
 		assertEquals(ID, (Number) b.id);
 		assertEquals(1, count);
 	}
@@ -381,39 +313,32 @@ public class SimpleUpdaterTestCase {
 	@Test
 	public void testInsertForInputStreamBeanWithProxies() {
 		InputStreamBean b = new InputStreamBean(0, "test", 
-				createMock(InputStreamProxy.class), createMock(InputStreamProxy.class),
-				createMock(InputStreamProxy.class), createMock(InputStreamProxy.class));
-		expect(ex.update(eq(INSERT_INPUT_STREAMS), anyObject(String[].class), anyObject(), eq(b.name), eq(b.bytes), eq(b.insertableBytes), eq(b.dynamicBytes)))
-			.andAnswer(new IAnswer<Integer>() {
-	
-				@Override
-				public Integer answer() throws Throwable {
-					Object[] args = getCurrentArguments();
-					for (Object arg: args) {
-						if (arg instanceof GeneratedKeyHolder) {
-							GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
-							List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
-							generatedKeys.add(new HashMap<>());
-							generatedKeys.get(0).put("", ID);
-							return 1;
-						}
-					}
-					fail("Can not find KeyHolder argument.");
-					// make the compiler happy, return null
-					return null;
-				}
-			})
-		;
+				mock(InputStreamProxy.class), mock(InputStreamProxy.class),
+				mock(InputStreamProxy.class), mock(InputStreamProxy.class));
+		when(ex.update(eq(INSERT_INPUT_STREAMS), any(String[].class), any(), eq(b.name), eq(b.bytes), eq(b.insertableBytes), eq(b.dynamicBytes)))
+			.thenAnswer(invocation -> {
+                Object[] args = invocation.getArguments();
+                for (Object arg: args) {
+                    if (arg instanceof GeneratedKeyHolder) {
+                        GeneratedKeyHolder generatedKeyHolder = (GeneratedKeyHolder) arg;
+                        List<Map<String, Object>> generatedKeys = generatedKeyHolder.getKeyList();
+                        generatedKeys.add(new HashMap<>());
+                        generatedKeys.get(0).put("", ID);
+                        return 1;
+                    }
+                }
+                fail("Can not find KeyHolder argument.");
+                // make the compiler happy, return null
+                return null;
+            });
 		
-		replay(ex);
 		int count = u.update(b, new UpdateSettings<DynamicColumn>(singleton(new DefaultDynamicColumn("dynamicBytes", InputStream.class))));
-		verify(ex);
-		assertEquals(ID, (Number) b.id);
+		assertEquals(ID, b.id);
 		assertEquals(1, count);
 	}
 	
 	// FYI: The following classes need to be public for ByteBuddy 1.9.2 if the class loading strategy is not ClassLoadingStrategy.Default.INJECTION. 
-	// For 1.5.10 they can be declared as package private (this is ideal, because I don't want them to be visible outside the package). 
+	// For 1.5.10 they can be declared as package private (this is ideal because I don't want them to be visible outside the package).
 	// I opened a stackoverflow question on this issue: 
 	// https://stackoverflow.com/questions/52829988/behavior-change-on-bytebuddy-version-1-9-1-compared-to-1-5-10
 	
@@ -436,7 +361,6 @@ public class SimpleUpdaterTestCase {
 		@Column(value = "updatable", insertable = false)
 		int updatable;
 
-		
 		int dynamicField;
 
 		public Bean() {
@@ -464,7 +388,6 @@ public class SimpleUpdaterTestCase {
 		@Override
 		public void setValue(DynamicColumn column, Object value) {
 			this.dynamicField = (int) value;
-			
 		}
 
 		@Override
@@ -482,7 +405,6 @@ public class SimpleUpdaterTestCase {
 		public ExtBean(int id, int field1, int field2, int insertable, int updatable, int dynamicField) {
 			super(id, field1, field2, insertable, updatable, dynamicField);
 		}
-		
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -521,7 +443,6 @@ public class SimpleUpdaterTestCase {
 		@Override
 		public void setValue(DynamicColumn column, Object value) {
 			this.dynamicField = (int) value;
-			
 		}
 
 		@Override
@@ -547,11 +468,8 @@ public class SimpleUpdaterTestCase {
 		@Column(value= "updatableBytes", insertable = false)
 		InputStream updatableBytes;
 
-		
 		InputStream dynamicBytes;
-		
-		
-		
+
 
 		public InputStreamBean(int id, String name, InputStream bytes, InputStream insertableBytes, InputStream updatableBytes, InputStream dynamicBytes) {
 			this.id = id;
@@ -572,6 +490,4 @@ public class SimpleUpdaterTestCase {
 			return dynamicBytes;
 		}
 	}
-
 }
-
