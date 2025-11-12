@@ -118,7 +118,8 @@ public interface OrmOperations extends SqlBuilderFactory, Updater {
      * @throws EmptyResultDataAccessException if the entity cannot be found.
      */
     default <T> T getEntity(Class<T> type, Object entityId,
-                            EntityDescriptorNodeCallback ... nodeCallbacks) {
+                            EntityDescriptorNodeCallback ... nodeCallbacks)
+            throws IncorrectResultSizeDataAccessException, EmptyResultDataAccessException {
         Assert.assertNotNull(type, "type");
         Assert.assertNotNull(entityId, "entityId");
         return this.newSqlBuilder(type)
@@ -134,8 +135,11 @@ public interface OrmOperations extends SqlBuilderFactory, Updater {
      *
 	 * @return an {@link Optional} containing the entity if found or
 	 * 		   an empty {@link Optional} otherwise.
+     *
+     * @throws IncorrectResultSizeDataAccessException if more than one entity is found for the specified id.
 	 */
-	default <T> Optional<T> getOptional(Class<T> type, Object entityId) {
+	default <T> Optional<T> getOptional(Class<T> type, Object entityId)
+            throws IncorrectResultSizeDataAccessException {
 		Assert.assertNotNull(type, "type");
 		Assert.assertNotNull(entityId, "entityId");
 		return this.newSqlBuilder(type)
@@ -160,10 +164,13 @@ public interface OrmOperations extends SqlBuilderFactory, Updater {
      *                      when the entity is loaded
      *
      * @return an {@link Optional} containing the entity if found or
-     * 	 * 		   an empty {@link Optional} otherwise.
+     * 	  		   an empty {@link Optional} otherwise.
+     *
+     * @throws IncorrectResultSizeDataAccessException if more than one entity is found for the specified id.
      */
     default <T> Optional<T> getOptional(Class<T> type, Object entityId,
-                            EntityDescriptorNodeCallback ... nodeCallbacks) {
+                            EntityDescriptorNodeCallback ... nodeCallbacks)
+            throws IncorrectResultSizeDataAccessException {
         Assert.assertNotNull(type, "type");
         Assert.assertNotNull(entityId, "entityId");
         return this.newSqlBuilder(type)
