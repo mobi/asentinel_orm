@@ -441,3 +441,4 @@ Any field annotated with `@Column(value = "SomeColumnName", sqlParam = @SqlParam
 
 # Further reading
 - [Runtime-Defined Columns With asentinel-orm](https://dzone.com/articles/runtime-defined-columns-with-asentinel-orm)
+- [How to Map PostgreSQL JSON Data Types in Java Using asentinel-orm](https://dzone.com/articles/postgresql-json-mapping-java-asentinel-orm)
