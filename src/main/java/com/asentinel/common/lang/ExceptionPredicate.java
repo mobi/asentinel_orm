@@ -22,8 +22,6 @@ public interface ExceptionPredicate<T, E extends Exception> {
      * 		the input argument
      * @return {@code true} if the input argument matches the predicate,
      * 		   otherwise {@code false}
-     * 
-     * @throws Exception
-     */	
+     */
     boolean test(T t) throws E; 
 }

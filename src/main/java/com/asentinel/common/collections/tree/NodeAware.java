@@ -21,6 +21,6 @@ public interface NodeAware<T> {
 	 * @see Node#setValue(Object)
 	 * @see SimpleNode#setValue(Object)
 	 */
-	public void setNode(Node<T> node);
+	void setNode(Node<T> node);
 
 }

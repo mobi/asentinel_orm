@@ -47,9 +47,8 @@ public interface SqlQuery {
 	 * @param mapper mapper used for extracting rows. 
 	 * @param inParams input parameters for the query.
 	 * @return List, one element for each row.
-	 * @throws DataAccessException
 	 */
-	public <T> List<T> query(String sql, RowMapper<T> mapper, Object ... inParams) throws DataAccessException;
+	<T> List<T> query(String sql, RowMapper<T> mapper, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Executes a SELECT sql query using a {@link RowCallbackHandler} to process the resultset rows
@@ -58,7 +57,7 @@ public interface SqlQuery {
 	 * @param handler {@link RowCallbackHandler} implementation used for processing each row. 
 	 * @param inParams input parameters for the query.
 	 */
-	public void query(String sql, RowCallbackHandler handler, Object ... inParams) throws DataAccessException;
+	void query(String sql, RowCallbackHandler handler, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Executes a SELECT query in the same conditions as {@link #query(String, RowMapper, Object...)}
@@ -71,7 +70,7 @@ public interface SqlQuery {
 	 * @return List, one element for each row, each element type is clasz.
 	 * @throws DataAccessException
 	 */
-	public <T> List<T> query(String sql, Class<T> clasz, Object ... inParams) throws DataAccessException;
+	<T> List<T> query(String sql, Class<T> clasz, Object ... inParams) throws DataAccessException;
 
 	/**
 	 * Executes a SELECT query that returns exactly one row.  If the resultset is empty 
@@ -86,7 +85,7 @@ public interface SqlQuery {
 	 * @throws IncorrectResultSizeDataAccessException if the resultset has more than 1 row.
 	 * @throws DataAccessException
 	 */
-	public <T> T queryForObject(String sql, RowMapper<T> mapper, Object ... inParams) 
+	<T> T queryForObject(String sql, RowMapper<T> mapper, Object ... inParams)
 		throws EmptyResultDataAccessException, IncorrectResultSizeDataAccessException, DataAccessException;
 	
 
@@ -101,9 +100,8 @@ public interface SqlQuery {
 	 * @return object of type clasz.
 	 * @throws EmptyResultDataAccessException if the resultset in empty.
 	 * @throws IncorrectResultSizeDataAccessException if the resultset has more than 1 row.
-	 * @throws DataAccessException
 	 */
-	public <T> T queryForObject(String sql, Class<T> clasz, Object ... inParams) 
+	<T> T queryForObject(String sql, Class<T> clasz, Object ... inParams)
 		throws EmptyResultDataAccessException, IncorrectResultSizeDataAccessException, DataAccessException;
 	
 	/**
@@ -111,7 +109,7 @@ public interface SqlQuery {
 	 * @return the int resulted from the query. If the query returns {@code null}
 	 * 			implementations should return 0. 
 	 */
-	public int queryForInt(String sql, Object ... inParams) 
+	int queryForInt(String sql, Object ... inParams)
 		throws EmptyResultDataAccessException, IncorrectResultSizeDataAccessException, DataAccessException;
 	
 	/**
@@ -119,16 +117,15 @@ public interface SqlQuery {
 	 * @return the long resulted from the query. If the query returns {@code null}
 	 * 			implementations should return 0. 
 	 */
-	public long queryForLong(String sql, Object ... inParams) 
+	long queryForLong(String sql, Object ... inParams)
 		throws EmptyResultDataAccessException, IncorrectResultSizeDataAccessException, DataAccessException;
-	
 
 	/**
 	 * Convenience method that executes a SELECT query that returns a String.
 	 * @return the String resulted from the query. If the query returns {@code null}
 	 * 			implementations should return "". 
 	 */
-	public String queryForString(String sql, Object ... inParams) 
+	String queryForString(String sql, Object ... inParams)
 		throws EmptyResultDataAccessException, IncorrectResultSizeDataAccessException, DataAccessException;
 	
 	
@@ -140,7 +137,7 @@ public interface SqlQuery {
 	 * @see #queryForObject(String, Class, Object...)
 	 * @see RowAsMapRowMapper
 	 */
-	public Map<String, Object> queryForMap(String sql, Object ... inParams)
+	Map<String, Object> queryForMap(String sql, Object ... inParams)
 			throws EmptyResultDataAccessException, IncorrectResultSizeDataAccessException, DataAccessException;
 	
 	
@@ -152,9 +149,8 @@ public interface SqlQuery {
 	 * @param inParams input parameters for the update query. Can contain instances of
 	 * 					byte[] or InputStream.
 	 * @return the update count for the query.
-	 * @throws DataAccessException
 	 */
-	public int update(String sql, Object ... inParams) throws DataAccessException;
+	int update(String sql, Object ... inParams) throws DataAccessException;
 
 	/**
 	 * This method should be used to execute INSERT operations that generate new ids in the database. 
@@ -167,14 +163,13 @@ public interface SqlQuery {
 	 * @param inParamsUpdate input parameters for the update query. Can contain instances of
 	 * 					byte[] or InputStream.
 	 * @return the update count for the query.
-	 * @throws DataAccessException
 	 */
-	public int update(String sql, String[] keyColumnNames, KeyHolder keyHolder, Object ... inParamsUpdate) throws DataAccessException;
+	int update(String sql, String[] keyColumnNames, KeyHolder keyHolder, Object ... inParamsUpdate) throws DataAccessException;
 	
 	/**
 	 * @return the underlying {@link JdbcOperations} implementation. This
 	 * 		is a convenience method.
 	 */
-	public JdbcOperations getJdbcOperations();
+	JdbcOperations getJdbcOperations();
 	
 }

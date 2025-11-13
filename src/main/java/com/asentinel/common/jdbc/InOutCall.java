@@ -65,7 +65,7 @@ public interface InOutCall {
 	 * @return the object that the action returns.
 	 * @throws DataAccessException if any database error occurs.
 	 */
-	public Object call(String spName, CallableStatementCallback<?> action, int resultCount, Object ... inParams) throws DataAccessException;
+	Object call(String spName, CallableStatementCallback<?> action, int resultCount, Object ... inParams) throws DataAccessException;
 
 	
 	// ---------  Calls with RowMapper parameters ---------------- //
@@ -90,13 +90,13 @@ public interface InOutCall {
 	 * @see SqlParameterValue
 	 * @see SqlTypeValue
 	 */
-	public List<List<?>> call(String spName, RowMapper<?>[] rowMappers, Object ... inParams) throws DataAccessException;
+	List<List<?>> call(String spName, RowMapper<?>[] rowMappers, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Calls a stored procedure that returns just one cursor.
 	 * @see #call(String, RowMapper[], Object...)
 	 */
-	public <T> List<T> call(String spName, RowMapper<T> rowMapper, Object ... inParams) throws DataAccessException;
+	<T> List<T> call(String spName, RowMapper<T> rowMapper, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Calls a stored procedure that returns exactly one cursor
@@ -106,7 +106,7 @@ public interface InOutCall {
 	 * @throws EmptyResultDataAccessException if the cursor is empty.
 	 * @throws IncorrectResultSizeDataAccessException if the cursor has more than 1 row.
 	 */
-	public <T> T callForObject(String spName, RowMapper<T> rowMapper, Object ... inParams) 
+	<T> T callForObject(String spName, RowMapper<T> rowMapper, Object ... inParams)
 		throws DataAccessException, EmptyResultDataAccessException, IncorrectResultSizeDataAccessException;
 	
 	
@@ -136,13 +136,13 @@ public interface InOutCall {
 	 * @see SqlParameterValue
 	 * @see SqlTypeValue
 	 */
-	public List<List<?>> call(String spName, Class<?>[] classes, Object ... inParams) throws DataAccessException;
+	List<List<?>> call(String spName, Class<?>[] classes, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Calls a stored procedure that returns just one cursor.
 	 * @see #call(String, Class[], Object...)
 	 */
-	public <T> List<T> call(String spName, Class<T> clasz, Object ... inParams) throws DataAccessException;
+	<T> List<T> call(String spName, Class<T> clasz, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Calls a stored procedure that returns exactly one cursor
@@ -152,7 +152,7 @@ public interface InOutCall {
 	 * @throws EmptyResultDataAccessException if the cursor is empty.
 	 * @throws IncorrectResultSizeDataAccessException if the cursor has more than 1 row.
 	 */
-	public <T> T callForObject(String spName, Class<T> clasz, Object ... inParams) 
+	<T> T callForObject(String spName, Class<T> clasz, Object ... inParams)
 		throws DataAccessException, EmptyResultDataAccessException, IncorrectResultSizeDataAccessException;
 	
 	// -------------------------------------------------------- //
@@ -163,7 +163,7 @@ public interface InOutCall {
 	 * @see #call(String, RowMapper[], Object...)
 	 * @see #call(String, Class[], Object...)
 	 */
-	public void callWithoutResult(String spName, Object ... inParams) throws DataAccessException;
+	void callWithoutResult(String spName, Object ... inParams) throws DataAccessException;
 	
 	
 	// -------------------------------------------------------- //
@@ -185,11 +185,10 @@ public interface InOutCall {
 	 * 					exact parameter matching is necessary. Also byte arrays or InputStreams can be used where the stored procedure 
 	 * 					expects blobs. Any InputStreams passed as parameters should be closed by the implementation.
 	 * @return list of lists, one list for each {@code rsParams} element
-	 * @throws DataAccessException
-	 * 
+	 *
 	 * @see ResultSetSqlParameter
 	 */
-	public List<List<?>> call(String spName, ResultSetSqlParameter[] rsParams, Object ... inParams) throws DataAccessException;
+	List<List<?>> call(String spName, ResultSetSqlParameter[] rsParams, Object ... inParams) throws DataAccessException;
 	
 	/**
 	 * Calls a stored procedure that returns one resultset that will be processed using
@@ -198,5 +197,5 @@ public interface InOutCall {
 	 * 
 	 * @see #call(String, ResultSetSqlParameter[], Object...)
 	 */
-	public void call(String spName, RowCallbackHandler handler, Object ... inParams) throws DataAccessException;	
+	void call(String spName, RowCallbackHandler handler, Object ... inParams) throws DataAccessException;
 }

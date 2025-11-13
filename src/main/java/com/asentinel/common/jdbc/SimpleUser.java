@@ -9,8 +9,7 @@ package com.asentinel.common.jdbc;
  */
 public interface SimpleUser {
 	
-	public Object getUserId();
+	Object getUserId();
 	
-	public String getUsername();
-	
+	String getUsername();
 }

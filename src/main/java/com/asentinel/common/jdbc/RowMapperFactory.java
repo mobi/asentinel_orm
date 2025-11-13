@@ -14,5 +14,5 @@ import org.springframework.jdbc.core.RowMapper;
  */
 public interface RowMapperFactory {
 
-	public <T> RowMapper<T> getInstance(Class<T> clasz);
+	<T> RowMapper<T> getInstance(Class<T> clasz);
 }

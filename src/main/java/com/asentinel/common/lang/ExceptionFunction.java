@@ -24,8 +24,6 @@ public interface ExceptionFunction<T, R, E extends Exception> {
      * 		the function argument
      * @return 
      * 		the function result
-     * 
-     * @throws Exception
-     */	
+     */
     R apply(T t) throws E; 
 }

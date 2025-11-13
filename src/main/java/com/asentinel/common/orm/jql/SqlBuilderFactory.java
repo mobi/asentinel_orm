@@ -18,15 +18,15 @@ public interface SqlBuilderFactory {
 	 * @return a {@code SqlBuilder} instance that can create and execute SQL code for
 	 * 			the specified class.
 	 */
-	public <E> SqlBuilder<E> newSqlBuilder(Class<E> clasz);
+	<E> SqlBuilder<E> newSqlBuilder(Class<E> clasz);
 
 	/**
 	 * @return the underlying {@code EntityDescriptorTreeRepository}.
 	 */
-	public EntityDescriptorTreeRepository getEntityDescriptorTreeRepository();
+	EntityDescriptorTreeRepository getEntityDescriptorTreeRepository();
 	
 	/**
 	 * @return the underlying {@code SqlQuery}.
 	 */
-	public SqlQuery getSqlQuery();
+	SqlQuery getSqlQuery();
 }

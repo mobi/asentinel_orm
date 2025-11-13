@@ -18,11 +18,10 @@ public interface TempResource extends WritableResource, AutoCloseable {
 	 * resource after it is no longer needed. It should be called
 	 * in a <code>finally</code> block. 
 	 */
-	public void cleanup();
+	void cleanup();
 	
 	@Override
-	public default void close() {
+	default void close() {
 		cleanup();
 	}
-
 }

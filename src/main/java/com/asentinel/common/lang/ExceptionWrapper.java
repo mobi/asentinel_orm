@@ -20,8 +20,6 @@ public final class ExceptionWrapper {
      * 
      * @param function
      * 			the call that is wrapped
-     * 
-     * @throws RuntimeException
      */
 	public static <T, R, E extends Exception> Function<T, R> apply(ExceptionFunction<T, R, E> function) {
 		return t -> {
@@ -69,8 +67,6 @@ public final class ExceptionWrapper {
      * @return
      * 		the result of the provided {@code predicate}
      * 		in case an exception is not thrown
-     * 
-     * @throws RuntimeException
      */
 	public static <T, E extends Exception> Predicate<T> test(ExceptionPredicate<T, E> predicate) {
 		return t -> {

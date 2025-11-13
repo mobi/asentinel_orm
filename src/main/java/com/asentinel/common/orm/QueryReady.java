@@ -30,19 +30,19 @@ public interface QueryReady {
 	 * Placeholder to be used in the string returned by the {@link #getJoinConditionsOverride()} method.<br>
 	 * This placeholder will be replaced with the default join condition.
 	 */
-	final static String PLACEHOLDER_DEFAULT_JOIN_CONDITION = "#{defaultJoinCondition}";
+	String PLACEHOLDER_DEFAULT_JOIN_CONDITION = "#{defaultJoinCondition}";
 	
 	/**
 	 * Placeholder to be used in the string returned by the {@link #getJoinConditionsOverride()} method.<br>
 	 * This placeholder will be replaced with the parent table alias.
 	 */
-	final static String PLACEHOLDER_PARENT_TABLE_ALIAS = "#{parentTableAlias}";
+	String PLACEHOLDER_PARENT_TABLE_ALIAS = "#{parentTableAlias}";
 
 	/**
 	 * Placeholder to be used in the string returned by the {@link #getJoinConditionsOverride()} method.<br>
 	 * This placeholder will be replaced with the child table alias.
 	 */
-	final static String PLACEHOLDER_CHILD_TABLE_ALIAS = "#{childTableAlias}";
+	String PLACEHOLDER_CHILD_TABLE_ALIAS = "#{childTableAlias}";
 	
 	/**
  	 * @return relation type of this descriptor to its parent.

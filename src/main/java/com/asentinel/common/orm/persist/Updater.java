@@ -60,7 +60,7 @@ public interface Updater {
 	 * 
 	 * @return the number of records affected by the operation.
 	 */
-	public default int update(Object entity) {
+	default int update(Object entity) {
 		return update(entity, UpdateType.AUTO);
 	}
 	
@@ -84,8 +84,8 @@ public interface Updater {
 	 * 
 	 * @see UpdateType
 	 */
-	public default int update(Object entity, UpdateType updateType) {
-		return update(entity, new UpdateSettings<DynamicColumn>(updateType));
+	default int update(Object entity, UpdateType updateType) {
+		return update(entity, new UpdateSettings<>(updateType));
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public interface Updater {
 	 * 
 	 * @see UpdateSettings
 	 */
-	public int update(Object entity, UpdateSettings<? extends DynamicColumn> settings); 	
+	int update(Object entity, UpdateSettings<? extends DynamicColumn> settings);
 
 	/**
 	 * Performs an atomic insert or update depending on a constraint defined for the
@@ -131,11 +131,10 @@ public interface Updater {
 	 * 
 	 * @see #upsert(Object, UpdateType, Object...)
 	 */
-	public default int upsert(Object entity, Object ... hints) {
+	default int upsert(Object entity, Object ... hints) {
 		return upsert(entity, UpdateType.INSERT_AUTO_ID, hints);
 	}
 
-	
 	/**
 	 * Performs an atomic insert or update depending on a constraint defined for the
 	 * target entity on the database side. <b>The entity id is always updated with
@@ -165,8 +164,8 @@ public interface Updater {
 	 * 
 	 * @see UpdateType
 	 */
-	public default int upsert(Object entity, UpdateType updateTypeInsert, Object ... hints) {
-		return upsert(entity, new UpdateSettings<DynamicColumn>(updateTypeInsert), hints);
+	default int upsert(Object entity, UpdateType updateTypeInsert, Object ... hints) {
+		return upsert(entity, new UpdateSettings<>(updateTypeInsert), hints);
 	}
 
 	/**
@@ -196,10 +195,8 @@ public interface Updater {
 	 * 
 	 * @see UpdateSettings
 	 */
-	public int upsert(Object entity, UpdateSettings<? extends DynamicColumn> settings, Object ... hints);	
+	int upsert(Object entity, UpdateSettings<? extends DynamicColumn> settings, Object ... hints);
 
-	
-	
 	// TODO: add a return type, to inform the client about the number of rows updated
 	/**
 	 * Saves the entities collection in the database auto detecting for each entity
@@ -207,7 +204,7 @@ public interface Updater {
 	 * {@link NewEntityDetector} implementation. The statements should be executed
 	 * using JDBC batching for maximum performance.<br>
 	 * <b>If new records are created in the database and new primary keys are
-	 * generated these primary keys should be set in the id fields of the
+	 *  generated, these primary keys should be set in the id fields of the
 	 * corresponding entities.</b>
 	 * 
 	 * @param entities collection of entities to be updated. All entities in the
@@ -218,7 +215,7 @@ public interface Updater {
 	 * @see NewEntityDetector
 	 * @see UpdateType
 	 */
-	public default <E> void update(Collection<E> entities) {
+	default <E> void update(Collection<E> entities) {
 		update(entities, UpdateType.AUTO);
 	}
 	
@@ -244,8 +241,8 @@ public interface Updater {
 	 * @see NewEntityDetector
 	 * @see UpdateType
 	 */
-	public default <E> void update(Collection<E> entities, UpdateType updateType) {
-		update(entities, new UpdateSettings<DynamicColumn>(updateType));
+	default <E> void update(Collection<E> entities, UpdateType updateType) {
+		update(entities, new UpdateSettings<>(updateType));
 	}
 	
 	/**
@@ -269,12 +266,12 @@ public interface Updater {
 	 * @see NewEntityDetector
 	 * @see UpdateSettings
 	 */
-	public <E> void update(Collection<E> entities, UpdateSettings<? extends DynamicColumn> settings);	
+	<E> void update(Collection<E> entities, UpdateSettings<? extends DynamicColumn> settings);
 	
 	/**
 	 * @see #update(Collection)
 	 */
-	public default <E> void update(@SuppressWarnings("unchecked") E ... entities) {
+	default <E> void update(@SuppressWarnings("unchecked") E ... entities) {
 		if (entities == null || entities.length == 0) {
 			return;
 		}
@@ -342,11 +339,10 @@ public interface Updater {
 	 * @see NewEntityDetector
 	 * @see UpdateType
 	 */
-	public default <E> void upsert(Collection<E> entities, UpdateType updateTypeInsert, Object ... hints) {
-		upsert(entities, new UpdateSettings<DynamicColumn>(updateTypeInsert), hints);
+	default <E> void upsert(Collection<E> entities, UpdateType updateTypeInsert, Object ... hints) {
+		upsert(entities, new UpdateSettings<>(updateTypeInsert), hints);
 	}
-	
-	
+
 	/**
 	 * Saves the entities collection in the database performing upserts. The
 	 * statements should be executed using JDBC batching for maximum performance.
@@ -378,13 +374,12 @@ public interface Updater {
 	 * @see NewEntityDetector
 	 * @see UpdateSettings
 	 */
-	public <E> void upsert(Collection<E> entities, UpdateSettings<? extends DynamicColumn> settings, Object ... hints);
-	
+	<E> void upsert(Collection<E> entities, UpdateSettings<? extends DynamicColumn> settings, Object ... hints);
 
 	/**
 	 * @see #upsert(Collection, Object...)
 	 */
-	public default <E> void upsert(E[] entities, Object ... hints) {
+	default <E> void upsert(E[] entities, Object ... hints) {
 		if (entities == null || entities.length == 0) {
 			return;
 		}
@@ -399,6 +394,5 @@ public interface Updater {
 	 * 
 	 * @return the number of records affected by the operation.
 	 */
-	public int delete(Class<?> entityType, Object ... ids);
-	
+	int delete(Class<?> entityType, Object ... ids);
 }

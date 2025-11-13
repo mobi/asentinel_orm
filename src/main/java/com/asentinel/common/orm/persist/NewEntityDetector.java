@@ -17,13 +17,13 @@ public interface NewEntityDetector {
 	 * 			if it is an entity that exists in the database.
 	 * @see #isNew(Object)
 	 */
-	public boolean isNewEntity(Object entity);
+	boolean isNewEntity(Object entity);
 	
 	/**
 	 * @param entityId the target entity id.
 	 * @return true if the entity id parameter is new, false
 	 * 			if it is an entity id that exists in the database.
 	 */
-	public boolean isNew(Object entityId);
+	boolean isNew(Object entityId);
 
 }

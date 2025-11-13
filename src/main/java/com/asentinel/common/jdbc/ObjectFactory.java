@@ -18,6 +18,5 @@ public interface ObjectFactory<T> {
 	// An idea would be to extend this interface and have a varargs method newObject(Object ... parameters)
 	// that would call the contructor with the right arguments
 	
-	public T newObject() throws IllegalStateException;
-	
+	T newObject() throws IllegalStateException;
 }
