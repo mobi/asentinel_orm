@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.sql.BatchUpdateException;
+
 import org.junit.Test;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
@@ -71,5 +73,24 @@ public class PgBetterSQLExceptionTranslatorTestCase {
 		DataIntegrityViolationException ex = new DataIntegrityViolationException("test", sqlEx);
 		when(defaultTranslator.translate("a", "select", sqlEx)).thenReturn(ex);
 		assertSame(ex, pgTranslator.translate("a", "select", sqlEx));
+	}
+	
+	/*
+	 * This test was failing for versions prior to 1.71.4
+	 */
+	@Test
+	public void testBatchUpdateException() {
+		BatchUpdateException bex = new BatchUpdateException(sqlEx);
+		DuplicateKeyException ex = new DuplicateKeyException("test", bex);
+		
+		when(sem.getConstraint()).thenReturn(CONSTRAINT);
+		when(defaultTranslator.translate("a", "insert", bex)).thenReturn(ex);
+		
+		Exception tex = pgTranslator.translate("a", "insert", bex);
+
+		assertTrue(tex instanceof BetterDuplicateKeyException);
+		assertSame(ex, tex.getCause());
+		assertEquals(CONSTRAINT, ((BetterDuplicateKeyException) tex).getConstraintName());
+		assertTrue(tex.getMessage().contains(CONSTRAINT));
 	}
 }
