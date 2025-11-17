@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -68,10 +69,8 @@ public class PgBetterSQLExceptionTranslator implements SQLExceptionTranslator {
 	}
 	
 	private static String getExceptionAttribute(Throwable orgEx, Function<ServerErrorMessage, String> getter) {
-		Throwable cause = orgEx;
-		if (orgEx instanceof DataAccessException) {
-			cause = ((DataAccessException) orgEx).getMostSpecificCause();
-		}
+		Throwable ex = NestedExceptionUtils.getRootCause(orgEx);
+		Throwable cause = ex != null ? ex : orgEx;
 		
 		if (cause instanceof PSQLException) {
 			PSQLException pSqlCause = (PSQLException) cause;
