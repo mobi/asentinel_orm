@@ -25,7 +25,6 @@ import com.asentinel.common.jdbc.flavors.JdbcFlavorConfig;
 import com.asentinel.common.util.Assert;
 import com.asentinel.common.util.Utils;
 
-
 /**
  * Implementation for the {@link SqlQuery} interface. 
  * This should be used as an effectively immutable object. It should be configured,
@@ -211,14 +210,14 @@ public class SqlQueryTemplate implements SqlQuery {
 	
 	@Override
 	public <T> List<T> query(String sql, Class<T> clasz, Object ... inParams) throws DataAccessException {
-		return (List<T>) query(sql, rowMapperFactory.getInstance(clasz), inParams);
+		return query(sql, rowMapperFactory.getInstance(clasz), inParams);
 	}
 	
 	@Override
 	public <T> T queryForObject(String sql, RowMapper<T> mapper, Object ... inParams) 
 		throws EmptyResultDataAccessException, DataAccessException {
 		List<T> objects = query(sql, mapper, inParams);
-		if (objects.size() == 0) {
+		if (objects.isEmpty()) {
 			throw new EmptyResultDataAccessException(1);
 		}
 		if (objects.size() > 1) {
@@ -284,12 +283,12 @@ public class SqlQueryTemplate implements SqlQuery {
     			userName = user.getUsername();
         	}
         	if (user != null) {
-        		log.debug("update - user: " + userName + " (" + userId + "); sql: " + sql);
+        		log.debug("update - user: {} ( {} ); sql: {}", userName, userId, sql);
         	} else {        	
-        		log.debug("update - sql: " + sql);
+        		log.debug("update - sql: {}", sql);
         	}
 			if (inParams.length > 0) {
-				log.debug("update - with parameters: " + JdbcUtils.parametersToString(true, inParams));
+				log.debug("update - with parameters: {}", JdbcUtils.parametersToString(true, inParams));
 			}
 		}
 		
@@ -309,7 +308,7 @@ public class SqlQueryTemplate implements SqlQuery {
 		}
 		long t1 = System.nanoTime();
 		if (log.isTraceEnabled()){
-			log.trace("update - Affected rows: " + count + ", update executed in " + ((t1 - t0)/1000000) + " ms");
+			log.trace("update - Affected rows: {}, update executed in {} ms", count, ((t1 - t0)/1000000));
 		}
 		return count;
 	}
@@ -334,7 +333,7 @@ public class SqlQueryTemplate implements SqlQuery {
 	}
 
 	/**
-	 * Performs parameters preprocessing:<br>
+	 * Performs parameter preprocessing:<br>
 	 * <li> {@code Boolean} instances are converted using {@link BooleanParameterConverter#asObject(boolean)};
 	 * <li> {@code Temporal} instances are converted to {@code Date} instances;
 	 * <li> {@code Double} instances are converted to {@code BigDecimal} if {@link JdbcFlavor#isWrapDoubleParameterWithBigDecimal()}
@@ -371,5 +370,4 @@ public class SqlQueryTemplate implements SqlQuery {
 		}
 		return inParamsFinal;
 	}
-
 }
