@@ -1,47 +1,63 @@
 package com.asentinel.common.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
-
 import org.junit.Test;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
+import java.util.Date;
+
+import static org.junit.Assert.*;
+
 public class UtilsTestCase {
-	private final LocalDateTime d = LocalDateTime.now();
+
+    @Test
+    public void temporalToDate_Null() {
+        assertNull(Utils.toDate((Temporal) null));
+    }
 
 	@Test
 	public void temporalToDate_LocalDate() {
-		assertEquals(Utils.toDate(d.toLocalDate()), Utils.toDate((Temporal) d.toLocalDate()));
+        LocalDate localDate = LocalDate.now();
+        Date expected = Utils.toDate(localDate);
+		assertEquals(expected, Utils.toDate((Temporal) localDate));
 	}
 	
 	@Test
 	public void temporalToDate_LocalTime() {
-		assertEquals(Utils.toDate(d.toLocalTime()), Utils.toDate((Temporal) d.toLocalTime()));
+        LocalTime localTime = LocalTime.now();
+        Timestamp expected = Utils.toTimestamp(localTime);
+		assertEquals(expected, Utils.toDate((Temporal) localTime));
 	}
 
 	@Test
 	public void temporalToDate_LocalDateTime() {
-		assertEquals(Utils.toDate(d), Utils.toDate((Temporal) d));
-	}
-
-	@Test
-	public void temporalToDate_Null() {
-		assertNull(Utils.toDate((Temporal) null));
+        LocalDateTime localDateTime = LocalDateTime.now();
+        Timestamp expected = Utils.toTimestamp(localDateTime);
+        assertEquals(expected, Utils.toDate((Temporal) localDateTime));
 	}
 
 	@Test
 	public void temporalToDate_ZonedDateTime() {
-		assertNotNull(Utils.toDate(ZonedDateTime.now()));
+        ZonedDateTime zonedDateTime = ZonedDateTime.now();
+        Timestamp expected = Utils.toTimestamp(zonedDateTime);
+        assertEquals(expected, Utils.toDate(zonedDateTime));
 	}
 	
 	@Test
 	public void temporalToDate_Instant() {
-		assertNotNull(Utils.toDate(Instant.now()));
+        Instant instant = Instant.now();
+        Timestamp expected = Utils.toTimestamp(instant);
+        assertEquals(expected, Utils.toDate(instant));
 	}
 
+    @Test(expected = IllegalArgumentException.class)
+    public void temporalToDate_UnsupportedType() {
+        Utils.toDate(OffsetTime.now());
+    }
 }
