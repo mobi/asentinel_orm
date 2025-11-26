@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 import org.springframework.core.convert.ConversionService;
@@ -91,24 +92,26 @@ public abstract class ConversionSupport extends LobHandlerSupport {
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked" })
 	protected Object getValue(Object parentObject, TypeDescriptor targetDescriptor, ResultSet rs, ColumnMetadata columnMetadata) throws SQLException {
-		Class<?> targetType = targetDescriptor.getType();
-		String column = columnMetadata.getResultsetName();
-		boolean allowNull = columnMetadata.isAllowNull();
-		if (targetType == int.class) {
-			return getIntObject(rs, column);
-		} else if (targetType == String.class) {
-			return getStringObject(rs, column, allowNull);
-		} else if (targetType == double.class) {
-			return getDoubleObject(rs, column);
-		} else if (targetType == boolean.class) {
-			return getBooleanObject(rs, column);
-		} else if (targetType == Date.class) {
-			return getDateObject(rs, column);
-		} else if (targetType == LocalDate.class) {
-			return getLocalDate(rs, column);
-		} else if (targetType == LocalTime.class) {
-			return getLocalTime(rs, column);
-		} else if (targetType == LocalDateTime.class) {
+        Class<?> targetType = targetDescriptor.getType();
+        String column = columnMetadata.getResultsetName();
+        boolean allowNull = columnMetadata.isAllowNull();
+        if (targetType == int.class) {
+            return getIntObject(rs, column);
+        } else if (targetType == String.class) {
+            return getStringObject(rs, column, allowNull);
+        } else if (targetType == double.class) {
+            return getDoubleObject(rs, column);
+        } else if (targetType == boolean.class) {
+            return getBooleanObject(rs, column);
+        } else if (targetType == Date.class) {
+            return getDateObject(rs, column);
+        } else if (targetType == LocalDate.class) {
+            return getLocalDate(rs, column);
+        } else if (targetType == LocalTime.class) {
+            return getLocalTime(rs, column);
+        } else if (targetType == ZonedDateTime.class) {
+            return getZonedDateTime(rs, column);
+        } else if (targetType == LocalDateTime.class) {
 			return getLocalDateTime(rs, column);
 		} else if (targetType == Instant.class) {
 			return getInstant(rs, column);

@@ -1,6 +1,14 @@
 package com.asentinel.common.jdbc;
 
-import static java.util.stream.Collectors.joining;
+import com.asentinel.common.util.Assert;
+import com.asentinel.common.util.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -15,22 +23,14 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.util.StringUtils;
-
-import com.asentinel.common.util.Assert;
-import com.asentinel.common.util.Utils;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Helper class useful for:<br>
@@ -689,6 +689,14 @@ public final class ResultSetUtils {
 	private static LocalTime getLocalTime(Timestamp t) throws SQLException {
 		return Utils.toLocalTime(t);
 	}
+
+    public static ZonedDateTime getZonedDateTime(ResultSet rs, String col) throws SQLException {
+        return getZonedDateTime(rs.getTimestamp(col));
+    }
+
+    private static ZonedDateTime getZonedDateTime(Timestamp t) throws SQLException {
+        return Utils.toZonedDateTime(t);
+    }
 
 	public static LocalDateTime getLocalDateTime(ResultSet rs, int col) throws SQLException {
 		return getLocalDateTime(rs.getTimestamp(col));
