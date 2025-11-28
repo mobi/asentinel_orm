@@ -283,7 +283,7 @@ public class SqlQueryTemplate implements SqlQuery {
     			userName = user.getUsername();
         	}
         	if (user != null) {
-        		log.debug("update - user: {} ( {} ); sql: {}", userName, userId, sql);
+        		log.debug("update - user: {} ({}); sql: {}", userName, userId, sql);
         	} else {        	
         		log.debug("update - sql: {}", sql);
         	}
@@ -295,14 +295,14 @@ public class SqlQueryTemplate implements SqlQuery {
 		long t0 = System.nanoTime();
 		int count;
 		if (isExpectKeys(keyColumnNames, keyHolder)) {
-			count = (Integer) jdbcOperations.update(
+			count = jdbcOperations.update(
 					new CustomPreparedStatementCreator(jdbcFlavor,
 							sql, jdbcFlavor.preprocessKeyColumnNames(keyColumnNames), 
 							inParams), 
 					keyHolder
 			); 
 		} else {
-			count = (Integer) jdbcOperations.update(
+			count = jdbcOperations.update(
 					new CustomPreparedStatementCreator(jdbcFlavor, sql, inParams)
 			); 
 		}
