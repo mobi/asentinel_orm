@@ -16,7 +16,6 @@ import com.asentinel.common.util.Assert;
  * @see InOutCall#call(String, ResultSetSqlParameter[], Object...)
  * 
  * @author Razvan Popian
- *
  */
 public class ResultSetSqlParameter extends ResultSetSupportingSqlParameter {
 	
@@ -27,7 +26,6 @@ public class ResultSetSqlParameter extends ResultSetSupportingSqlParameter {
 	/**
 	 * Constructor that initializes this sql parameter with
 	 * a {@link RowCallbackHandler}. 
-	 * @param rch
 	 */
 	public ResultSetSqlParameter(RowCallbackHandler rch) {
 		super("RS", cursorType, rch);
@@ -37,14 +35,12 @@ public class ResultSetSqlParameter extends ResultSetSupportingSqlParameter {
 	/**
 	 * Constructor that initializes this sql parameter with
 	 * a {@link RowMapper}. 
-	 * @param mapper
 	 */
 	public ResultSetSqlParameter(RowMapper<?> mapper) {
 		super("RS", cursorType, mapper);
 		Assert.assertNotNull(mapper, "mapper");
 	}
-	
-	
+
 	/**
 	 * Constructor that initializes this sql parameter with
 	 * a {@link RowMapper} created using the class clasz
@@ -64,7 +60,6 @@ public class ResultSetSqlParameter extends ResultSetSupportingSqlParameter {
 	public ResultSetSqlParameter(Class<?> clasz) {
 		this(clasz, (LobHandler) null);
 	}
-
 
 	/**
 	 * Constructor that initializes this parameter with
@@ -98,5 +93,4 @@ public class ResultSetSqlParameter extends ResultSetSupportingSqlParameter {
 	public boolean isRowMapper() {
 		return getRowMapper() != null;
 	}
-	
 }

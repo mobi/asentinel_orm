@@ -4,7 +4,7 @@
 
 	<groupId>com.asentinel.common</groupId>
 	<artifactId>asentinel-common</artifactId>
-	<version>1.71.4</version>
+	<version>1.71.5</version>
 	<packaging>jar</packaging>
 
 	<name>Asentinel ORM</name>
@@ -85,8 +85,7 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>${aspecj.version}</version>
 		</dependency>		
-		
-		
+
 		<dependency>
 		    <groupId>ch.qos.logback</groupId>
 		    <artifactId>logback-classic</artifactId>
@@ -199,20 +198,20 @@
 					<showSuccess>false</showSuccess>
 				</configuration>
 			</plugin>
-			<plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-gpg-plugin</artifactId>
-			    <version>3.2.4</version>
-			    <executions>
-			        <execution>
-			            <id>sign-artifacts</id>
-			            <phase>verify</phase>
-			            <goals>
-			                <goal>sign</goal>
-			            </goals>
-			        </execution>
-			    </executions>
-			</plugin>	
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 	        <plugin>
 	          <groupId>org.sonatype.central</groupId>
 	          <artifactId>central-publishing-maven-plugin</artifactId>
