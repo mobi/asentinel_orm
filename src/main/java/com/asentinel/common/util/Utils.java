@@ -156,7 +156,6 @@ public class Utils {
      *          the {@link LocalDateTime} to convert.
      * @return {@link Timestamp} instance for the specified {@link LocalDateTime}.
      *          The conversion is done using the system default time zone.
-     *          The date part is set to the current date.
      *  		If the {@code localDateTime} argument is {@code null} the result is {@code null}.
      */
     public static Timestamp toTimestamp(LocalDateTime localDateTime) {
@@ -200,7 +199,7 @@ public class Utils {
 	 * @return the converted {@link Date}
 	 * @throws IllegalArgumentException if the argument is not one of the supported types.
 	 */
-	public static Object toDate(Temporal someDateOrTime) {
+	public static Date toDate(Temporal someDateOrTime) {
         if (someDateOrTime == null) {
             return null;
         } else if (someDateOrTime instanceof LocalDate) {
