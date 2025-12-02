@@ -1,5 +1,6 @@
 package com.asentinel.common.util;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,8 +19,7 @@ public class Utils {
 	private Utils() {}
 
 	public static double nanosToMillis(long nanos) {
-		double millis = ((double) nanos) / 1000000;
-		return millis;
+        return ((double) nanos) / 1000000;
 	}
 
 	/**
@@ -61,7 +61,6 @@ public class Utils {
 		}
 		return toZonedDateTime(date).toLocalTime();
 	}
-	
 
 	/**
 	 * @param date the {@link Date} to convert.
@@ -75,7 +74,6 @@ public class Utils {
 		}
 		return toZonedDateTime(date).toLocalDateTime();
 	}
-
 
 	/**
 	 * @param date the {@link Date} to convert.
@@ -101,7 +99,10 @@ public class Utils {
 		if (localDate == null) {
 			return null;
 		}
-		return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        var instant = localDate.atStartOfDay()
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
+		return Date.from(instant);
 	}
 	
 	/**
@@ -132,6 +133,66 @@ public class Utils {
 		return toDate(localTime.atDate(LocalDate.now()));
 	}
 
+    /**
+     * @param localTime
+     *          the {@link LocalTime} to convert.
+     * @return {@link Timestamp} instance for the specified {@link LocalTime}.
+     *          The conversion is done using the system default time zone.
+     *          The date part is set to the current date.
+     *  		If the {@code localTime} argument is {@code null} the result is {@code null}.
+     */
+    public static Timestamp toTimestamp(LocalTime localTime) {
+        if (localTime == null) {
+            return null;
+        }
+        var instant = localTime.atDate(LocalDate.now())
+                .atZone(ZoneId.systemDefault())
+                .toInstant();
+        return toTimestamp(instant);
+    }
+
+    /**
+     * @param localDateTime
+     *          the {@link LocalDateTime} to convert.
+     * @return {@link Timestamp} instance for the specified {@link LocalDateTime}.
+     *          The conversion is done using the system default time zone.
+     *  		If the {@code localDateTime} argument is {@code null} the result is {@code null}.
+     */
+    public static Timestamp toTimestamp(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return null;
+        }
+        var instant = localDateTime.atZone(ZoneId.systemDefault())
+                .toInstant();
+        return toTimestamp(instant);
+    }
+
+    /**
+     * @param zonedDateTime
+     *          the {@link ZonedDateTime} to convert.
+     * @return {@link Timestamp} instance for the specified {@link ZonedDateTime}.
+     *  		If the {@code zonedDateTime} argument is {@code null} the result is {@code null}.
+     */
+    public static Timestamp toTimestamp(ZonedDateTime zonedDateTime) {
+        if (zonedDateTime == null) {
+            return null;
+        }
+        return toTimestamp(zonedDateTime.toInstant());
+    }
+
+    /**
+     * @param instant
+     *          the {@link Instant} to convert.
+     * @return {@link Timestamp} instance for the specified {@link Instant}.
+     *  		If the {@code instant} argument is {@code null} the result is {@code null}.
+     */
+    public static Timestamp toTimestamp(Instant instant) {
+        if (instant == null) {
+            return null;
+        }
+        return Timestamp.from(instant);
+    }
+
 	/**
 	 * This method will convert the {@link Temporal} argument to a {@link Date}.
 	 * @param someDateOrTime some date/time representation.
@@ -139,18 +200,18 @@ public class Utils {
 	 * @throws IllegalArgumentException if the argument is not one of the supported types.
 	 */
 	public static Date toDate(Temporal someDateOrTime) {
-		if (someDateOrTime instanceof LocalDate) {
+        if (someDateOrTime == null) {
+            return null;
+        } else if (someDateOrTime instanceof LocalDate) {
 			return toDate((LocalDate) someDateOrTime);
 		} else if (someDateOrTime instanceof LocalTime) {
-			return toDate((LocalTime) someDateOrTime);
+			return toTimestamp((LocalTime) someDateOrTime);
 		} else if (someDateOrTime instanceof LocalDateTime) {
-			return toDate((LocalDateTime) someDateOrTime);
+			return toTimestamp((LocalDateTime) someDateOrTime);
 		} else if (someDateOrTime instanceof ZonedDateTime) {
-			return Date.from(((ZonedDateTime) someDateOrTime).toInstant());
+			return toTimestamp((ZonedDateTime) someDateOrTime);
 		} else if (someDateOrTime instanceof Instant) {
-			return Date.from((Instant) someDateOrTime);
-		} else if (someDateOrTime == null) {
-			return null;
+            return toTimestamp((Instant) someDateOrTime);
 		} else {
 			throw new IllegalArgumentException("Unsupported date type: " + someDateOrTime.getClass().getName());
 		}
