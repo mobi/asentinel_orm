@@ -280,7 +280,7 @@ public class SqlBuilder<E> {
 
 	/**
 	 * Compiles the instructions that were added to the builder. This method will work even if
-	 * one of the <code>select</code> methods was not called.
+	 * one of the {@code select} or {@code from} methods was not called.
 	 * @param root the <code>EntityDescriptor</code> tree to use for compilation.
 	 * @return a {@link CompiledSql} instance that holds the compiled SQL query, any query parameters
 	 * 			and the tree that was used for compilation.
@@ -292,7 +292,7 @@ public class SqlBuilder<E> {
 
 	/**
 	 * Compiles the instructions that were added to the builder. This method will only work if a 
-	 * call was made to one of the <code>select</code> methods.
+	 * call was made to one of the {@code select} or {@code from} methods.
 	 * @return a {@link CompiledSql} instance that holds the compiled SQL query, any query parameters
 	 * 			and the tree that was used for compilation.
 	 * @see CompiledSql
