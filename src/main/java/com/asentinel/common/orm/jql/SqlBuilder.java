@@ -208,7 +208,6 @@ public class SqlBuilder<E> {
 	 * {@link EntityDescriptorTreeRepository} methods to create the {@link EntityDescriptor} tree.
 	 */
 	public SqlBuilder<E> select(EntityDescriptorNodeCallback ... nodeCallbacks) {
-		Assert.assertNotNull(clasz, "clasz");
 		select(
 				entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, nodeCallbacks)
 		);
@@ -220,7 +219,6 @@ public class SqlBuilder<E> {
 	 * {@link EntityDescriptorTreeRepository} methods to create the {@link EntityDescriptor} tree.
 	 */
 	public SqlBuilder<E> select(String rootTableAlias, EntityDescriptorNodeCallback ... nodeCallbacks) {
-		Assert.assertNotNull(clasz, "clasz");
 		select(
 				entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, rootTableAlias, nodeCallbacks)
 		);
