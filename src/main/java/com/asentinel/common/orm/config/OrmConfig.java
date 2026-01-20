@@ -1,7 +1,7 @@
 package com.asentinel.common.orm.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -25,6 +25,7 @@ import com.asentinel.common.orm.query.SqlFactory;
  * @since 1.72.0
  * @author Razvan Popian
  */
+@Configuration
 public class OrmConfig {
 	
 	static final String ORM_CS_BEAN_NAME = "ormConversionService";
@@ -41,8 +42,8 @@ public class OrmConfig {
 
     @Bean
     public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(
-    		SqlBuilderFactory sqlBuilderFactory,
-    		@Qualifier(ORM_CS_BEAN_NAME) ConversionService conversionService) {
+    		SqlBuilderFactory sqlBuilderFactory) {
+    	ConversionService conversionService = ormConversionService();
         DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
         treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
         treeRepository.setConversionService(conversionService);
@@ -57,7 +58,11 @@ public class OrmConfig {
         return sqlBuilderFactory;
     }
     
-    @Bean(name = OrmConfig.ORM_CS_BEAN_NAME)
+	/**
+	 * Not an autowire candidate, to avoid conflicts with other conversion service
+	 * beans that might be present in the container.
+	 */
+    @Bean(name = OrmConfig.ORM_CS_BEAN_NAME, autowireCandidate = false)
     public ConfigurableConversionService ormConversionService() {
     	GenericConversionService conversionService = new GenericConversionService();
     	return conversionService;
@@ -65,8 +70,8 @@ public class OrmConfig {
     
     @Bean
     public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
-                             SqlBuilderFactory sqlBuilderFactory,
-                             @Qualifier(ORM_CS_BEAN_NAME) ConversionService conversionService) {
+                             SqlBuilderFactory sqlBuilderFactory) {
+    	ConversionService conversionService = ormConversionService();
        	SimpleUpdater updater = new SimpleUpdater(jdbcFlavor, sqlQuery);
     	updater.setConversionService(conversionService);
         return new OrmTemplate(sqlBuilderFactory, updater);
