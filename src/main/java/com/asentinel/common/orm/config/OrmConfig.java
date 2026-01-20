@@ -1,5 +1,11 @@
 package com.asentinel.common.orm.config;
 
+import java.sql.DatabaseMetaData;
+
+import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -7,10 +13,19 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
+import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.support.MetaDataAccessException;
 
 import com.asentinel.common.jdbc.SqlQuery;
 import com.asentinel.common.jdbc.SqlQueryTemplate;
+import com.asentinel.common.jdbc.flavors.CustomArgumentPreparedStatementSetter;
 import com.asentinel.common.jdbc.flavors.JdbcFlavor;
+import com.asentinel.common.jdbc.flavors.h2.H2JdbcFlavor;
+import com.asentinel.common.jdbc.flavors.oracle.OracleJdbcFlavor;
+import com.asentinel.common.jdbc.flavors.postgres.PgEchoingJdbcTemplate;
+import com.asentinel.common.jdbc.flavors.postgres.PostgresJdbcFlavor;
 import com.asentinel.common.orm.OrmOperations;
 import com.asentinel.common.orm.OrmTemplate;
 import com.asentinel.common.orm.ed.tree.DefaultEntityDescriptorTreeRepository;
@@ -27,8 +42,58 @@ import com.asentinel.common.orm.query.SqlFactory;
  */
 @Configuration
 public class OrmConfig {
+	private final static Logger log = LoggerFactory.getLogger(OrmConfig.class);
+	
+	private static final String PG_NAME = "PostgreSQL";
 	
 	static final String ORM_CS_BEAN_NAME = "ormConversionService";
+	
+	/**
+	 * Expensive call as it opens a connection to the database to retrieve metadata.
+	 */
+	@Bean(autowireCandidate = false)
+	public String getDatabaseName(DataSource dataSource) throws MetaDataAccessException {
+		log.debug("getDatabaseName - Determining database product name...");
+		String name = JdbcUtils.extractDatabaseMetaData(dataSource,
+				DatabaseMetaData::getDatabaseProductName);
+		log.info("getDatabaseName - Found: {}", name);
+		return name;
+	}
+	
+    @Bean
+    public JdbcFlavor jdbcFlavor(DataSource dataSource) throws MetaDataAccessException {
+    	String name = getDatabaseName(dataSource);
+    	if (PG_NAME.equalsIgnoreCase(name)) {
+    		return new PostgresJdbcFlavor();
+    	} else if ("H2".equalsIgnoreCase(name)) {
+			return new H2JdbcFlavor();
+		} else if ("Oracle".equalsIgnoreCase(name)) {
+			return new OracleJdbcFlavor();
+		} else {
+			throw new IllegalStateException("Database '" + name + "' is not yet supported. "
+					+ "A new kind of " + JdbcFlavor.class.getSimpleName() + " is needed. We welcome contributions!");
+		}
+    }
+    
+	@Bean
+	public JdbcOperations jdbcOperations(DataSource dataSource, JdbcFlavor jdbcFlavor) throws MetaDataAccessException {
+		String name = getDatabaseName(dataSource);
+		if (PG_NAME.equalsIgnoreCase(name)) {
+			PgEchoingJdbcTemplate pgt =  new PgEchoingJdbcTemplate(dataSource);
+			pgt.setJdbcFlavor(jdbcFlavor);
+			return pgt;
+		} else {
+			return new JdbcTemplate(dataSource) {
+				/*
+				 * add support for byte[], InputStream and Enum params
+				 */
+				@Override
+				protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
+					return new CustomArgumentPreparedStatementSetter(jdbcFlavor, args);
+				}
+			};
+		}
+	}
 
     @Bean
     public SqlQuery sqlQuery(JdbcFlavor jdbcFlavor, JdbcOperations jdbcOps) {
@@ -64,8 +129,7 @@ public class OrmConfig {
 	 */
     @Bean(name = OrmConfig.ORM_CS_BEAN_NAME, autowireCandidate = false)
     public ConfigurableConversionService ormConversionService() {
-    	GenericConversionService conversionService = new GenericConversionService();
-    	return conversionService;
+    	return new GenericConversionService();
     }
     
     @Bean
