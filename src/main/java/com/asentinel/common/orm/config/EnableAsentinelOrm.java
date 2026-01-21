@@ -13,7 +13,7 @@ import com.asentinel.common.orm.OrmOperations;
 
 /**
  * Enables Asentinel ORM support. It creates an {@link OrmTemplate} bean instance
- * implementing the ORM centarl interface {@link OrmOperations} - that can be
+ * implementing the ORM central interface {@link OrmOperations} - that can be
  * further injected as needed.
  * <br> Client code can provide either:
  * <li> the {@code DataSource} instance, or
