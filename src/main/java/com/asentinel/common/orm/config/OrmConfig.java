@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -45,9 +46,10 @@ public class OrmConfig {
 	private final static Logger log = LoggerFactory.getLogger(OrmConfig.class);
 	
 	private static final String PG_NAME = "PostgreSQL";
-	
+
+	private static final String ORM_SQL_BUILDER_FACTORY_BEAN_NAME = "ormSqlBuilderFactory";
 	static final String ORM_CS_BEAN_NAME = "ormConversionService";
-	
+
 	/**
 	 * Expensive call as it opens a connection to the database to retrieve metadata.
 	 */
@@ -107,7 +109,7 @@ public class OrmConfig {
 
     @Bean
     public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(
-    		SqlBuilderFactory sqlBuilderFactory) {
+    		@Qualifier(ORM_SQL_BUILDER_FACTORY_BEAN_NAME) SqlBuilderFactory sqlBuilderFactory) {
     	ConversionService conversionService = ormConversionService();
         DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
         treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
@@ -115,7 +117,7 @@ public class OrmConfig {
         return treeRepository;
     }
 
-    @Bean
+    @Bean(name = ORM_SQL_BUILDER_FACTORY_BEAN_NAME)
     public DefaultSqlBuilderFactory sqlBuilderFactory(@Lazy EntityDescriptorTreeRepository entityDescriptorTreeRepository,
                                                       SqlFactory sqlFactory, SqlQuery sqlQuery) {
         DefaultSqlBuilderFactory sqlBuilderFactory = new DefaultSqlBuilderFactory(sqlFactory, sqlQuery);
@@ -134,7 +136,7 @@ public class OrmConfig {
     
     @Bean
     public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
-                             SqlBuilderFactory sqlBuilderFactory) {
+							 @Qualifier(ORM_SQL_BUILDER_FACTORY_BEAN_NAME) SqlBuilderFactory sqlBuilderFactory) {
     	ConversionService conversionService = ormConversionService();
        	SimpleUpdater updater = new SimpleUpdater(jdbcFlavor, sqlQuery);
     	updater.setConversionService(conversionService);
