@@ -39,7 +39,8 @@ import com.asentinel.common.orm.query.SqlFactory;
 
 /**
  * @since 1.72.0
- * @author Razvan Popian 
+ * @author Razvan Popian
+ * @author horatiu.dan
  */
 @Configuration
 public class OrmConfig {
