@@ -4,7 +4,7 @@
 
 	<groupId>com.asentinel.common</groupId>
 	<artifactId>asentinel-common</artifactId>
-	<version>1.71.6</version>
+	<version>1.72.0</version>
 	<packaging>jar</packaging>
 
 	<name>Asentinel ORM</name>
@@ -69,12 +69,17 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring-framework.version}</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>net.bytebuddy</groupId>
 			<artifactId>byte-buddy</artifactId>

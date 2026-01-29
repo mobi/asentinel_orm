@@ -6,7 +6,7 @@ One of the Tangoe Telecom project features is to allow users to define their own
 
 # Key features
 
-- simple configuration on top of `JdbcTemplate`
+- simple configuration on top of `JdbcTemplate` (made even simpler since version 1.72.0)
 - easy to integrate in any `JdbcTemplate` project
 - easy fallback to plain SQL statements and `JdbcTemplate`
 - all SQL queries are executed using `JdbcTemplate` so they participate in Spring managed transactions
@@ -27,7 +27,7 @@ Please see [asentinel-orm-demo](https://github.com/jMediaConverter/asentinel-orm
 The database specifics are abstracted behind an interface called `JdbcFlavor`. Currently out of the box this interface has implementations for the following databases.
 
 - H2
-- Postgres
+- PostgreSQL
 - Oracle
 
 It should be reasonably easy to add specific `JdbcFlavor` implementations for other databases. It's likely that we will add other out of the box implementations in the future.
@@ -37,66 +37,23 @@ It should be reasonably easy to add specific `JdbcFlavor` implementations for ot
 <dependency>
     <groupId>com.asentinel.common</groupId>
     <artifactId>asentinel-common</artifactId>
-    <version>1.71.0</version>
+    <version>1.72.0</version>
 </dependency>
 ```
 
 # Configuration for Spring application context
 
-Here is how to configure the asentinel-orm to access an H2 database. The last bean created is the `OrmOperations` which is
-the interface you will use to perform all the ORM actions.
+Here is how to configure the asentinel-orm to access an H2 database using the `@EnableAsentinelOrm` annotation. This will create the `OrmOperations` bean which is
+the interface you will use to perform all the ORM actions. For more advanced use cases or for versions below 1.72.0 you need to manually configure all the ORM beans and you can use the `com.asentinel.common.orm.config.OrmConfig` class as a starting point. This is the class that is imported by the `@EnableAsentinelOrm` annotation. 
 
 ```
-@Bean
-public DataSource dataSource() {
-	return new SingleConnectionDataSource("jdbc:h2:mem:testdb", "sa", "", false);
-}
-
-@Bean
-public JdbcFlavor jdbcFlavor() {
-    return new H2JdbcFlavor();
-}
-
-@Bean
-public JdbcOperations jdbcOperations(DataSource dataSource, JdbcFlavor jdbcFlavor) {
-	return new JdbcTemplate(dataSource) {
-		
-		@Override
-		protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
-			return new CustomArgumentPreparedStatementSetter(jdbcFlavor, args);
-		}
-	};
-}
-
-@Bean
-public SqlQuery sqlQuery(JdbcFlavor jdbcFlavor, JdbcOperations jdbcOps) {
-    return new SqlQueryTemplate(jdbcFlavor, jdbcOps);
-}
-
-@Bean
-public SqlFactory sqlFactory(JdbcFlavor jdbcFlavor) {
-    return new DefaultSqlFactory(jdbcFlavor);
-}
-
-@Bean
-public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(SqlBuilderFactory sqlBuilderFactory) {
-    DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
-    treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
-    return treeRepository;
-}
-
-@Bean
-public DefaultSqlBuilderFactory sqlBuilderFactory(@Lazy EntityDescriptorTreeRepository entityDescriptorTreeRepository,
-                                                  SqlFactory sqlFactory, SqlQuery sqlQuery) {
-    DefaultSqlBuilderFactory sqlBuilderFactory = new DefaultSqlBuilderFactory(sqlFactory, sqlQuery);
-    sqlBuilderFactory.setEntityDescriptorTreeRepository(entityDescriptorTreeRepository);
-    return sqlBuilderFactory;
-}
-
-@Bean
-public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
-                         SqlBuilderFactory sqlBuilderFactory) {
-    return new OrmTemplate(sqlBuilderFactory, new SimpleUpdater(jdbcFlavor, sqlQuery));
+@EnableAsentinelOrm
+@Configuration
+public class AppConfig {
+	@Bean
+	public DataSource dataSource() {
+		return new SingleConnectionDataSource("jdbc:h2:mem:testdb", "sa", "", false);
+	}
 }
 ```
 
@@ -257,39 +214,33 @@ private void loadSomeDataEagerly() {
 
 # Custom data types conversion
 
-To support custom data types conversion a `ConversionService` has to be injected both in the `DefaultEntityDescriptorTreeRepository` and the `SimpleUpdater`. The appropiate converters have to be registered with the `ConversionService`. The methods that create the `DefaultEntityDescriptorTreeRepository` and `OrmOperations` shown in the configuration above will change like this:
+To support custom data types conversion a Spring `ConversionService` is used. The appropriate converters have to be registered with the `ConversionService` using the `OrmConversionServiceConfig` class. Below is an example configuration file that adds support for working with JSON fields in PostgreSQL. 
 
 ```
-	.....
+@EnableAsentinelOrm
+@Configuration
+public class AppConfig {
+	@Bean
+	public DataSource dataSource() {
+		return new SingleConnectionDataSource("jdbc:h2:mem:testdb", "sa", "", false);
+	}
 	
-    @Bean
-    public DefaultEntityDescriptorTreeRepository entityDescriptorTreeRepository(SqlBuilderFactory sqlBuilderFactory,
-    		@Qualifier("ormConversionService") ConversionService conversionService) {
-        DefaultEntityDescriptorTreeRepository treeRepository = new DefaultEntityDescriptorTreeRepository();
-        treeRepository.setSqlBuilderFactory(sqlBuilderFactory);
-        treeRepository.setConversionService(conversionService);
-        return treeRepository;
-    }
+	@Bean
+	public OrmConversionServiceConfig ormConversionServiceConfig() {
+		return new OrmConversionServiceConfig() {
 
-    @Bean
-    public OrmOperations orm(JdbcFlavor jdbcFlavor, SqlQuery sqlQuery,
-                             SqlBuilderFactory sqlBuilderFactory,
-                             @Qualifier("ormConversionService") ConversionService conversionService) {
-    	SimpleUpdater updater = new SimpleUpdater(jdbcFlavor, sqlQuery);
-    	updater.setConversionService(conversionService);
-        return new OrmTemplate(sqlBuilderFactory, updater);
-    }
-    
-    @Bean("ormConversionService")
-    public ConversionService ormConversionService() {
-    	GenericConversionService conversionService = new GenericConversionService();
-    	conversionService.addConverter(new JsonToObjectConverter());
-    	conversionService.addConverter(new ObjectToJsonConverter());
-    	return conversionService;
-    }
+			@Override
+			protected void registerConverters(ConfigurableConversionService conversionService) {
+		    	conversionService.addConverter(new JsonToObjectConverter());
+		    	conversionService.addConverter(new ObjectToJsonConverter());
+			}
+			
+		};
+	}
+}
 ```
 
-Note that we are also creating a `ConversionService` bean that is able to convert to/from JSONB. This example works for Postgres. See below the source code for the 2 JSONB converters:
+See below the source code for the 2 registered JSONB converters:
 
 ```
 	public class JsonToObjectConverter implements ConditionalGenericConverter {
@@ -373,7 +324,7 @@ Note that we are also creating a `ConversionService` bean that is able to conver
 
 ```
 
-Below is a simple domain class that includes the id and an employee member that is stored as JSONB in a Postgres database. Notice the `@Column` annotation on the employee member declares the column name and a `@SqlParam` annotation that has the database type name as the value. This annotation will trigger the `ConversionService` for the annotated field causing the 2 converters declared above to be used for reading and writing the field. 
+Below is a simple domain class that includes the id and an employee member that is stored as JSONB in a PostgreSQL database. Notice the `@Column` annotation on the employee member declares the column name and a `@SqlParam` annotation that has the database type name as the value. This annotation will trigger the `ConversionService` for the annotated field causing the 2 converters declared above to be used for reading and writing the field. 
 
 ```
 @Table("EmployeeHolder")
