@@ -1,0 +1,283 @@
+name: 'Trivy Security Scan'
+
+runs:
+  using: "composite"
+  steps:
+                        
+    # Generate CycloneDX SBOM and License Scan
+    - name: Generate CycloneDX SBOM with Anchore Syft
+      shell: bash
+      run: |
+        echo "Generating CycloneDX SBOM and scanning for issues..."
+        
+        # Generate CycloneDX SBOM with directory exclusions
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          anchore/syft:latest \
+          /workspace \
+          --exclude './tmp/**' \
+          --exclude './log/**' \
+          -o cyclonedx-json=/workspace/syft-sbom-cyclonedx.json
+        
+        echo "Generated CycloneDX SBOM: syft-sbom-cyclonedx.json"
+        
+        # Display basic statistics
+        if [ -f "syft-sbom-cyclonedx.json" ]; then
+          echo "SBOM CycloneDX file size: $(wc -c < syft-sbom-cyclonedx.json) bytes"
+          echo "Number of components detected: $(jq '.components | length' syft-sbom-cyclonedx.json 2>/dev/null || echo 'N/A')"
+        fi
+
+        echo "Scanning CycloneDX SBOM for issues..."
+        docker run --rm \
+          -v ${{ github.workspace }}:/workspace \
+          aquasec/trivy:latest \
+          sbom \
+          --format json \
+          --output /workspace/trivy-sbom-results.json \
+          --scanners license \
+          --exit-code 0 \
+          /workspace/syft-sbom-cyclonedx.json
+
+    - name: Trivy Scanner
+      id: trivy_scanner
+      shell: bash
+      run: |
+          # Run Trivy scan for ALL severities and output to JSON for API processing
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:latest \
+            fs --scanners vuln,license \
+            --exit-code 0 \
+            --format json \
+            --output /workspace/trivy-results.json \
+            --db-repository public.ecr.aws/aquasecurity/trivy-db \
+            --skip-dirs "./vendor/bundle,./vendor/cache" \
+            --include-dev-deps \
+            /workspace
+
+    - name: Merge Ruby License Results
+      shell: bash
+      run: |
+        echo "=== Merging Ruby License Results from SBOM scan ==="
+        
+        # Check if both files exist
+        if [ ! -f "trivy-results.json" ]; then
+          echo "❌ trivy-results.json not found. Skipping merge."
+          exit 0
+        fi
+        
+        if [ ! -f "trivy-sbom-results.json" ]; then
+          echo "❌ trivy-sbom-results.json not found. Skipping merge."
+          exit 0
+        fi
+        
+        # Create backup of original trivy-results.json
+        cp trivy-results.json trivy-results-backup.json
+        echo "✅ Backup created: trivy-results-backup.json"
+        
+        # Extract Ruby license results from SBOM scan and merge into main results
+        jq --slurpfile sbom trivy-sbom-results.json '
+          # Extract Ruby license results from SBOM
+          ($sbom[0].Results // [] | 
+           map(select(.Target == "Ruby" and .Class == "license"))) as $rubyLicenseResults |
+          
+          # If we have Ruby license results to merge
+          if ($rubyLicenseResults | length) > 0 then
+            # Add them to the existing Results array
+            .Results += $rubyLicenseResults |
+            # Update metadata to indicate merge
+            .MergedFrom = {
+              sbom_file: "trivy-sbom-results.json",
+              merged_results_count: ($rubyLicenseResults | length),
+              merged_timestamp: now | strftime("%Y-%m-%dT%H:%M:%SZ")
+            }
+          else
+            # No Ruby license results found, keep original
+            . + {
+              MergedFrom: {
+                sbom_file: "trivy-sbom-results.json", 
+                merged_results_count: 0,
+                merged_timestamp: now | strftime("%Y-%m-%dT%H:%M:%SZ"),
+                note: "No Ruby license results found to merge"
+              }
+            }
+          end
+        ' trivy-results.json > trivy-results-merged.json
+        
+        # Verify the merge was successful
+        if [ -f "trivy-results-merged.json" ]; then
+          # Check if the merged file is valid JSON
+          if jq empty trivy-results-merged.json 2>/dev/null; then
+            # Replace original with merged version
+            mv trivy-results-merged.json trivy-results.json
+            
+            # Display merge statistics
+            ORIGINAL_COUNT=$(jq '.Results | length' trivy-results-backup.json)
+            MERGED_COUNT=$(jq '.Results | length' trivy-results.json)
+            ADDED_COUNT=$((MERGED_COUNT - ORIGINAL_COUNT))
+            
+            echo "✅ Successfully merged Ruby license results"
+            echo "   Original results count: $ORIGINAL_COUNT"
+            echo "   Final results count: $MERGED_COUNT"
+            echo "   Ruby license results added: $ADDED_COUNT"
+            
+            # Show sample of what was merged
+            if [ $ADDED_COUNT -gt 0 ]; then
+              echo ""
+              echo "Sample of merged Ruby license results:"
+              jq -r '.Results[] | select(.Target == "Ruby" and .Class == "license") | "  Target: \(.Target), Class: \(.Class), Licenses: \(.Licenses // [] | length)"' trivy-results.json | head -3
+            fi
+          else
+            echo "❌ Merged JSON is invalid, restoring backup"
+            mv trivy-results-backup.json trivy-results.json
+            rm -f trivy-results-merged.json
+            exit 1
+          fi
+        else
+          echo "❌ Failed to create merged results file"
+          exit 1
+        fi
+        
+        echo "=== Ruby License Merge Complete ==="
+
+    - name: Trivy Security CSV Report
+      shell: bash
+      run: |
+        echo "=== Creating Vulnerability CSV Report ==="
+        
+        # Check if trivy vulnerability results file exists
+        if [ ! -f "trivy-results.json" ]; then
+          echo "❌ Trivy vulnerability results file not found. Skipping CSV creation."
+          exit 0
+        fi
+        
+        # Define CSV file
+        VULN_CSV_FILE="trivy-vulnerabilities-report.csv"
+        
+        # Create vulnerability CSV header
+        echo "SEVERITY,VULN_ID,PACKAGE,VERSION,FIXED_VERSION,TARGET_FILE,TITLE,DESCRIPTION" > "$VULN_CSV_FILE"
+        
+        # Extract vulnerability data and format as CSV
+        jq -r '
+          [
+            .Results[]? | 
+            select(.Vulnerabilities) | 
+            .Target as $target | 
+            .Vulnerabilities[] | 
+            {
+              severity: .Severity,
+              severity_order: (
+                if .Severity == "CRITICAL" then 1
+                elif .Severity == "HIGH" then 2
+                elif .Severity == "MEDIUM" then 3
+                elif .Severity == "LOW" then 4
+                elif .Severity == "UNKNOWN" then 5
+                else 6 end
+              ),
+              vuln_id: .VulnerabilityID,
+              package: .PkgName,
+              version: (.InstalledVersion // "N/A"),
+              fixed_version: (.FixedVersion // "N/A"),
+              target_file: $target,
+              title: (.Title // "N/A"),
+              description: (.Description // "N/A")
+            }
+          ] | 
+          sort_by(.severity_order) | 
+          .[] | 
+          [.severity, .vuln_id, .package, .version, .fixed_version, .target_file, .title, .description] | 
+          @csv
+        ' trivy-results.json >> "$VULN_CSV_FILE"
+        
+        # Display vulnerability CSV creation status
+        if [ -f "$VULN_CSV_FILE" ]; then
+          echo "✅ Vulnerability CSV file created: $VULN_CSV_FILE"
+          TOTAL_ROWS=$(wc -l < "$VULN_CSV_FILE")
+          VULN_ROWS=$((TOTAL_ROWS - 1))
+          echo "Total vulnerabilities in CSV: $VULN_ROWS"
+          echo "CSV file size: $(du -h "$VULN_CSV_FILE" | cut -f1)"
+          echo ""
+          echo "Sample of vulnerability CSV content (first 5 lines):"
+          head -n 5 "$VULN_CSV_FILE"
+          echo ""
+          echo "CSV columns: SEVERITY, VULN_ID, PACKAGE, VERSION, FIXED_VERSION, TARGET_FILE, TITLE, DESCRIPTION"
+        else
+          echo "❌ Failed to create vulnerability CSV file"
+        fi
+
+
+        echo "=== Creating License CSV Report ==="
+        
+        # Check if trivy license results file exists
+        if [ ! -f "trivy-results.json" ]; then
+          echo "❌ Trivy license results file not found. Skipping license CSV creation."
+          exit 0
+        fi
+        
+        # Define license CSV file
+        LICENSE_CSV_FILE="trivy-license-report.csv"
+        
+        # Create license CSV header
+        echo "SEVERITY,LICENSE,PACKAGE,VERSION,TARGET_FILE,CATEGORY" > "$LICENSE_CSV_FILE"
+        
+        # Extract license data and format as CSV
+        jq -r '
+          [
+            .Results[]? | 
+            select(.Licenses) | 
+            .Target as $target | 
+            .Licenses[] | 
+            {
+              severity: .Severity,
+              severity_order: (
+                if .Severity == "CRITICAL" then 1
+                elif .Severity == "HIGH" then 2
+                elif .Severity == "MEDIUM" then 3
+                elif .Severity == "LOW" then 4
+                elif .Severity == "UNKNOWN" then 5
+                else 6 end
+              ),
+              license: (.Name // "N/A"),
+              package: .PkgName,
+              version: (.PkgVersion // "N/A"),
+              target_file: $target,
+              category: (.Category // "N/A")
+            }
+          ] | 
+          sort_by(.severity_order) | 
+          .[] | 
+          [.severity, .license, .package, .version, .target_file, .category] | 
+          @csv
+        ' trivy-results.json >> "$LICENSE_CSV_FILE"
+        
+        # Display license CSV creation status
+        if [ -f "$LICENSE_CSV_FILE" ]; then
+          echo "✅ License CSV file created: $LICENSE_CSV_FILE"
+          TOTAL_ROWS=$(wc -l < "$LICENSE_CSV_FILE")
+          LICENSE_ROWS=$((TOTAL_ROWS - 1))
+          echo "Total license issues in CSV: $LICENSE_ROWS"
+          echo "CSV file size: $(du -h "$LICENSE_CSV_FILE" | cut -f1)"
+          echo ""
+          echo "Sample of license CSV content (first 5 lines):"
+          head -n 5 "$LICENSE_CSV_FILE"
+          echo ""
+          echo "CSV columns: SEVERITY, LICENSE, PACKAGE, VERSION, TARGET_FILE, CATEGORY"
+        else
+          echo "❌ Failed to create license CSV file"
+        fi
+    - name: Upload Trivy CSV Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-security-report-${{ github.run_number }}
+        path: |
+          trivy-sbom-results.json
+          syft-sbom-cyclonedx.json
+          trivy-vulnerabilities-report.csv
+          trivy-license-report.csv
+          trivy-results.json
+          trivy-results-backup.json
+        retention-days: 30
+    
+
+    

@@ -1,0 +1,536 @@
+name: Trivy Test Run
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      DEPLOY_BRANCH:
+        description: 'Branch to scan (e.g., main, develop)'
+        required: true
+
+jobs:
+  scan:
+    runs-on: [self-hosted, "centos8"] 
+    timeout-minutes: 30
+    env:
+      DEPLOY_BRANCH : ${{github.ref_name}}
+    outputs:
+      git_branch: ${{ env.GIT_BRANCH }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+             
+      - name: Run Trivy Security Scan
+        uses: ./.github/actions/trivy_security_scan
+
+      - name: Check Vulnerability Thresholds and Fail Build
+        env:
+          TRIVY_FAIL_SEVERITIES: ''
+        run: |
+          # Check if trivy results file exists
+          if [ ! -f "trivy-results.json" ]; then
+            echo "Trivy results file not found. Cannot perform vulnerability threshold check."
+            exit 1
+          fi
+          
+          echo "=== Vulnerability Threshold Check ==="
+          echo "Configured fail severities: $TRIVY_FAIL_SEVERITIES"
+          echo ""
+          
+          # Count vulnerabilities by severity
+          CRITICAL_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-results.json)
+          HIGH_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-results.json)
+          MEDIUM_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy-results.json)
+          LOW_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "LOW")] | length' trivy-results.json)
+          UNKNOWN_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "UNKNOWN")] | length' trivy-results.json)
+          
+          echo "Current vulnerability counts:"
+          echo "  Critical: $CRITICAL_VULNS"
+          echo "  High: $HIGH_VULNS" 
+          echo "  Medium: $MEDIUM_VULNS"
+          echo "  Low: $LOW_VULNS"
+          echo "  Unknown: $UNKNOWN_VULNS"
+          echo ""
+
+          # Parse and display results from JSON for human-readable output
+          if [ -f "trivy-results.json" ]; then
+            echo "=== Trivy Security Scan Results ==="
+            echo "Configured display severities: $TRIVY_FAIL_SEVERITIES"
+            echo ""
+            
+            # Count vulnerabilities by all severities
+            TOTAL_VULNS=$(jq '[.Results[]?.Vulnerabilities[]?] | length' trivy-results.json)
+            CRITICAL_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-results.json)
+            HIGH_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-results.json)
+            MEDIUM_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy-results.json)
+            LOW_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "LOW")] | length' trivy-results.json)
+            UNKNOWN_VULNS=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "UNKNOWN")] | length' trivy-results.json)
+            
+            echo "Full Summary (all severities):"
+            echo "  Total vulnerabilities: $TOTAL_VULNS"
+            echo "  Critical: $CRITICAL_VULNS"
+            echo "  High: $HIGH_VULNS"
+            echo "  Medium: $MEDIUM_VULNS"
+            echo "  Low: $LOW_VULNS"
+            echo "  Unknown: $UNKNOWN_VULNS"
+            echo ""
+            
+            # Build severity filter for jq
+            # Set default severities if TRIVY_FAIL_SEVERITIES is empty
+            SEVERITIES_TO_USE="CRITICAL,HIGH"
+            
+            IFS=',' read -ra DISPLAY_SEVERITIES <<< "$SEVERITIES_TO_USE"
+            SEVERITY_FILTER=""
+            for severity in "${DISPLAY_SEVERITIES[@]}"; do
+              severity=$(echo "$severity" | tr -d ' ')  # Remove any spaces
+              if [ -z "$SEVERITY_FILTER" ]; then
+                SEVERITY_FILTER=".Severity == \"$severity\""
+              else
+                SEVERITY_FILTER="$SEVERITY_FILTER or .Severity == \"$severity\""
+              fi
+            done
+
+            echo ""
+            echo "Summary by Target Files (filtered severities only):"
+            jq -r "
+              .Results[]? | 
+              select(.Vulnerabilities) | 
+              .Target as \$target | 
+              [.Vulnerabilities[] | select($SEVERITY_FILTER)] | length as \$count |
+              select(\$count > 0) |
+              [\$target, \$count] | 
+              @tsv
+            " trivy-results.json | while IFS=$'\t' read -r target count; do
+              printf "  %-50s : %s vulnerabilities\n" "$target" "$count"
+            done
+            echo ""
+            
+            # Count filtered vulnerabilities
+            FILTERED_VULNS=$(jq "[.Results[]?.Vulnerabilities[]? | select($SEVERITY_FILTER)] | length" trivy-results.json)
+            
+            echo "Filtered Summary (showing only: $SEVERITIES_TO_USE):"
+            echo "  Filtered vulnerabilities: $FILTERED_VULNS"
+            
+            # Display detailed vulnerabilities if any filtered vulnerabilities found
+            if [ "$FILTERED_VULNS" -gt 0 ]; then
+              
+              echo ""
+              echo "Detailed Vulnerabilities (filtered by: $SEVERITIES_TO_USE):"
+              echo ""
+              
+              # Create fancy table header
+              echo "┌──────────────┬────────────────────────┬────────────────────┬──────────────┬────────────────┬─────────────────────────────────────┬──────────────────────────────────────────────────┐"
+              printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-14s │ %-35s │ %-48s │\n" "SEVERITY" "VULN ID" "PACKAGE" "VERSION" "FIXED VER" "TARGET FILE" "TITLE & DESCRIPTION"
+              echo "├──────────────┼────────────────────────┼────────────────────┼──────────────┼────────────────┼─────────────────────────────────────┼──────────────────────────────────────────────────┤"
+              
+              # Display filtered vulnerabilities in detailed tabular format, sorted by severity
+              jq -r "
+                [
+                  .Results[]? | 
+                  select(.Vulnerabilities) | 
+                  .Target as \$target | 
+                  .Vulnerabilities[] | 
+                  select($SEVERITY_FILTER) |
+                  {
+                    severity: .Severity,
+                    severity_order: (
+                      if .Severity == \"CRITICAL\" then 1
+                      elif .Severity == \"HIGH\" then 2
+                      elif .Severity == \"MEDIUM\" then 3
+                      elif .Severity == \"LOW\" then 4
+                      elif .Severity == \"UNKNOWN\" then 5
+                      else 6 end
+                    ),
+                    vuln_id: .VulnerabilityID,
+                    package: .PkgName,
+                    version: (.InstalledVersion // \"N/A\"),
+                    fixed_version: (.FixedVersion // \"N/A\"),
+                    target_file: \$target,
+                    title: (.Title // \"N/A\"),
+                    description: (.Description // \"N/A\")
+                  }
+                ] | 
+                sort_by(.severity_order) | 
+                .[] | 
+                [.severity, .vuln_id, .package, .version, .fixed_version, .target_file, .title, .description] | 
+                @tsv
+              " trivy-results.json | \
+              while IFS=$'\t' read -r severity vuln_id package version fixed_version target_file title description; do
+                
+                # Handle multi-line fixed version (break long versions)
+                if [ ${#fixed_version} -gt 14 ]; then
+                  fixed_ver_lines=$(echo "$fixed_version" | fold -s -w 14)
+                  fixed_ver_first=$(echo "$fixed_ver_lines" | head -n1)
+                  fixed_ver_rest=$(echo "$fixed_ver_lines" | tail -n +2)
+                else
+                  fixed_ver_first="$fixed_version"
+                  fixed_ver_rest=""
+                fi
+                
+                # Handle multi-line title and description
+                full_info="$title"
+                if [ "$description" != "N/A" ] && [ ${#description} -gt 0 ]; then
+                  full_info="$title | $description"
+                fi
+                
+                # Handle multi-line target file (break long paths)
+                if [ ${#target_file} -gt 35 ]; then
+                  target_file_lines=$(echo "$target_file" | fold -s -w 35)
+                  target_file_first=$(echo "$target_file_lines" | head -n1)
+                  target_file_rest=$(echo "$target_file_lines" | tail -n +2)
+                else
+                  target_file_first="$target_file"
+                  target_file_rest=""
+                fi
+                
+                # Print first line
+                printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-14s │ %-35s │ %-48s │\n" \
+                  "$severity" "$vuln_id" "$package" "$version" "$fixed_ver_first" "$target_file_first" \
+                  "$(echo "$full_info" | cut -c1-48)"
+                
+                # Print additional lines for long fixed version
+                if [ -n "$fixed_ver_rest" ]; then
+                  echo "$fixed_ver_rest" | while read -r line; do
+                    [ -n "$line" ] && printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-14s │ %-35s │ %-48s │\n" \
+                      "" "" "" "" "$line" "" ""
+                  done
+                fi
+                
+                # Print additional lines for long target file
+                if [ -n "$target_file_rest" ]; then
+                  echo "$target_file_rest" | while read -r line; do
+                    [ -n "$line" ] && printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-14s │ %-35s │ %-48s │\n" \
+                      "" "" "" "" "" "$line" ""
+                  done
+                fi
+                
+                # Print additional lines for long title/description (if longer than 48 chars)
+                if [ ${#full_info} -gt 48 ]; then
+                  remaining_info=$(echo "$full_info" | cut -c49-)
+                  echo "$remaining_info" | fold -s -w 48 | while read -r line; do
+                    [ -n "$line" ] && printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-14s │ %-35s │ %-48s │\n" \
+                      "" "" "" "" "" "" "$line"
+                  done
+                fi
+                
+                # Add separator line between vulnerabilities
+                echo "├──────────────┼────────────────────────┼────────────────────┼──────────────┼────────────────┼─────────────────────────────────────┼──────────────────────────────────────────────────┤"
+              done
+              
+              # Close the table
+              echo "└──────────────┴────────────────────────┴────────────────────┴──────────────┴────────────────┴─────────────────────────────────────┴──────────────────────────────────────────────────┘"
+              
+            else
+              echo "✅ No vulnerabilities found with configured severities: $TRIVY_FAIL_SEVERITIES"
+            fi
+            
+          else
+            echo "❌ Trivy results file not found!"
+            exit 1
+          fi
+
+
+
+
+          
+          # Check if we should fail based on configured severities
+          SHOULD_FAIL=false
+          FAIL_REASONS=()
+          IFS=',' read -ra FAIL_SEVERITIES <<< "$TRIVY_FAIL_SEVERITIES"
+          
+          for severity in "${FAIL_SEVERITIES[@]}"; do
+            severity=$(echo "$severity" | tr -d ' ')  # Remove any spaces
+            case "$severity" in
+              "CRITICAL")
+                if [ "$CRITICAL_VULNS" -gt 0 ]; then
+                  echo "❌ Found $CRITICAL_VULNS CRITICAL vulnerabilities - FAILING BUILD"
+                  FAIL_REASONS+=("$CRITICAL_VULNS CRITICAL")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "HIGH")
+                if [ "$HIGH_VULNS" -gt 0 ]; then
+                  echo "❌ Found $HIGH_VULNS HIGH vulnerabilities - FAILING BUILD"
+                  FAIL_REASONS+=("$HIGH_VULNS HIGH")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "MEDIUM")
+                if [ "$MEDIUM_VULNS" -gt 0 ]; then
+                  echo "❌ Found $MEDIUM_VULNS MEDIUM vulnerabilities - FAILING BUILD"
+                  FAIL_REASONS+=("$MEDIUM_VULNS MEDIUM")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "LOW")
+                if [ "$LOW_VULNS" -gt 0 ]; then
+                  echo "❌ Found $LOW_VULNS LOW vulnerabilities - FAILING BUILD"
+                  FAIL_REASONS+=("$LOW_VULNS LOW")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "UNKNOWN")
+                if [ "$UNKNOWN_VULNS" -gt 0 ]; then
+                  echo "❌ Found $UNKNOWN_VULNS UNKNOWN vulnerabilities - FAILING BUILD"
+                  FAIL_REASONS+=("$UNKNOWN_VULNS UNKNOWN")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+            esac
+          done
+          
+          echo ""
+          if [ "$SHOULD_FAIL" = true ]; then
+            echo "🚨 VULNERABILITY CHECK FAILED 🚨"
+            echo "Build is failing due to vulnerabilities with configured severities: $TRIVY_FAIL_SEVERITIES"
+            echo ""
+            echo "Failure summary:"
+            for reason in "${FAIL_REASONS[@]}"; do
+              echo "  - $reason vulnerabilities found"
+            done
+            echo ""
+            echo "Please remediate these vulnerabilities before proceeding."
+            exit 1
+          else
+            echo "✅ VULNERABILITY CHECK PASSED"
+            echo "No vulnerabilities found with configured fail severities: $TRIVY_FAIL_SEVERITIES"
+            echo ""
+            echo "Build can proceed safely."
+          fi
+
+      - name: Check License Thresholds and Fail Build
+        env:
+          TRIVY_LICENSE_FAIL_SEVERITIES: ''
+        run: |
+          # Check if trivy license results file exists
+          if [ ! -f "trivy-results.json" ]; then
+            echo "Trivy license results file not found. Cannot perform license threshold check."
+            exit 1
+          fi
+          
+          echo "=== License Threshold Check ==="
+          echo "Configured fail severities: $TRIVY_LICENSE_FAIL_SEVERITIES"
+          echo ""
+          
+          # Count license issues by severity
+          CRITICAL_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "CRITICAL")] | length' trivy-results.json)
+          HIGH_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "HIGH")] | length' trivy-results.json)
+          MEDIUM_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "MEDIUM")] | length' trivy-results.json)
+          LOW_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "LOW")] | length' trivy-results.json)
+          UNKNOWN_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "UNKNOWN")] | length' trivy-results.json)
+          
+          echo "Current license issue counts:"
+          echo "  Critical: $CRITICAL_LICENSES"
+          echo "  High: $HIGH_LICENSES" 
+          echo "  Medium: $MEDIUM_LICENSES"
+          echo "  Low: $LOW_LICENSES"
+          echo "  Unknown: $UNKNOWN_LICENSES"
+          echo ""
+
+          # Parse and display license results from JSON for human-readable output
+          if [ -f "trivy-results.json" ]; then
+            echo "=== Trivy License Scan Results ==="
+            echo "Configured display severities: $TRIVY_LICENSE_FAIL_SEVERITIES"
+            echo ""
+            
+            # Count license issues by all severities
+            TOTAL_LICENSES=$(jq '[.Results[]?.Licenses[]?] | length' trivy-results.json)
+            CRITICAL_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "CRITICAL")] | length' trivy-results.json)
+            HIGH_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "HIGH")] | length' trivy-results.json)
+            MEDIUM_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "MEDIUM")] | length' trivy-results.json)
+            LOW_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "LOW")] | length' trivy-results.json)
+            UNKNOWN_LICENSES=$(jq '[.Results[]?.Licenses[]? | select(.Severity == "UNKNOWN")] | length' trivy-results.json)
+            
+            echo "Full Summary (all severities):"
+            echo "  Total license issues: $TOTAL_LICENSES"
+            echo "  Critical: $CRITICAL_LICENSES"
+            echo "  High: $HIGH_LICENSES"
+            echo "  Medium: $MEDIUM_LICENSES"
+            echo "  Low: $LOW_LICENSES"
+            echo "  Unknown: $UNKNOWN_LICENSES"
+            echo ""
+            
+            # Build severity filter for jq
+            # Set default severities if TRIVY_LICENSE_FAIL_SEVERITIES is empty
+            SEVERITIES_TO_USE="CRITICAL,HIGH"
+            
+            IFS=',' read -ra DISPLAY_SEVERITIES <<< "$SEVERITIES_TO_USE"
+            SEVERITY_FILTER=""
+            for severity in "${DISPLAY_SEVERITIES[@]}"; do
+              severity=$(echo "$severity" | tr -d ' ')  # Remove any spaces
+              if [ -z "$SEVERITY_FILTER" ]; then
+                SEVERITY_FILTER=".Severity == \"$severity\""
+              else
+                SEVERITY_FILTER="$SEVERITY_FILTER or .Severity == \"$severity\""
+              fi
+            done
+
+            echo ""
+            echo "Summary by Target Files (filtered severities only):"
+            jq -r "
+              .Results[]? | 
+              select(.Licenses) | 
+              .Target as \$target | 
+              [.Licenses[] | select($SEVERITY_FILTER)] | length as \$count |
+              select(\$count > 0) |
+              [\$target, \$count] | 
+              @tsv
+            " trivy-results.json | while IFS=$'\t' read -r target count; do
+              printf "  %-50s : %s license issues\n" "$target" "$count"
+            done
+            echo ""
+            
+            # Count filtered license issues
+            FILTERED_LICENSES=$(jq "[.Results[]?.Licenses[]? | select($SEVERITY_FILTER)] | length" trivy-results.json)
+            
+            echo "Filtered Summary (showing only: $SEVERITY_FILTER):"
+            echo "  Filtered license issues: $FILTERED_LICENSES"
+            
+            # Display detailed license issues if any filtered issues found
+            if [ "$FILTERED_LICENSES" -gt 0 ]; then
+
+              echo ""
+              echo "Detailed License Issues (filtered by: $SEVERITY_FILTER):"
+              echo ""
+              
+              # Create fancy table header for licenses
+              echo "┌──────────────┬────────────────────────┬────────────────────┬──────────────┬─────────────────────────────────────┬──────────────────────────────────────────────────┐"
+              printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-35s │ %-48s │\n" "SEVERITY" "LICENSE" "PACKAGE" "VERSION" "TARGET FILE" "CATEGORY"
+              echo "├──────────────┼────────────────────────┼────────────────────┼──────────────┼─────────────────────────────────────┼──────────────────────────────────────────────────┤"
+              
+              # Display filtered license issues in detailed tabular format, sorted by severity
+              jq -r "
+                [
+                  .Results[]? | 
+                  select(.Licenses) | 
+                  .Target as \$target | 
+                  .Licenses[] | 
+                  select($SEVERITY_FILTER) |
+                  {
+                    severity: .Severity,
+                    severity_order: (
+                      if .Severity == \"CRITICAL\" then 1
+                      elif .Severity == \"HIGH\" then 2
+                      elif .Severity == \"MEDIUM\" then 3
+                      elif .Severity == \"LOW\" then 4
+                      elif .Severity == \"UNKNOWN\" then 5
+                      else 6 end
+                    ),
+                    license: (.Name // \"N/A\"),
+                    package: .PkgName,
+                    version: (.PkgVersion // \"N/A\"),
+                    target_file: \$target,
+                    category: (.Category // \"N/A\")
+                  }
+                ] | 
+                sort_by(.severity_order) | 
+                .[] | 
+                [.severity, .license, .package, .version, .target_file, .category] | 
+                @tsv
+              " trivy-results.json | \
+              while IFS=$'\t' read -r severity license package version target_file category; do
+                
+                # Handle multi-line target file (break long paths)
+                if [ ${#target_file} -gt 35 ]; then
+                  target_file_lines=$(echo "$target_file" | fold -s -w 35)
+                  target_file_first=$(echo "$target_file_lines" | head -n1)
+                  target_file_rest=$(echo "$target_file_lines" | tail -n +2)
+                else
+                  target_file_first="$target_file"
+                  target_file_rest=""
+                fi
+                
+                # Print first line
+                printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-35s │ %-48s │\n" \
+                  "$severity" "$license" "$package" "$version" "$target_file_first" "$category"
+                
+                # Print additional lines for long target file
+                if [ -n "$target_file_rest" ]; then
+                  echo "$target_file_rest" | while read -r line; do
+                    [ -n "$line" ] && printf "│ %-12s │ %-22s │ %-18s │ %-12s │ %-35s │ %-48s │\n" \
+                      "" "" "" "" "$line" ""
+                  done
+                fi
+                
+                # Add separator line between license issues
+                echo "├──────────────┼────────────────────────┼────────────────────┼──────────────┼─────────────────────────────────────┼──────────────────────────────────────────────────┤"
+              done
+              
+              # Close the table
+              echo "└──────────────┴────────────────────────┴────────────────────┴──────────────┴─────────────────────────────────────┴──────────────────────────────────────────────────┘"
+              
+            else
+              echo "✅ No license issues found with configured severities: $TRIVY_LICENSE_FAIL_SEVERITIES"
+            fi
+            
+          else
+            echo "❌ Trivy license results file not found!"
+            exit 1
+          fi
+          
+          # Check if we should fail based on configured severities
+          SHOULD_FAIL=false
+          FAIL_REASONS=()
+          IFS=',' read -ra FAIL_SEVERITIES <<< "$TRIVY_LICENSE_FAIL_SEVERITIES"
+          
+          for severity in "${FAIL_SEVERITIES[@]}"; do
+            severity=$(echo "$severity" | tr -d ' ')  # Remove any spaces
+            case "$severity" in
+              "CRITICAL")
+                if [ "$CRITICAL_LICENSES" -gt 0 ]; then
+                  echo "❌ Found $CRITICAL_LICENSES CRITICAL license issues - FAILING BUILD"
+                  FAIL_REASONS+=("$CRITICAL_LICENSES CRITICAL license")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "HIGH")
+                if [ "$HIGH_LICENSES" -gt 0 ]; then
+                  echo "❌ Found $HIGH_LICENSES HIGH license issues - FAILING BUILD"
+                  FAIL_REASONS+=("$HIGH_LICENSES HIGH license")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "MEDIUM")
+                if [ "$MEDIUM_LICENSES" -gt 0 ]; then
+                  echo "❌ Found $MEDIUM_LICENSES MEDIUM license issues - FAILING BUILD"
+                  FAIL_REASONS+=("$MEDIUM_LICENSES MEDIUM license")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "LOW")
+                if [ "$LOW_LICENSES" -gt 0 ]; then
+                  echo "❌ Found $LOW_LICENSES LOW license issues - FAILING BUILD"
+                  FAIL_REASONS+=("$LOW_LICENSES LOW license")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+              "UNKNOWN")
+                if [ "$UNKNOWN_LICENSES" -gt 0 ]; then
+                  echo "❌ Found $UNKNOWN_LICENSES UNKNOWN license issues - FAILING BUILD"
+                  FAIL_REASONS+=("$UNKNOWN_LICENSES UNKNOWN license")
+                  SHOULD_FAIL=true
+                fi
+                ;;
+            esac
+          done
+          
+          echo ""
+          if [ "$SHOULD_FAIL" = true ]; then
+            echo "🚨 LICENSE CHECK FAILED 🚨"
+            echo "Build is failing due to license issues with configured severities: $TRIVY_LICENSE_FAIL_SEVERITIES"
+            echo ""
+            echo "Failure summary:"
+            for reason in "${FAIL_REASONS[@]}"; do
+              echo "  - $reason issues found"
+            done
+            echo ""
+            echo "Please resolve these license issues before proceeding."
+            exit 1
+          else
+            echo "✅ LICENSE CHECK PASSED"
+            echo "No license issues found with configured fail severities: $TRIVY_LICENSE_FAIL_SEVERITIES"
+            echo ""
+            echo "Build can proceed safely."
+          fi
