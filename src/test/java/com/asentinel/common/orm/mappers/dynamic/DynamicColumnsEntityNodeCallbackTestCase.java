@@ -18,6 +18,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.asentinel.common.collections.tree.SimpleNode;
+import com.asentinel.common.jdbc.SqlQuery;
 import com.asentinel.common.jdbc.TypedObjectFactorySupport;
 import com.asentinel.common.orm.EntityDescriptor;
 import com.asentinel.common.orm.SimpleEntityDescriptor;
@@ -72,7 +73,8 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 	}
 	
 	private SimpleNode<EntityDescriptor> test(DynamicColumnsEntityNodeCallback<DefaultDynamicColumn, TestBean> callback, String tableName, String pk) {
-		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(TestBean.class);
+		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(TestBean.class)
+				.queryExecutor(mock(SqlQuery.class)); // without this InputStreams will be included in the column names list
 		SimpleNode<EntityDescriptor> node = new SimpleNode<EntityDescriptor>();
 		
 		SqlBuilderFactory sbf = mock(SqlBuilderFactory.class);
@@ -94,7 +96,7 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 		
 		// simple columns assertions
 		assertEquals(
-				Set.of("StaticColumn", "StaticColumnInputStream", "SomeField1", "SomeField2", pk == null ? "Id" : pk), 
+				Set.of("StaticColumn", "SomeField1", "SomeField2", pk == null ? "Id" : pk), 
 				new HashSet<>(dced.getColumnNames()));
 		assertEquals(
 				Set.of(new DefaultDynamicColumn("SomeField1", String.class), new DefaultDynamicColumn("SomeField2", String.class)), 
@@ -108,6 +110,9 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 		assertEquals("Association", childEd.getTableName());
 		assertEquals("Aid", childEd.getPkName());
 		assertEquals("SomeFK", childEd.getFkName());
+		assertEquals(
+				Set.of("Aid", "SomeString"), 
+				new HashSet<>(childEd.getColumnNames()));		
 		assertEquals(new DefaultDynamicColumn("SomeFK", AssociationBean.class), childEd.getName());
 		assertTrue(childEd.getTableAlias().startsWith(dced.getTableAlias()));
 		assertTrue(childEd.getTableAlias().endsWith("0"));
@@ -139,7 +144,8 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 			)
 		);
 		
-		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(TestBean.class);
+		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(TestBean.class)
+				.queryExecutor(mock(SqlQuery.class)); // without this InputStreams will be included in the column names list
 		SimpleNode<EntityDescriptor> node = new SimpleNode<EntityDescriptor>();
 		
 		SqlBuilderFactory sbf = mock(SqlBuilderFactory.class);
@@ -151,6 +157,10 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 		SimpleNode<EntityDescriptor> child = (SimpleNode<EntityDescriptor>) node.getChildren().get(0).getChildren().get(0);
 		SimpleEntityDescriptor parentEd = (SimpleEntityDescriptor) node.getChildren().get(0).getValue();
 		SimpleEntityDescriptor childEd = (SimpleEntityDescriptor) child.getValue();
+		
+		assertEquals(
+				Set.of("pid", "SomeString", "cid"), 
+				new HashSet<>(parentEd.getColumnNames()));
 		
 		// ensure our callback got called
 		assertEquals("OverriddenDynamicChildTable", childEd.getTableName());
@@ -189,6 +199,13 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 	private static class AssociationBean {
 		@PkColumn("Aid")
 		int id;
+		
+		@Column("SomeString")
+		String someString;
+		
+		@Column("SomeInputStream")
+		InputStream someInputStream;
+		
 	}
 	
 	@Table("ParentAssociation")
@@ -196,6 +213,12 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 		@PkColumn("pid")
 		int id;
 		
+		@Column("SomeString")
+		String someString;
+		
+		@Column("SomeInputStream")
+		InputStream someInputStream;
+				
 		@Child
 		ChildAssociation childAssociation;
 	}

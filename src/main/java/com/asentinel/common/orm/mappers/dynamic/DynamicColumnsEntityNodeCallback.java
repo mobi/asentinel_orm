@@ -108,7 +108,9 @@ public class DynamicColumnsEntityNodeCallback<C extends DynamicColumn, T extends
 			Builder fkEntityBuilder = new SimpleEntityDescriptor.Builder(col.getDynamicColumnType())
 					.name(col)
 					.fkName(col.getDynamicColumnName())
-					.tableAlias(builder.getTableAlias() + "_" + Integer.toHexString(i));
+					.tableAlias(builder.getTableAlias() + "_" + Integer.toHexString(i))
+					.queryExecutor(builder.getQueryEx()) // needed to proxy InputStreams/BLOBS, see ConversionSupport
+					.lobHandler(builder.getLobHandler());
 			
 			Node<EntityDescriptor> n;			
 			if (entityOverride == null) {
