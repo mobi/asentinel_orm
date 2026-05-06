@@ -242,7 +242,6 @@ public class SqlBuilder<E> {
 	}
 	
 	public SqlBuilder<E> from(EntityDescriptorNodeCallback ... nodeCallbacks) {
-		Assert.assertNotNull(clasz, "clasz");
 		from(
 				entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, nodeCallbacks)
 		);
@@ -250,7 +249,6 @@ public class SqlBuilder<E> {
 	}
 	
 	public SqlBuilder<E> from(String rootTableAlias, EntityDescriptorNodeCallback ... nodeCallbacks) {
-		Assert.assertNotNull(clasz, "clasz");
 		from(
 				entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, rootTableAlias, nodeCallbacks)
 		);
@@ -1372,7 +1370,6 @@ public class SqlBuilder<E> {
 	 * @see #pagedSelect(long, long, String, EntityDescriptorNodeCallback...)
 	 */
 	public SqlBuilder<E> pagedSelect(long beginIndex, long endIndex, EntityDescriptorNodeCallback ... nodeCallbacks) {
-		Assert.assertNotNull(clasz, "clasz");
 		pagedSelect(beginIndex, endIndex, 
 				entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, nodeCallbacks));
 		return this;
@@ -1391,7 +1388,6 @@ public class SqlBuilder<E> {
 	 * @see QueryCriteria
 	 */
 	public SqlBuilder<E> pagedSelect(long beginIndex, long endIndex, String rootTableAlias, EntityDescriptorNodeCallback ... nodeCallbacks) {
-		Assert.assertNotNull(clasz, "clasz");
 		pagedSelect(beginIndex, endIndex, 
 				entityDescriptorTreeRepository.getEntityDescriptorTree(clasz, rootTableAlias, nodeCallbacks));
 		return this;
