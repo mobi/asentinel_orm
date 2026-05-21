@@ -194,10 +194,20 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 			) {
 		Assert.assertNotNull(root, "root");
 		Assert.assertNotNull(root.getValue(), "root.getValue()");
-		getEntityDescriptorTreeInternal(root, nodeCallbacks, null, null);
+		getEntityDescriptorTreeInternalLog(root, nodeCallbacks);
 		return root;
 	}
-	
+
+	private void getEntityDescriptorTreeInternalLog(
+			Node<EntityDescriptor> root,
+			EntityDescriptorNodeCallback[] nodeCallbacks
+			) {
+		getEntityDescriptorTreeInternal(root, nodeCallbacks, null, null);
+		if (log.isTraceEnabled()) {
+			log.trace("getEntityDescriptorTreeInternalLog - EntityDescriptor tree:\n{}", root.toStringAsTree());
+		}
+	}
+
 	
 	private void getEntityDescriptorTreeInternal(
 			Node<EntityDescriptor> parent,
