@@ -146,21 +146,21 @@ public class SqlQueryTemplate implements SqlQuery {
     			userName = user.getUsername();
         	}
         	if (user != null) {
-        		log.debug("query - user: " + userName + " (" + userId + "); sql: " + sql);
+        		log.debug("query - user: {} ({}); sql: {}", userName, userId, sql);
         	} else {        	
-        		log.debug("query - sql: " + sql);
+        		log.debug("query - sql: {}", sql);
         	}
 			if (inParams.length > 0) {
-				log.debug("query - with parameters: " +  JdbcUtils.parametersToString(true, inParams));
+				log.debug("query - with parameters: {}",  JdbcUtils.parametersToString(true, inParams));
 			}
 		}
 		if (log.isTraceEnabled()) {
 			if (rsProcessor instanceof RowMapper) {
-				log.trace("query - mapper: " + rsProcessor);
+				log.trace("query - mapper: {}", rsProcessor);
 			} else if (rsProcessor instanceof RowCallbackHandler) {
-				log.trace("query - handler: " + rsProcessor);
+				log.trace("query - handler: {}", rsProcessor);
 			} else {
-				log.trace("query - Unknown resultset processor: " + rsProcessor);
+				log.trace("query - Unknown resultset processor: {}", rsProcessor);
 			}
 		}
 	}
@@ -203,7 +203,7 @@ public class SqlQueryTemplate implements SqlQuery {
 		logBefore(sql, handler, inParams);
 		long t0 = System.nanoTime();
 		RowCallbackHandlerDecorator handlerDecorator = new RowCallbackHandlerDecorator(handler);
-		jdbcOperations.query(sql, inParams, handlerDecorator);
+		jdbcOperations.query(sql, handlerDecorator, inParams);
 		long t1 = System.nanoTime();
 		logAfter(handlerDecorator.size(), t0, t1);
 	}

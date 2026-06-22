@@ -1,9 +1,13 @@
 package com.asentinel.common.jdbc.flavors.postgres;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Statement;
 
 import javax.sql.DataSource;
 
+import org.postgresql.jdbc.PgConnection;
 import org.postgresql.util.PSQLWarning;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
@@ -20,14 +24,15 @@ import com.asentinel.common.jdbc.flavors.JdbcFlavor;
 /**
  * Extension of the {@link JdbcTemplate} class that echoes the messages raised
  * by the Postgres database to the java logging system. The name of the logger
- * used for this is {@code DB-ECHO}. <br>
- * This class also supports the following:
+ * used for this is {@code DB-ECHO}. It can also output the Postgres PID
+ * associated with the current SQL statement. The logger for this is
+ * {@code DB-PID}. This class also supports the following:
  * <li>injecting a custom {@code JdbcFlavor}, by default a
  * {@link PostgresJdbcFlavor} is used.
  * <li>sets the {@code SQLExceptionTranslator} to a default
  * {@link PgBetterSQLExceptionTranslator}.
  * 
- * @see #LOGGER_NAME
+ * @see #LOGGER_ECHO
  * 
  * @author Razvan Popian
  */
@@ -36,9 +41,15 @@ public class PgEchoingJdbcTemplate extends JdbcTemplate {
 	/**
 	 * The name of the default logger used for echoing.  
 	 */
-	public final static String LOGGER_NAME = "DB-ECHO";
+	public final static String LOGGER_ECHO = "DB-ECHO";
+	private final static Logger logEcho = LoggerFactory.getLogger(LOGGER_ECHO);
 	
-	private final static Logger log = LoggerFactory.getLogger(LOGGER_NAME);
+	/**
+	 * The name of the default logger used for echoing.  
+	 */
+	public final static String LOGGER_PID = "DB-PID";
+	private final static Logger logPid = LoggerFactory.getLogger(LOGGER_PID);
+	
 	
 	final static String LOG_MESSAGE_TEMPLATE = "%s: %s";
 	
@@ -80,7 +91,7 @@ public class PgEchoingJdbcTemplate extends JdbcTemplate {
 	
 	// method for helping with testing, do not directly access the log member
 	protected Logger getLogger() {
-		return log;
+		return logEcho;
 	}
 
 	@Override
@@ -135,11 +146,37 @@ public class PgEchoingJdbcTemplate extends JdbcTemplate {
 	@Override
 	protected PreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
 		if (jdbcFlavor == null) {
-			log.warn("newArgPreparedStatementSetter - No " + JdbcFlavor.class.getSimpleName() 
+			logEcho.warn("newArgPreparedStatementSetter - No " + JdbcFlavor.class.getSimpleName() 
 					+ " injected, using the default " + PreparedStatementSetter.class.getSimpleName() + " from " + JdbcTemplate.class.getSimpleName()
 					+ ". This may not be the fastest setter for null parameters.");
 			return super.newArgPreparedStatementSetter(args);
 		}
 		return new CustomArgumentPreparedStatementSetter(jdbcFlavor, args);
 	}
+	
+	@Override
+	protected void applyStatementSettings(Statement stmt) throws SQLException {
+		super.applyStatementSettings(stmt);
+		if (!logPid.isTraceEnabled()) {
+			return;
+		}
+		int pid = getPid(stmt.getConnection());
+		logPid.trace("applyStatementSettings - PG backend PID: {}", pid);	
+	}
+	
+    private int getPid(Connection connection) {
+		// we do not fail if we can not get the PID, we just return a negative value
+    	try {
+    		if (connection.isWrapperFor(PgConnection.class)) {
+				PgConnection pgConn = connection.unwrap(PgConnection.class);
+				return pgConn.getBackendPID();
+    		} else {
+    			logger.warn("getPid - Can not display the PG backend PID. Not a PG connection.");
+    			return -1;
+    		}
+		} catch (Exception e) {
+			logger.error("Exception while trying to get the PG backend PID.", e);
+			return -1;
+		}
+    }
 }

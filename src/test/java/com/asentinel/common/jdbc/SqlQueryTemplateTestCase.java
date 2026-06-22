@@ -335,7 +335,7 @@ public class SqlQueryTemplateTestCase {
 		log.info("testQueryWithRowCallbackHandler - start");
 		JdbcOperations jdbcOperations = createStrictMock(JdbcOperations.class);
 		RowCallbackHandler handler = rs -> log.debug("testQueryWithRowCallbackHandler - row: {}", rs.getRow());
-		jdbcOperations.query(anyObject(String.class), anyObject(Object[].class), anyObject(RowCallbackHandler.class));
+		jdbcOperations.query(anyObject(String.class), anyObject(RowCallbackHandler.class), anyObject(Object[].class));
 		
 		SqlQueryTemplate query = new SqlQueryTemplate(new PostgresJdbcFlavor(), jdbcOperations);
 		
