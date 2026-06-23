@@ -134,9 +134,8 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 			) {
 		Assert.assertNotNull(clazz, "clazz");
 		if (nodeCallbacks != null && nodeCallbacks.length != 0) {
-			if (log.isDebugEnabled()) {
-				log.debug("getEntityDescriptorTree - The tree for class " +
-						clazz.getName() + " is NOT cached.");
+			if (log.isTraceEnabled()) {
+				log.trace("getEntityDescriptorTree - The tree for class {} is NOT cached.", clazz.getName());
 			}
 			// build the tree, we don't yet support caching for trees built with
 			// node callbacks
@@ -147,14 +146,24 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 				() -> getEntityDescriptorTreeInternal(clazz, rootTableAlias, nodeCallbacks)
 			);
 			
-			if (log.isDebugEnabled()) {
-				log.debug("getEntityDescriptorTree - The tree for class " + 
-						clazz.getName() + " is cached.");
+			if (log.isTraceEnabled()) {
+				log.trace("getEntityDescriptorTree - The tree for class {} is cached.", clazz.getName());
 			}
 			// make a defensive copy of the cached tree, we don't want the client code to alter the structure
 			// of the cached tree
 			return TreeUtils.copy(tree);
 		}
+	}
+	
+	@Override
+	public Node<EntityDescriptor> getEntityDescriptorTree(
+			Node<EntityDescriptor> root, 
+			EntityDescriptorNodeCallback ... nodeCallbacks
+			) {
+		Assert.assertNotNull(root, "root");
+		Assert.assertNotNull(root.getValue(), "root.getValue()");
+		getEntityDescriptorTreeInternalLog(root, nodeCallbacks);
+		return root;
 	}
 	
 	private Node<EntityDescriptor> getEntityDescriptorTreeInternal(
@@ -185,19 +194,17 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 		return ret;
 	}
 	
-	
 
-	@Override
-	public Node<EntityDescriptor> getEntityDescriptorTree(
-			Node<EntityDescriptor> root, 
-			EntityDescriptorNodeCallback ... nodeCallbacks
+	private void getEntityDescriptorTreeInternalLog(
+			Node<EntityDescriptor> root,
+			EntityDescriptorNodeCallback[] nodeCallbacks
 			) {
-		Assert.assertNotNull(root, "root");
-		Assert.assertNotNull(root.getValue(), "root.getValue()");
 		getEntityDescriptorTreeInternal(root, nodeCallbacks, null, null);
-		return root;
+		if (log.isDebugEnabled()) {
+			log.debug("getEntityDescriptorTreeInternalLog - EntityDescriptor tree:\n{}", root.toStringAsTree());
+		}
 	}
-	
+
 	
 	private void getEntityDescriptorTreeInternal(
 			Node<EntityDescriptor> parent,
