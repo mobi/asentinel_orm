@@ -33,6 +33,7 @@ import com.asentinel.common.jdbc.flavors.JdbcFlavor;
  * {@link PgBetterSQLExceptionTranslator}.
  * 
  * @see #LOGGER_ECHO
+ * @see #LOGGER_PID
  * 
  * @author Razvan Popian
  */
