@@ -58,22 +58,22 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 	 * using.
 	 */
 	static final String TABLE_ALIAS_PREFIX = "t";
+
+	// helper for automatic lazy loading circular references
+	private final AutoLazyLoader autoLazyLoader = new AutoLazyLoader();
 	
 	private final ConcurrentCache<CacheKey, Node<EntityDescriptor>> cache = new ConcurrentCache<>();
 	
 	private final LobHandler lobHandler;
+
+	// FYI: if the next members are configured from a spring application context the volatile is not necessary,
+	// but if these dependencies are set later the volatile is critical to ensure the visibility of the references 
 	
 	// not final to allow the setter to work. We need to support
 	// circular references for EntityDescriptorTreeRepository and SqlBuilderFactory
-	// FYI: if this is configured from a spring application context the volatile is not necessary,
-	// but if this dependency is set later the volatile is critical to ensure the visibility of this reference 
 	private volatile SqlBuilderFactory sqlBuilderFactory;
 	
-	// helper for automatic lazy loading circular references
-	private final AutoLazyLoader autoLazyLoader = new AutoLazyLoader();
-
-	
-	private ConversionService conversionService;
+	private volatile ConversionService conversionService;
 
 	/**
 	 * Default constructor. No {@code LobHandler} is set so

@@ -4,7 +4,7 @@
 
 	<groupId>com.asentinel.common</groupId>
 	<artifactId>asentinel-common</artifactId>
-	<version>1.72.2</version>
+	<version>1.72.3</version>
 	<packaging>jar</packaging>
 
 	<name>Asentinel ORM</name>
