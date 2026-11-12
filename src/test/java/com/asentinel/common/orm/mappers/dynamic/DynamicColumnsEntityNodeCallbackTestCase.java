@@ -16,6 +16,9 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.junit.Test;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.lob.LobHandler;
 
 import com.asentinel.common.collections.tree.SimpleNode;
 import com.asentinel.common.jdbc.SqlQuery;
@@ -24,6 +27,7 @@ import com.asentinel.common.orm.EntityDescriptor;
 import com.asentinel.common.orm.SimpleEntityDescriptor;
 import com.asentinel.common.orm.ed.tree.DefaultEntityDescriptorTreeRepository;
 import com.asentinel.common.orm.jql.SqlBuilderFactory;
+import com.asentinel.common.orm.mappers.AnnotationRowMapper;
 import com.asentinel.common.orm.mappers.Child;
 import com.asentinel.common.orm.mappers.Column;
 import com.asentinel.common.orm.mappers.PkColumn;
@@ -171,6 +175,40 @@ public class DynamicColumnsEntityNodeCallbackTestCase {
 		assertNotEquals(parentEd.getTableAlias(), childEd.getTableAlias());
 	}
 
+	
+	@Test
+	public void criticalServicesArePropagatedToTheRowMapperOfTheDynamicFkEntity() {
+		DynamicColumnsEntityNodeCallback<DefaultDynamicColumn, TestBean> callback = new DynamicColumnsEntityNodeCallback<>(factory, 
+				List.of(
+					new DefaultDynamicColumn("SomeFK", AssociationBean.class, EnumSet.of(DynamicColumn.DynamicColumnFlags.ENTITY_FK)))
+			);
+		
+		ConversionService conversionService = mock(ConversionService.class);
+		SqlQuery queryExecutor = mock(SqlQuery.class);
+		LobHandler lobHandler = mock(LobHandler.class);
+		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(TestBean.class)
+				.conversionService(conversionService)
+				.queryExecutor(queryExecutor)
+				.lobHandler(lobHandler);
+		SimpleNode<EntityDescriptor> node = new SimpleNode<>();
+		
+		SqlBuilderFactory sbf = mock(SqlBuilderFactory.class);
+		when(sbf.getEntityDescriptorTreeRepository()).thenReturn(new DefaultEntityDescriptorTreeRepository());
+		
+		assertFalse(callback.customize(node, builder, sbf));
+		assertTrue(node.getValue() instanceof DynamicColumnsEntityDescriptor);
+		
+		assertEquals(1, node.getChildren().size());
+		assertTrue(node.getChildren().get(0).getValue() instanceof SimpleEntityDescriptor);
+		SimpleEntityDescriptor childEd = (SimpleEntityDescriptor) node.getChildren().get(0).getValue();
+		RowMapper<?> mapper = childEd.getEntityRowMapper();
+		assertTrue(mapper instanceof AnnotationRowMapper);
+		
+		// the critical assertions, services in the original builder should be propagated to the row mapper of the dynamic FK entity
+		assertSame(conversionService, ((AnnotationRowMapper<?>) mapper).getConversionService());
+		assertSame(queryExecutor, ((AnnotationRowMapper<?>) mapper).getQueryExecutor());
+		assertSame(lobHandler, ((AnnotationRowMapper<?>) mapper).getLobHandler());
+	}
 	
 	@Table("Test")
 	private static class TestBean implements DynamicColumnsEntity<DefaultDynamicColumn> {

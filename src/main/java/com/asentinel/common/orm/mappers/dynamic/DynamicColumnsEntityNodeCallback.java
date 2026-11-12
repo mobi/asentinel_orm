@@ -110,7 +110,8 @@ public class DynamicColumnsEntityNodeCallback<C extends DynamicColumn, T extends
 					.fkName(col.getDynamicColumnName())
 					.tableAlias(builder.getTableAlias() + "_" + Integer.toHexString(i))
 					.queryExecutor(builder.getQueryEx()) // needed to proxy InputStreams/BLOBS, see ConversionSupport
-					.lobHandler(builder.getLobHandler());
+					.lobHandler(builder.getLobHandler())
+					.conversionService(builder.getConversionService());
 			
 			Node<EntityDescriptor> n;			
 			if (entityOverride == null) {
