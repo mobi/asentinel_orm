@@ -149,6 +149,10 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 			if (log.isTraceEnabled()) {
 				log.trace("getEntityDescriptorTree - The tree for class {} is cached.", clazz.getName());
 			}
+			if (log.isDebugEnabled()) {
+				log.debug("getEntityDescriptorTree - EntityDescriptor tree:\n{}", tree.toStringAsTree());
+			}
+			
 			// make a defensive copy of the cached tree, we don't want the client code to alter the structure
 			// of the cached tree
 			return TreeUtils.copy(tree);
