@@ -83,7 +83,7 @@ public class SelfReferencingEntityWithCollectionTestCase {
 		assertFalse(EntityUtils.isLoadedProxy(a2.set));
 		
 		// verify no attempt is made to load any proxy
-		verify(sbFactory, times(6)).getSqlQuery();
+		verify(sbFactory, times(5)).getSqlQuery();
 		verifyNoMoreInteractions(sbFactory);
 		
 		eb.getEntityList().forEach(e -> log.debug("test - {}", e));

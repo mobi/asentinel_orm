@@ -4,7 +4,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Member;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -168,11 +167,11 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 		EntityDescriptor rootEd = root.getValue();
 		RowMapper<?> rootRowMapper = rootEd.getEntityRowMapper();
 		
-		// initialize the root row mapper with what it needs to be able to proxy input streams, handle LOBS and
-		// use the conversion service in case it is not already initialized.
+		// if needed, initialize the root row mapper with what it needs to be able to proxy input streams, handle LOBS and
+		// use the conversion service 
 		if (rootRowMapper instanceof ConversionSupport) {
 			ConversionSupport convSupport = (ConversionSupport) rootRowMapper;
-			if (convSupport.getLobHandler() == null) {
+			if (convSupport.getOptionalLobHandler().isEmpty()) {
 				convSupport.setLobHandler(lobHandler);
 			}
 			if (convSupport.getQueryExecutor() == null) {
@@ -199,10 +198,7 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 			t0 = System.nanoTime(); 
 		}
 		SimpleEntityDescriptor.Builder builder = new SimpleEntityDescriptor.Builder(clazz)
-			.tableAlias(getTableAlias(rootTableAlias, new IndexHolder(0)))
-			.queryExecutor(Optional.ofNullable(sqlBuilderFactory).map(SqlBuilderFactory::getSqlQuery).orElse(null))
-			.lobHandler(lobHandler)
-			.conversionService(conversionService);
+			.tableAlias(getTableAlias(rootTableAlias, new IndexHolder(0)));
 		Node<EntityDescriptor> root = new SimpleNode<>();
 		if (!processNodeCallbackChain(root, builder, nodeCallbacks)) {
 			throw new IllegalArgumentException("The root node value was transformed to a non QueryReady implementation "

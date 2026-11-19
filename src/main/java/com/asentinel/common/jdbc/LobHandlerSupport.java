@@ -1,5 +1,7 @@
 package com.asentinel.common.jdbc;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.support.lob.LobHandler;
@@ -52,6 +54,7 @@ abstract class LobHandlerSupport {
 	 * 		it creates a new {@code LobHandler} instance and assigns it to the member variable.<br>
 	 * 		<b>It is highly recommended NOT to rely on the lazy init behavior of this method. Inject a {@code LobHandler} instead.</b>
 	 * 
+	 * @see #getOptionalLobHandler()
 	 * @see JdbcUtils#buildLobHandler()
 	 */
 	public final synchronized LobHandler getLobHandler() {
@@ -61,6 +64,16 @@ abstract class LobHandlerSupport {
 			lobHandler = JdbcUtils.buildLobHandler();
 		}
 		return lobHandler;
+	}
+	
+	/**
+	 * @return an {@code Optional} containing the {@code LobHandler} associated with
+	 *         this instance, or an empty {@code Optional} if not set.
+	 * 
+	 * @see #getLobHandler()
+	 */
+	public final synchronized Optional<LobHandler> getOptionalLobHandler() {
+		return Optional.ofNullable(lobHandler);
 	}
 
 	/**
