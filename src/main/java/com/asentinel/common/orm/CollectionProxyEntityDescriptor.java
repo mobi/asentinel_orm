@@ -1,5 +1,7 @@
 package com.asentinel.common.orm;
 
+import static com.asentinel.common.orm.ProxyEntityDescriptor.getTableOverrideRootNode;
+
 import java.lang.reflect.Member;
 import java.util.Collection;
 import java.util.function.Function;
@@ -8,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import com.asentinel.common.collections.tree.Node;
-import com.asentinel.common.collections.tree.SimpleNode;
-import com.asentinel.common.orm.ed.tree.EntityDescriptorTreeRepository;
 import com.asentinel.common.orm.jql.SqlBuilderFactory;
 import com.asentinel.common.orm.proxy.collection.CollectionLazyLoadInterceptor;
 import com.asentinel.common.orm.proxy.entity.ProxyFactory;
@@ -110,19 +109,8 @@ public class CollectionProxyEntityDescriptor extends EntityDescriptor {
 		return loader;
 	}
 	
-	private static Node<EntityDescriptor> getTableOverrideRootNode(SqlBuilderFactory sqlBuilderFactory, Class<?> clazz, String tableName) {
-		EntityDescriptorTreeRepository edtr = sqlBuilderFactory.getEntityDescriptorTreeRepository();
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Node<EntityDescriptor> root = edtr.getEntityDescriptorTree(
-			new SimpleNode(new SimpleEntityDescriptor.Builder(clazz).tableName(tableName).build())
-		);
-		return root;
-	}
-	
 	@Override
 	public String toString() {
 		return "CollectionProxyEntityDescriptor [fk=" + getName() + ", class=" + getEntityClass().getName() + "]";
 	}
-	
-
 }
