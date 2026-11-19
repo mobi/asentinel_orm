@@ -10,6 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.util.StringUtils;
 
@@ -147,10 +148,8 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 			);
 			
 			if (log.isTraceEnabled()) {
-				log.trace("getEntityDescriptorTree - The tree for class {} is cached.", clazz.getName());
-			}
-			if (log.isDebugEnabled()) {
-				log.debug("getEntityDescriptorTree - EntityDescriptor tree:\n{}", tree.toStringAsTree());
+				log.trace("getEntityDescriptorTree - The tree for class {} is cached:\n{}", 
+						clazz.getName(), tree.toStringAsTree());
 			}
 			
 			// make a defensive copy of the cached tree, we don't want the client code to alter the structure
@@ -166,6 +165,25 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 			) {
 		Assert.assertNotNull(root, "root");
 		Assert.assertNotNull(root.getValue(), "root.getValue()");
+		EntityDescriptor rootEd = root.getValue();
+		RowMapper<?> rootRowMapper = rootEd.getEntityRowMapper();
+		
+		// initialize the root row mapper with what it needs to be able to proxy input streams, handle LOBS and
+		// use the conversion service in case it is not already initialized.
+		if (rootRowMapper instanceof ConversionSupport) {
+			ConversionSupport convSupport = (ConversionSupport) rootRowMapper;
+			if (convSupport.getLobHandler() == null) {
+				convSupport.setLobHandler(lobHandler);
+			}
+			if(convSupport.getQueryExecutor() == null) {
+				convSupport.setQueryExecutor(
+					sqlBuilderFactory != null ? sqlBuilderFactory.getSqlQuery() : null);
+			}
+			if (convSupport.getConversionService() == null) {
+				convSupport.setConversionService(conversionService);
+			}
+		}
+		
 		getEntityDescriptorTreeInternalLog(root, nodeCallbacks);
 		return root;
 	}
@@ -267,7 +285,7 @@ public class DefaultEntityDescriptorTreeRepository implements EntityDescriptorTr
 				.parentJoinType(childAnn.parentJoinType())
 				.joinConditionsOverride(childAnn.joinConditionsOverride())
 				.forceManyAsOneInPaginatedQueries(childAnn.forceManyAsOneInPaginatedQueries())
-				.queryExecutor(Optional.ofNullable(sqlBuilderFactory).map(SqlBuilderFactory::getSqlQuery).orElse(null))
+				.queryExecutor(sqlBuilderFactory != null ? sqlBuilderFactory.getSqlQuery() : null)
 				.lobHandler(lobHandler)
 				.conversionService(conversionService)
 				.targetMember(member)
