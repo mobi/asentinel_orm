@@ -5,24 +5,39 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.jdbc.support.lob.LobHandler;
 
 import com.asentinel.common.collections.tree.Node;
+import com.asentinel.common.collections.tree.SimpleNode;
+import com.asentinel.common.jdbc.SqlQuery;
 import com.asentinel.common.orm.EntityDescriptor;
 import com.asentinel.common.orm.EntityDescriptorNodeCallback;
 import com.asentinel.common.orm.Invoice;
+import com.asentinel.common.orm.SimpleEntityDescriptor;
+import com.asentinel.common.orm.jql.SqlBuilderFactory;
 import com.asentinel.common.orm.mappers.AnnotationRowMapper;
 
 public class EDTRCacheTestCase {
 	
-	LobHandler lh = mock(LobHandler.class);
-	DefaultEntityDescriptorTreeRepository edtrRepo = new DefaultEntityDescriptorTreeRepository(lh);
-	EntityDescriptorNodeCallback nc = (n, b) -> false;
+	private final LobHandler lh = mock(LobHandler.class);
+	private final SqlQuery qEx = mock(SqlQuery.class);
+	private final ConversionService cs = mock(ConversionService.class);
+	private final SqlBuilderFactory sbf = mock(SqlBuilderFactory.class);
+	private final DefaultEntityDescriptorTreeRepository edtrRepo = new DefaultEntityDescriptorTreeRepository(lh);
+	private final EntityDescriptorNodeCallback nc = (n, b) -> false;
+	
+	{
+		edtrRepo.setConversionService(cs);
+		edtrRepo.setSqlBuilderFactory(sbf);
+		when(sbf.getSqlQuery()).thenReturn(qEx);
+	}
 
 	@Test
 	public void testCached() {
@@ -59,12 +74,30 @@ public class EDTRCacheTestCase {
 	
 	// not related to caching
 	@Test
-	public void testLobHandlerSet() {
+	public void testServicesSetInRowMapperForClass() {
 		Node<EntityDescriptor> root = edtrRepo.getEntityDescriptorTree(Invoice.class);
-		root.traverse(n ->
-				assertSame(lh, ((AnnotationRowMapper<?>) n.getValue().getEntityRowMapper()).getLobHandler()));
+		root.traverse(n -> {
+				AnnotationRowMapper<?> rm = ((AnnotationRowMapper<?>) n.getValue().getEntityRowMapper());
+				assertSame(cs, rm.getConversionService());
+				assertSame(qEx, rm.getQueryExecutor());
+				assertSame(lh, rm.getLobHandler());
+		});
 	}
 
+	// not related to caching
+	@Test
+	public void testServicesSetInRowMapperForDescriptor() {
+		Node<EntityDescriptor> root = edtrRepo.getEntityDescriptorTree(
+				new SimpleNode<>(new SimpleEntityDescriptor(Invoice.class)));
+		root.traverse(n -> {
+				AnnotationRowMapper<?> rm = ((AnnotationRowMapper<?>) n.getValue().getEntityRowMapper());
+				assertSame(cs, rm.getConversionService());
+				assertSame(qEx, rm.getQueryExecutor());
+				assertSame(lh, rm.getLobHandler());
+		});
+	}
+
+	
 	// should not be considered a valid production tree equality function,
 	// it's just good enough for this test
 	private boolean equalTrees(Node<EntityDescriptor> t1, Node<EntityDescriptor> t2) {

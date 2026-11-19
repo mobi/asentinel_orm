@@ -61,18 +61,24 @@ public class ProxyEntityDescriptor<T> extends EntityDescriptor {
 			if (log.isDebugEnabled()) {
 				log.debug("getLoader - The table name is overridden in the @Child annotation for class " + clazz);
 			}
-			EntityDescriptorTreeRepository edtr = sqlBuilderFactory.getEntityDescriptorTreeRepository();
-			@SuppressWarnings({ "unchecked", "rawtypes" })
-			Node<EntityDescriptor> root = edtr.getEntityDescriptorTree(
-				new SimpleNode(new SimpleEntityDescriptor.Builder(clazz).tableName(tableName).build())
-			);
 			loader = id -> sqlBuilderFactory.newSqlBuilder(clazz)
-					.select(root).where().id().eq(id)
+					.select(getTableOverrideRootNode(sqlBuilderFactory, clazz, tableName))
+					.where().id().eq(id)
 					.execForEntity();
 		}
 		return loader;
 	}
-
+	
+	static Node<EntityDescriptor> getTableOverrideRootNode(SqlBuilderFactory sqlBuilderFactory, Class<?> clazz, String tableName) {
+		EntityDescriptorTreeRepository edtr = sqlBuilderFactory.getEntityDescriptorTreeRepository();
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Node<EntityDescriptor> root = edtr.getEntityDescriptorTree(
+			new SimpleNode(new SimpleEntityDescriptor.Builder(clazz)
+					.tableName(tableName)
+					.build())
+		);
+		return root;
+	}
 
 	@Override
 	public String toString() {
